@@ -63,9 +63,10 @@
 #ifndef MMC_H
 #define MMC_H
 
-#include "avrlibdefs.h"			// global AVRLIB defines
-#include "avrlibtypes.h"		// global AVRLIB types definitions
-
+typedef unsigned char u08;
+typedef unsigned short u16;
+typedef unsigned int u32;
+    
 // constants/macros/typdefs
 // MMC commands (taken from sandisk MMC reference)
 #define MMC_GO_IDLE_STATE			0		///< initialize card to SPI-type access

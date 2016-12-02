@@ -28,42 +28,51 @@
 //*****************************************************************************
 
 //----- Include Files ---------------------------------------------------------
-#include <avr/io.h>			// include I/O definitions (port names, pin names, etc)
-#include <avr/signal.h>		// include "signal" names (interrupt names)
-#include <avr/interrupt.h>	// include interrupt support
-
-#include "avrlibdefs.h"			// global AVRLIB defines
-#include "avrlibtypes.h"		// global AVRLIB types definitions
-#include "spi.h"		// include spi bus support
-
+#include "project.h"
 
 //#define spiTransferTwoFF()	{ spiTransferFF(); spiTransferFF(); }
 
 
 #include "mmc.h"
 
-// include project-specific hardware configuration
-#include "mmcconf.h"
-
 
 void mmcInit(void)
 {
 	// initialize SPI interface
-	spiInit();
-	// release chip select
-	sbi(MMC_CS_DDR, MMC_CS_PIN);
-	sbi(MMC_CS_PORT,MMC_CS_PIN);
+	SPIM_1_Start();
 }
 
 extern u32 n_actual_mmc_sector;
 extern u08 n_actual_mmc_sector_needswrite;
+
+
+void spiSendByte(u08 data)
+{
+    SPIM_1_SpiUartWriteTxData(data);
+    while(!SPIM_1_SpiUartGetRxBufferSize());
+    SPIM_1_SpiUartReadRxData();    
+}
+
+u08 spiTransferByte(u08 data)
+{
+    SPIM_1_SpiUartWriteTxData(data);
+    while(!SPIM_1_SpiUartGetRxBufferSize());
+    return SPIM_1_SpiUartReadRxData();    
+}
+
+u08 spiTransferFF()
+{
+	return spiTransferByte(0xFF);
+}
+
+
 
 u08 mmcReset(void)
 {
 	u16 retry;
 	u08 r1;
 	u08 i;
-	u08 sdcard;
+	//u08 sdcard;
 
 	n_actual_mmc_sector=0xFFFFFFFF;	//!!! pridano dovnitr
 	n_actual_mmc_sector_needswrite=0;
@@ -131,16 +140,12 @@ u08 mmcSendCommand(u08 cmd, u32 arg)
 {
 	u08 r1;
 
-	// assert chip select
-	cbi(MMC_CS_PORT,MMC_CS_PIN);
 	//
 	//spiTransferFF();			//pribude 34 bajtu kodu (!)
 	// issue the command
 	r1 = mmcCommand(cmd, arg);
 	//
 	//spiTransferFF();
-	// release chip select
-	sbi(MMC_CS_PORT,MMC_CS_PIN);
 
 	return r1;
 }
@@ -153,8 +158,6 @@ u08 mmcRead(u32 sector)
 	u16 i;
 	u08 *buffer=mmc_sector_buffer;	//natvrdo!
 
-	// assert chip select
-	cbi(MMC_CS_PORT,MMC_CS_PIN);
 	// issue command
 	r1 = mmcCommand(MMC_READ_SINGLE_BLOCK, sector<<9);
 
@@ -177,8 +180,6 @@ u08 mmcRead(u32 sector)
 	//// + 1x FF navic pred releasnutim chip selectu
 	//spiTransferFF();
 	//
-	// release chip select
-	sbi(MMC_CS_PORT,MMC_CS_PIN);
 	//
 	return 0;	//success
 }
@@ -189,8 +190,6 @@ u08 mmcWrite(u32 sector)
 	u16 i;
 	u08 *buffer=mmc_sector_buffer;	//natvrdo!
 
-	// assert chip select
-	cbi(MMC_CS_PORT,MMC_CS_PIN);
 	// issue command
 	r1 = mmcCommand(MMC_WRITE_BLOCK, sector<<9);
 	// check for valid response
@@ -216,8 +215,6 @@ u08 mmcWrite(u32 sector)
 	// wait until card not busy
 	while(!spiTransferFF());
 	// release chip select
-	sbi(MMC_CS_PORT,MMC_CS_PIN);
-	// return success
 	return 0;
 }
 

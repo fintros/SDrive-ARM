@@ -95,7 +95,7 @@ struct partrecord // length 16 bytes
 	unsigned short	prEndCylSect;				// ending cylinder and sector
 	unsigned long	prStartLBA;					// first LBA sector for this partition
 	unsigned long	prSize;						// size of this partition (bytes or sectors ?)
-};
+} __attribute__((packed));
 
         
 struct partsector
@@ -106,7 +106,7 @@ struct partsector
 	unsigned char	psBootSectSig1;
 #define BOOTSIG0        0x55
 #define BOOTSIG1        0xaa
-};
+} __attribute__((packed));
 
 
 // Format of a boot sector.  This is the first sector on a DOS floppy disk
@@ -122,7 +122,7 @@ struct bootsector33 {
 	unsigned char	bsBootSectSig1;				// boot sector signature byte 0xAA
 #define BOOTSIG0        0x55
 #define BOOTSIG1        0xaa
-};
+} __attribute__((packed));
 
 struct extboot {
 	unsigned char	exDriveNumber;				// drive number (0x80)
@@ -132,7 +132,7 @@ struct extboot {
 	unsigned char	exVolumeID[4];				// volume ID number
 	unsigned char	exVolumeLabel[11];			// volume label
 	unsigned char	exFileSysType[8];			// fs type (FAT12 or FAT16)
-};
+} __attribute__((packed));
 
 struct bootsector50 {
 	unsigned char	bsJump[3];					// jump inst E9xxxx or EBxx90
@@ -144,7 +144,7 @@ struct bootsector50 {
 	unsigned char	bsBootSectSig1;				// boot sector signature byte 0xAA
 #define BOOTSIG0        0x55
 #define BOOTSIG1        0xaa
-};
+} __attribute__((packed));
 
 struct bootsector710 {
 	unsigned char	bsJump[3];					// jump inst E9xxxx or EBxx90
@@ -160,7 +160,7 @@ struct bootsector710 {
 #define BOOTSIG1        0xaa
 #define BOOTSIG2        0
 #define BOOTSIG3        0
-};
+} __attribute__((packed));
 
 
 /***************************************************************/
@@ -179,7 +179,7 @@ struct bpb33 {
         unsigned short	bpbSecPerTrack; // sectors per track
         unsigned short	bpbHeads;       // number of heads
         unsigned short	bpbHiddenSecs;  // number of hidden sectors
-};
+} __attribute__((packed));
 
 // BPB for DOS 5.0
 // The difference is bpbHiddenSecs is a short for DOS 3.3,
@@ -198,7 +198,7 @@ struct bpb50 {
         unsigned long	bpbHiddenSecs;  // # of hidden sectors
 // 3.3 compat ends here
         unsigned long	bpbHugeSectors; // # of sectors if bpbSectors == 0
-};
+} __attribute__((packed));
 
 // BPB for DOS 7.10 (FAT32)
 // This one has a few extensions to bpb50.
@@ -227,7 +227,7 @@ struct bpb710 {
 		unsigned short      bpbFSInfo;	// filesystem info structure sector
 		unsigned short      bpbBackup;	// backup boot sector
 		// There is a 12 byte filler here, but we ignore it
-};
+} __attribute__((packed));
 
 
 // ***************************************************************
@@ -247,7 +247,7 @@ struct byte_bpb33 {
         unsigned char bpbSecPerTrack[2];     // sectors per track
         unsigned char bpbHeads[2];           // number of heads
         unsigned char bpbHiddenSecs[2];      // number of hidden sectors
-};
+} __attribute__((packed));
 
 // BPB for DOS 5.0
 // The difference is bpbHiddenSecs is a short for DOS 3.3,
@@ -265,7 +265,7 @@ struct byte_bpb50 {
         unsigned char bpbHeads[2];           // number of heads
         unsigned char bpbHiddenSecs[4];      // number of hidden sectors
         unsigned char bpbHugeSectors[4];		// # of sectors if bpbSectors == 0
-};
+} __attribute__((packed));
 
 // BPB for DOS 7.10 (FAT32).
 // This one has a few extensions to bpb50.
@@ -289,7 +289,7 @@ struct byte_bpb710 {
         unsigned char bpbFSInfo[2];          // filesystem info structure sector
         unsigned char bpbBackup[2];          // backup boot sector
         // There is a 12 byte filler here, but we ignore it
-};
+} __attribute__((packed));
 
 // FAT32 FSInfo block.
 struct fsinfo {
@@ -302,7 +302,7 @@ struct fsinfo {
         unsigned char fsisig3[4];
         unsigned char fsifill3[508];
         unsigned char fsisig4[4];
-};
+} __attribute__((packed));
 
 
 // Structure of a dos directory entry.
@@ -333,7 +333,7 @@ struct direntry {
 		unsigned char        deMDate[2];     // last update date
 		unsigned short        deStartCluster; // starting cluster of file
 		unsigned long       deFileSize;  	// size of file in bytes
-};
+} __attribute__((packed));
 
 // number of directory entries in one sector
 #define DIRENTRIES_PER_SECTOR	0x10
@@ -351,7 +351,7 @@ struct winentry {
 		unsigned char		wePart2[12];
 		unsigned short       	weReserved2;
 		unsigned char		wePart3[4];
-};
+} __attribute__((packed));
 
 #define WIN_ENTRY_CHARS	13      // Number of chars per winentry
 
@@ -397,7 +397,7 @@ typedef struct						//2+2+2+2+2+4+1=15
 	unsigned short file_index;			//< file index
 	unsigned long size;					//< file size
 	unsigned char flags;				//< file flags
-}virtual_disk_t;
+} __attribute__((packed)) virtual_disk_t ;
 
 struct FileInfoStruct
 {
@@ -407,7 +407,7 @@ struct FileInfoStruct
 	unsigned char percomstate;		//=0 default, 1=percomwrite ok (single sectors), 2=percomwrite ok (double sectors), 3=percomwrite bad
 	//
 	virtual_disk_t vDisk;
-};
+} __attribute__((packed));;
 
 struct GlobalSystemValues			//4+4+2+2+1=13 bytes
 {
