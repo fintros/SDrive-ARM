@@ -117,16 +117,16 @@ uint8_t boot_xex_loader[179] = {
 #define FILE_ACCESS_WRITE	1
 
 
-#define LED_ON     LEDREG_Write(0xFF);
-#define LED_OFF    LEDREG_Write(0);
+#define LED_ON     
+#define LED_OFF    
 
 
 // Aktivita
-#define LED_GREEN_ON	;
-#define LED_GREEN_OFF	;
+#define LED_GREEN_ON	LEDREG_Write(LEDREG_Read() & ~0x1)
+#define LED_GREEN_OFF	LEDREG_Write(LEDREG_Read() | 0x1)
 // Zapis
-#define LED_RED_ON		;
-#define LED_RED_OFF		;
+#define LED_RED_ON		LEDREG_Write(LEDREG_Read() & ~0x2)
+#define LED_RED_OFF		LEDREG_Write(LEDREG_Read() | 0x2)
 
 unsigned char mmc_sector_buffer[512];	// one SD sector
 u32 n_actual_mmc_sector;
@@ -154,7 +154,7 @@ extern u32 debug_endofvariables;
 #define get_cmd_L()		( !(Command_Read()) )
 #define get_readonly()	0 //read only - skip it 
 
-#define read_key()		(0) // skip it
+#define read_key()		((SWBUT_Read()>>4) & 0x07) 
 
 unsigned char last_key;
 
@@ -491,12 +491,25 @@ unsigned short faccess_offset(char mode, unsigned long offset_start, unsigned sh
 
 void set_display(unsigned char n)
 {
-	//PORTC=(inb(PINC)&0xe0)|(0x1f ^ (1<<(4-n)) );
-	//PORTC=(inb(PINC)&0xf0)|( (n>0)? (0x0f ^ (1<<(4-n)) ) : 0);
-	//u08 v;
-	//v=inb(PINC)&0xf0;
-	//if (n>0) v|=(0x0f ^ (1<<(4-n)) );  //pro bootD0: sviti vsechny 4 zlute diody
-	//PORTC=v;
+    DebugPrintf("Set display to %d, %02X\r\n", n, LEDREG_Read());
+    switch(n)
+    {
+        case 0:
+            LEDREG_Write(LEDREG_Read() & ~0x3C);
+            break;
+        case 1:
+            LEDREG_Write((LEDREG_Read() | 0x3C) & ~0x04);
+            break;
+        case 2:
+            LEDREG_Write((LEDREG_Read() | 0x3C) & ~0x10);
+            break;
+        case 3:
+            LEDREG_Write((LEDREG_Read() | 0x3C) & ~0x08);
+            break;
+        case 4:
+            LEDREG_Write((LEDREG_Read() | 0x3C) & ~0x20);
+            break;        
+    }    
 }
 
 //#define full_display()		{ PORTC=(inb(PINC)&0xc0)|0x00; }
@@ -610,7 +623,7 @@ int sdrive(void)
 	//Parameters
 	struct SDriveParameters sdrparams;
     UART_1_Start();
-    //Debug_Start();
+    Debug_Start();
     
     LED_ON;
     
@@ -663,7 +676,7 @@ SD_CARD_EJECTED:
 	}
 	FileInfo.vDisk.flags=0;		//special_xex_loader=0;
 
-//SET_BOOT_DRIVE:
+SET_BOOT_DRIVE:
 
 	actual_drive_number=0;	//pro bootovani z jednotky vD0:
 
@@ -758,7 +771,7 @@ find_sdrive_atr_next_entry:
 		//takze nastavi jednotku dle cisla SDrive (1-4)
 		if (actual_drive_number==0)
 		{
-		 actual_drive_number=1; //todo: (unsigned char)4-((unsigned char)(inb(PINB))&0x03);
+		 actual_drive_number=(unsigned char)4-((unsigned char)(SWBUT_Read()&0x03));
 		}
 	}
 find_sdrive_atr_finished:
@@ -780,15 +793,11 @@ ST_IDLE:
 //autowritecounter_reset:
 		 autowritecounter=0;
 		 while( get_cmd_H() )	//dokud je Atari signal command na H
-		 {
-            //uint16 count;
-           // uint8 buffer[64];
-                 
-            
+		 {           
 			//tak bude zkoumat klavesnici
 
 			//buttons
-			//unsigned char actual_key;
+			unsigned char actual_key;
 
 			//read key				bit
 			//PD7 .. RIGHT			0x80
@@ -799,24 +808,26 @@ ST_IDLE:
 			//PD2 .. CARD INSERTED	0x04
 			//PD1
 			//PD0
-			//actual_key = read_key();		//(inb(PIND)&0xe4)
-			/* todo if(actual_key != last_key)
+			actual_key = read_key();		//(inb(PIND)&0xe4)
+			if(actual_key != last_key)
 			{
-				if (inb(PIND)&0x04) goto SD_CARD_EJECTED;
+                DebugPrintf("Key: %02X\r\n", actual_key);
+				//if (inb(PIND)&0x04) goto SD_CARD_EJECTED;
 				//nyni je bit 0x04 vzdy 0 , protoze karta je vlozena
 				switch(actual_key)	//&0xfe)
 				{
-					case 0xc0: //0x20^0xe0: //BOOT KEY
+					case 6: //0x20^0xe0: //BOOT KEY
 						//actual_drive_number=0;
+        				last_key = actual_key;
 						goto SET_BOOT_DRIVE;
 						break;
-					case 0xa0: //0x40^0xe0: //LEFT
+					case 5: //0x40^0xe0: //LEFT
 						if(actual_drive_number>1)
 							actual_drive_number--;
 						else
 							actual_drive_number=4;
 						break;
-					case 0x60: //0x80^0xe0: //RIGHT
+					case 3: //0x80^0xe0: //RIGHT
 						if(actual_drive_number<4)
 							actual_drive_number++;
 						else
@@ -825,9 +836,9 @@ ST_IDLE:
 				}
 				set_display(actual_drive_number);
 				last_key = actual_key;
-				Delay100usX(500); //pauza 50ms = 0.05s (kvuli tlacitkum)
+				CyDelay(50); //pauza 50ms = 0.05s (kvuli tlacitkum)
 			}
-            */
+            
 			if (autowritecounter>1700000)
 			{
 				//  100'000 nebylo temer poznat
@@ -906,7 +917,7 @@ change_sio_speed_by_fastsio_active:
 		   	// DISKETOVE OPERACE D0: az D4:
 		  	unsigned char virtual_drive_number;
 
-			if( command[0] == (unsigned char)0x31 ) // todo +3-((unsigned char)(inb(PINB))&0x03) )
+			if( command[0] == (unsigned char)0x31 + 3 - ((unsigned char)(SWBUT_Read()&0x03)))
 			{
 				//chce cist z drive Dx (D1: az D4:) ktere je prehazovaci
 			    virtual_drive_number = actual_drive_number;
@@ -915,7 +926,7 @@ change_sio_speed_by_fastsio_active:
 			if ( command[0] == (unsigned char)0x30+actual_drive_number )
 			{
 				//chce cist z drive Dx (D0: az D4:) ktery je prehozen s drive number
-				virtual_drive_number = 4-1; // todo ((unsigned char)(inb(PINB))&0x03);
+				virtual_drive_number = 4-((unsigned char)(SWBUT_Read()&0x03));
 			}
 			else
 			{
@@ -1520,7 +1531,7 @@ set_number_of_sectors_to_buffer_1_2:
 			} //switch
 		} // disketove operace
 		else
-		if( command[0] == (unsigned char)0x71 ) // todo +3-((unsigned char)(inb(PINB))&0x03) )
+		if( command[0] == (unsigned char)0x71 +3-((unsigned char)(SWBUT_Read()&0x03)))
 		{
 			// SDRIVE OPERACE 
 
@@ -2119,7 +2130,7 @@ Different_char:
 
 				//Prepnuti prislusneho drive do Dsdrivenum:
 				//(if >=5) SetDefault
-				actual_drive_number = ( command[2] < DEVICESNUM )? command[2] : 4-3;// todo ((unsigned char)(inb(PINB))&0x03);
+				actual_drive_number = ( command[2] < DEVICESNUM )? command[2] : (unsigned char)4-((unsigned char)(SWBUT_Read()&0x03));
 				set_display(actual_drive_number);
 				goto Send_CMPL_and_Delay;
 				break;
