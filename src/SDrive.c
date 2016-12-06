@@ -624,6 +624,9 @@ int sdrive(void)
 	struct SDriveParameters sdrparams;
     UART_1_Start();
     Debug_Start();
+    CapSense_Start();
+    CapSense_InitializeAllBaselines();
+    CapSense_ScanAllWidgets();
     
     LED_ON;
     
@@ -792,13 +795,40 @@ ST_IDLE:
 		 unsigned long autowritecounter;
 //autowritecounter_reset:
 		 autowritecounter=0;
+
+            
+		//buttons
+		unsigned char actual_key = 0;
+
+            
 		 while( get_cmd_H() )	//dokud je Atari signal command na H
 		 {           
 			//tak bude zkoumat klavesnici
-
-			//buttons
-			unsigned char actual_key;
-
+            
+            if(CapSense_NOT_BUSY == CapSense_IsBusy())
+            {
+                CapSense_ProcessAllWidgets();
+                if(CapSense_IsAnyWidgetActive())
+                {
+                    if(CapSense_IsWidgetActive(CapSense_BUTTON0_WDGT_ID))
+                        actual_key = 6;
+                    else if(CapSense_IsWidgetActive(CapSense_BUTTON1_WDGT_ID))
+                        actual_key = 5;
+                    else if(CapSense_IsWidgetActive(CapSense_BUTTON2_WDGT_ID))
+                        actual_key = 3;
+                    //else
+        			//    actual_key = read_key();                    
+                }                                
+                else
+                {
+    			    actual_key = 0;// read_key();
+                }
+                CapSense_ScanAllWidgets();
+            }
+//            else
+//            {
+//			    actual_key = read_key();		//(inb(PIND)&0xe4)
+//            }
 			//read key				bit
 			//PD7 .. RIGHT			0x80
 			//PD6 .. LEFT			0x40
@@ -808,7 +838,7 @@ ST_IDLE:
 			//PD2 .. CARD INSERTED	0x04
 			//PD1
 			//PD0
-			actual_key = read_key();		//(inb(PIND)&0xe4)
+               
 			if(actual_key != last_key)
 			{
                 DebugPrintf("Key: %02X\r\n", actual_key);

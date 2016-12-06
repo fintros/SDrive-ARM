@@ -35,13 +35,41 @@
   <block name="Boot" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="Left" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="Right" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="LED_Y3" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="LED_Y0" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="CapSense" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
+    <block name="CSD" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="ZeroTerminal_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="ZeroTerminal_6" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="Cmod" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="CapSense_IDACComp" BASE="0x0" SIZE="0x0" desc="IDAC" visible="true" hidden="false">
+      <block name="cy_psoc4_idac" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+      <block name="OneTerminal_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+      <register name="CSD_IDAC_POLARITY" address="0x40080004" bitWidth="32" desc=" CSD IDAC Polarity" hidden="false" />
+      <register name="CSD_IDAC" address="0x40080008" bitWidth="32" desc=" CSD IDAC register" hidden="false" />
+      <register name="CSD_TRIM1" address="0x4008FF00" bitWidth="32" desc=" CSD IDAC TRIM1" hidden="false" />
+      <register name="CSD_TRIM2" address="0x4008FF04" bitWidth="32" desc=" CSD IDAC TRIM2" hidden="false" />
+    </block>
+    <block name="Sns" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="or_ModClk" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="CapSense_IDACMod" BASE="0x0" SIZE="0x0" desc="IDAC" visible="true" hidden="false">
+      <block name="cy_psoc4_idac" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+      <block name="OneTerminal_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+      <register name="CSD_IDAC_POLARITY" address="0x40080004" bitWidth="32" desc=" CSD IDAC Polarity" hidden="false" />
+      <register name="CSD_IDAC" address="0x40080008" bitWidth="32" desc=" CSD IDAC register" hidden="false" />
+      <register name="CSD_TRIM1" address="0x4008FF00" bitWidth="32" desc=" CSD IDAC TRIM1" hidden="false" />
+      <register name="CSD_TRIM2" address="0x4008FF04" bitWidth="32" desc=" CSD IDAC TRIM2" hidden="false" />
+    </block>
+    <block name="cy_constant_3" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="VirtualMux_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="ModClk" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="SnsClk" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="ISR" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  </block>
   <block name="cy_boot" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="cy_lfclk" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="LED_Y0" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="LED_Y1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="LED_Y2" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="RW" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="LED_Y3" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="LED_G" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="LEDREG" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
     <register name="LEDREG_CONTROL_REG" address="0x400F0072" bitWidth="8" desc="" hidden="false" />
@@ -412,9 +440,6 @@
       <field name="UART_1_RX_STS_ADDR_MATCH" from="6" to="6" access="R" resetVal="" desc="" hidden="false" />
     </register>
   </block>
-  <block name="Dnumb0" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="Dnumb1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="Unlock" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="Debug" BASE="0x0" SIZE="0x0" desc="Serial Communication Block" visible="true" hidden="false">
     <block name="clock_VM" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="sclk_s_VM" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
@@ -754,6 +779,10 @@
       <field name="BREAK_DETECT" from="11" to="11" access="RW" resetVal="" desc="Logical and of corresponding request and mask bits" hidden="false" />
     </register>
   </block>
+  <block name="Dnumb1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="Unlock" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="RW" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="Rx_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="Tx_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="Dnumb0" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
 </blockRegMap>
