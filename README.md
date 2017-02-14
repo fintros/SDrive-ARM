@@ -6,6 +6,7 @@ Atari800 disk drives emulator based on C.P.U. project SDrive
 ## Specs
 - SDrive was developed originally by C.P.U. team in 2008 and use AT Mega 8 processor;
 - It is extension of previous project with following features:
+  - Works with Atari 8-bit systems like Atari 800xl, XE/GS, etc.
   - 5V compatible 32bit Cypress CY8C4245AXI ARM processor with:
     - 48 MHz core
     - 32Kb Flash
