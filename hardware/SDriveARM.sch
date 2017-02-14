@@ -14971,8 +14971,8 @@ Surface Mounting type.</description>
 <sheet>
 <plain>
 <text x="73.66" y="81.28" size="1.778" layer="98">CMOD Capacitor</text>
-<text x="182.88" y="83.82" size="1.27" layer="97">Read only Switch</text>
-<text x="124.46" y="86.36" size="1.27" layer="97">Capacitive buttons</text>
+<text x="180.34" y="91.44" size="1.27" layer="97">Read only Switch</text>
+<text x="129.54" y="91.44" size="1.27" layer="97">Capacitive buttons</text>
 <wire x1="114.3" y1="172.72" x2="114.3" y2="101.6" width="0.1524" layer="97" style="longdash"/>
 <wire x1="114.3" y1="101.6" x2="114.3" y2="55.88" width="0.1524" layer="97" style="longdash"/>
 <wire x1="2.54" y1="55.88" x2="73.66" y2="55.88" width="0.1524" layer="97" style="longdash"/>
@@ -14988,6 +14988,8 @@ Surface Mounting type.</description>
 <text x="127" y="48.26" size="1.27" layer="97">Reset</text>
 <text x="246.38" y="91.44" size="1.27" layer="97">LEDS</text>
 <text x="119.38" y="10.16" size="1.778" layer="97">Pull to ground to activate bootloader</text>
+<text x="48.26" y="7.62" size="1.4224" layer="97">Use DS1072-8 F  (PHU-8) 
+Female connectors</text>
 </plain>
 <instances>
 <instance part="FRAME1" gate="G$1" x="0" y="0"/>
@@ -15958,4 +15960,10 @@ Surface Mounting type.</description>
 </errors>
 </schematic>
 </drawing>
+<compatibility>
+<note version="6.3" minversion="6.2.2" severity="warning">
+Since Version 6.2.2 text objects can contain more than one line,
+which will not be processed correctly with this version.
+</note>
+</compatibility>
 </eagle>
