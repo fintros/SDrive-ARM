@@ -15,6 +15,12 @@ int sdrive(void);
 
 int main(void)
 {
+    
+    //if(BL_Init_Read() == 0)
+   // {
+    //    Bootloadable_Load();    // start bootloader in case of pin detect
+    //}
+        
     CyGlobalIntEnable; /* Enable global interrupts. */
 
     /* Place your initialization/startup code here (e.g. MyInst_Start()) */

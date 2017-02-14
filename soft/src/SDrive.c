@@ -20,11 +20,17 @@
 
 typedef unsigned char uint8_t;
 
+#define SWBUT_Read() 3
+
 char buf[255];    
 
 void DebugPrintf(const char* msg, ...)
 {
+#ifndef DEBUG
     return;
+#endif   
+    
+    // debug variant 
 	va_list argptr;
 	va_start(argptr, msg);
 	vsnprintf(buf, 255, msg, argptr);    
@@ -140,10 +146,10 @@ struct FileInfoStruct FileInfo;			//< file information for last file accessed
 
 extern u32 debug_endofvariables;
 
-#define send_ACK()	USART_Transmit_Byte('A'); /* DebugPrintf("Send ACK\r\n"); */
-#define send_NACK()	USART_Transmit_Byte('N'); /* DebugPrintf("Send NACK\r\n"); */
-#define send_CMPL()	USART_Transmit_Byte('C'); /* DebugPrintf("Send CMPL\r\n"); */
-#define send_ERR()	USART_Transmit_Byte('E'); /* DebugPrintf("Send ERR\r\n"); */
+#define send_ACK()	USART_Transmit_Byte('A');  DebugPrintf("Send ACK\r\n"); 
+#define send_NACK()	USART_Transmit_Byte('N');  DebugPrintf("Send NACK\r\n");
+#define send_CMPL()	USART_Transmit_Byte('C');  DebugPrintf("Send CMPL\r\n");
+#define send_ERR()	USART_Transmit_Byte('E');  DebugPrintf("Send ERR\r\n"); 
 
 #define wait_cmd_HL() { while ( Command_Read() ); }
 #define wait_cmd_LH() { while ( !Command_Read() ); }
@@ -152,9 +158,9 @@ extern u32 debug_endofvariables;
 #define CMD_STATE_L		0
 #define get_cmd_H()		( Command_Read() )
 #define get_cmd_L()		( !(Command_Read()) )
-#define get_readonly()	0 //read only - skip it 
+#define get_readonly()	(SWBUT_Read() & 0x01) 
 
-#define read_key()		((SWBUT_Read()>>4) & 0x07) 
+#define read_key()		0 //((SWBUT_Read()>>4) & 0x07) 
 
 unsigned char last_key;
 
@@ -277,7 +283,7 @@ u08 USART_Get_Buffer_And_Check(unsigned char *buff, u16 len, u08 cmd_state)
 		{
 			//pokud by prisel command L nebo stisknuta klavesa, prerusi prijem
 			if ( get_cmd_H()!=cmd_state ) return 0x01;
-    		if ( read_key()!=last_key ) return 0x02;
+    		//if ( read_key()!=last_key ) return 0x02;
         }
         
         value = UART_1_ReadRxData();
@@ -487,8 +493,6 @@ unsigned short faccess_offset(char mode, unsigned long offset_start, unsigned sh
 
 // DISPLAY
 
-//#define init_display()		{ PORTC=(inb(PINC)&0xc0)|0x3f; }		//zhasne vsechny kontrolky
-
 void set_display(unsigned char n)
 {
     DebugPrintf("Set display to %d, %02X\r\n", n, LEDREG_Read());
@@ -500,10 +504,10 @@ void set_display(unsigned char n)
         case 1:
             LEDREG_Write((LEDREG_Read() | 0x3C) & ~0x04);
             break;
-        case 2:
+        case 3:
             LEDREG_Write((LEDREG_Read() | 0x3C) & ~0x10);
             break;
-        case 3:
+        case 2:
             LEDREG_Write((LEDREG_Read() | 0x3C) & ~0x08);
             break;
         case 4:
@@ -512,14 +516,6 @@ void set_display(unsigned char n)
     }    
 }
 
-//#define full_display()		{ PORTC=(inb(PINC)&0xc0)|0x00; }
-
-
-//prog_uchar system_atr_name[]={"SDRIVE  .ATR"};
-// =pgm_read_byte_near(&system_atr_name[idx]);
-//uint8_t EEMEM system_atr_name[]={"SDRIVE  ATR"};
-// =eeprom_read_byte(&system_atr_name[idx]);
-//
 uint8_t system_info[]="SDrive01 20161202 AlSp based on Bob!k & Raster, C.P.U.";	//SDriveVersion info
 //                                 VVYYYYMMDD
 //                                 VV cislo nove oficialne vydane verze, meni se jen pri vydani noveho oficialniho firmware
@@ -640,14 +636,8 @@ SD_CARD_EJECTED:
 	bootloader_relocation=0;
 	//actual_drive_number=0;	//nastavovano kousek dal (za SET_BOOT_DRIVE)
 	FileInfo.percomstate=0;	//inicializace
-	//fastsio_pokeydiv=US_POKEY_DIV_DEFAULT;		//default fastsio
 	fastsio_pokeydiv= system_fastsio_pokeydiv_default; //definovano v EEPROM
     
-    // temp
-    //fastsio_pokeydiv= US_POKEY_DIV_STANDARD; //definovano v EEPROM
-
-	//init_display();
-
 	USART_Init(ATARI_SPEED_STANDARD);
     
 	LED_GREEN_ON;	// LED on
@@ -899,8 +889,8 @@ ST_IDLE:
 
             if(err)
                 DebugPrintf("Command error: [%02X]\r\n", err);
-            //else
-            //    DebugPrintf("Command: [%02X %02X %02X %02X]\r\n", command[0], command[1], command[2], command[3]);
+            else
+                DebugPrintf("Command: [%02X %02X %02X %02X]\r\n", command[0], command[1], command[2], command[3]);
 
 
             //pokud je duvodem zmena cmd na H, nemusi cekat na wait_cmd_LH()
@@ -1495,7 +1485,7 @@ set_number_of_sectors_to_buffer_1_2:
 					atari_sector_size=XEX_SECTOR_SIZE;
 				}
 
-               if(0){
+               if(1){
                     DebugPrintf("Put Atari sector: \r\n");
                     int i = 0;
                     for(i = 0; i < atari_sector_size;i+=16)
@@ -1551,11 +1541,11 @@ set_number_of_sectors_to_buffer_1_2:
 
 				USART_Send_cmpl_and_atari_sector_buffer_and_check_sum(4);
 
-                //DebugPrintf("Send status: [%02X %02X %02X %02X]\r\n", 
-                //    atari_sector_buffer[0], 
-                //    atari_sector_buffer[1],
-                //    atari_sector_buffer[2],
-                //    atari_sector_buffer[3]);
+                DebugPrintf("Send status: [%02X %02X %02X %02X]\r\n", 
+                    atari_sector_buffer[0], 
+                    atari_sector_buffer[1],
+                    atari_sector_buffer[2],
+                    atari_sector_buffer[3]);
                 
 				break;
 			} //switch
