@@ -1,7 +1,7 @@
 # SDrive-ARM
 Atari800 disk drives emulator based on C.P.U. project SDrive
 
-![image](docs/photos/build07.jpg)
+![image](docs/photos/build07s.jpg)
 
 ## Specs
 - SDrive was developed originally by C.P.U. team in 2008 and use AT Mega 8 processor;
