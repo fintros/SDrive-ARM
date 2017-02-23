@@ -12,30 +12,34 @@
 #include "project.h"
 
 #include "fat.h"
-#include "mmc.h"
+#include "mmcsd.h"
 
 #include <stdio.h>
 #include <stdarg.h>
 #include <math.h>
 
+#define CAPSENSE 1
+
 typedef unsigned char uint8_t;
 
-#define SWBUT_Read() 3
+//#define SWBUT_Read() 3
 
+char _driveShift = 3; // 3 D1 = 0 drive
+
+#ifdef DEBUG
 char buf[255];    
 
 void DebugPrintf(const char* msg, ...)
 {
-#ifndef DEBUG
-    return;
-#endif   
-    
     // debug variant 
 	va_list argptr;
 	va_start(argptr, msg);
 	vsnprintf(buf, 255, msg, argptr);    
     Debug_SpiUartPutArray((const unsigned char*)&buf[0], strlen(&buf[0]));
 }
+#else
+#define DebugPrintf(X,...)  
+#endif  
 
 //*****************************************************************************
 // SDrive
@@ -189,9 +193,9 @@ void USART_Flush( void )
 
 void USART_Init( u08 value )
 {     
-    const double freq = 48000000.0;
+    const unsigned long freq = 48000000;
     
-    int TargetSpeed = 0;
+    unsigned long TargetSpeed = 0;
     
     switch(value-6)
     {
@@ -220,23 +224,22 @@ void USART_Init( u08 value )
             TargetSpeed = 74575;
             break;
         default:
-            TargetSpeed = freq / 19040 / 8 / 46 * value;
+            TargetSpeed = freq / 8 * value / 19040 / 46;
     }
 
-    double TargetDivider = freq/8/TargetSpeed;  
-    int IntDivider = (int) TargetDivider;
-    int FractDevider = (int)((TargetDivider - IntDivider)*32);
-    double ActualDevider = IntDivider + FractDevider/32.0;   
-    Clock_1_SetFractionalDividerRegister(TargetDivider, FractDevider);
+    unsigned long TargetDivider = freq * 32 / 8 / TargetSpeed;  // fixed point 27.5
+    int IntDivider = TargetDivider / 32 ;
+    int FractDivider = TargetDivider - IntDivider * 32;
+    Clock_1_SetFractionalDividerRegister(IntDivider, FractDivider);
     UART_1_ClearRxBuffer();
     UART_1_ClearTxBuffer();
-    DebugPrintf("Change UART speed [%d, %d] to %d\r\n", IntDivider, FractDevider, (int)(48000000.0/ActualDevider/8));    
+    DebugPrintf("Change UART speed %d: [%d, %d] to %d\r\n", value, IntDivider, FractDivider, (int)(48000000*32/(IntDivider*32 + FractDivider)/8));    
 }
 
 void USART_Transmit_Byte( unsigned char data )
 {
-    while(UART_1_GetTxBufferSize());
     UART_1_WriteTxData(data);
+    while(UART_1_GetTxBufferSize());
 }
 
 unsigned char USART_Receive_Byte( void )
@@ -251,8 +254,8 @@ unsigned char USART_Receive_Byte( void )
 
 void USART_Send_Buffer(unsigned char *buff, u16 len)
 {
-    while(UART_1_GetTxBufferSize());
     UART_1_PutArray(buff, len);
+    while(UART_1_GetTxBufferSize());
 }
 
 /*
@@ -345,7 +348,7 @@ void USART_Send_cmpl_and_atari_sector_buffer_and_check_sum(unsigned short len)
 						//(tato fce se pouziva se i u read SpeedIndex 3F,
 						// coz s delsi pauzou nefunguje (pod Qmegem3 fast)
 	//Delay800us();	//t6
-	CyDelayUs(300u);	//<--pouziva se i u commandu 3F
+	CyDelayUs(200u);	//<--pouziva se i u commandu 3F
 
 	USART_Send_Buffer(atari_sector_buffer,len);
 	check_sum = get_checksum(atari_sector_buffer,len);
@@ -407,8 +410,9 @@ void mmcWriteCachedFlush()
 	}
 }
 
+extern unsigned char Fat32Enabled;
 
-unsigned short getClusterN(unsigned short ncluster)
+unsigned long getClusterN(unsigned short ncluster)
 {
 	if(ncluster<FileInfo.vDisk.ncluster)
 	{
@@ -422,9 +426,8 @@ unsigned short getClusterN(unsigned short ncluster)
 		FileInfo.vDisk.ncluster++;
 	}
 
-	return (FileInfo.vDisk.current_cluster&0xFFFF);
+	return (FileInfo.vDisk.current_cluster&(Fat32Enabled?0xFFFFFFFF:0xFFFF));
 }
-
 
 unsigned short faccess_offset(char mode, unsigned long offset_start, unsigned short ncount)
 {
@@ -620,10 +623,12 @@ int sdrive(void)
 	struct SDriveParameters sdrparams;
     UART_1_Start();
     Debug_Start();
+#ifdef CAPSENSE
     CapSense_Start();
     CapSense_InitializeAllBaselines();
     CapSense_ScanAllWidgets();
-    
+#endif
+
     LED_ON;
     
     DebugPrintf("SDrive started\r\n");
@@ -640,22 +645,27 @@ SD_CARD_EJECTED:
     
 	USART_Init(ATARI_SPEED_STANDARD);
     
-	LED_GREEN_ON;	// LED on
-    
- 	// skip
+    char ledState = 0;
     //CEKACI SMYCKA!!!
-	//while (inb(PIND)&0x04); //cekani az zasune nejakou kartu
+	while (SWBUT_Read() & 0x40)
+    { 
+        CyDelay(200);
+        ledState = 1-ledState;
+        if(ledState) LED_RED_ON; 
+        else LED_RED_OFF; 
+    }
 
 	//pozor, v tomto okamziku nesmi byt nacacheovan zadny sektor
 	//pro zapis, protoze init karty inicializuje i mmc_sector atd.!!!
-    LED_OFF;
+    LED_RED_OFF; 
+    LED_GREEN_ON;
 	do
 	{
 		mmcInit();
 	}
 	while(mmcReset());	//dokud nenulove, tak smycka (return 0 => ok!)
 	//n_actual_mmc_sector=0xFFFFFFFF; //presunuto do mmcReset
-    LED_ON;
+    LED_GREEN_OFF;
     DebugPrintf("SD card inititialized\r\n");
 
 	// set SPI speed on maximum (F_CPU/2)
@@ -764,7 +774,7 @@ find_sdrive_atr_next_entry:
 		//takze nastavi jednotku dle cisla SDrive (1-4)
 		if (actual_drive_number==0)
 		{
-		 actual_drive_number=(unsigned char)4-((unsigned char)(SWBUT_Read()&0x03));
+		 actual_drive_number=(unsigned char)4-((unsigned char)(_driveShift&0x03));
 		}
 	}
 find_sdrive_atr_finished:
@@ -794,7 +804,7 @@ ST_IDLE:
 		 while( get_cmd_H() )	//dokud je Atari signal command na H
 		 {           
 			//tak bude zkoumat klavesnici
-            
+#ifdef CAPSENSE
             if(CapSense_NOT_BUSY == CapSense_IsBusy())
             {
                 CapSense_ProcessAllWidgets();
@@ -815,6 +825,8 @@ ST_IDLE:
                 }
                 CapSense_ScanAllWidgets();
             }
+#endif
+            
 //            else
 //            {
 //			    actual_key = read_key();		//(inb(PIND)&0xe4)
@@ -937,7 +949,7 @@ change_sio_speed_by_fastsio_active:
 		   	// DISKETOVE OPERACE D0: az D4:
 		  	unsigned char virtual_drive_number;
 
-			if( command[0] == (unsigned char)0x31 + 3 - ((unsigned char)(SWBUT_Read()&0x03)))
+			if( command[0] == (unsigned char)0x31 + 3 - ((unsigned char)(_driveShift&0x03)))
 			{
 				//chce cist z drive Dx (D1: az D4:) ktere je prehazovaci
 			    virtual_drive_number = actual_drive_number;
@@ -946,7 +958,7 @@ change_sio_speed_by_fastsio_active:
 			if ( command[0] == (unsigned char)0x30+actual_drive_number )
 			{
 				//chce cist z drive Dx (D0: az D4:) ktery je prehozen s drive number
-				virtual_drive_number = 4-((unsigned char)(SWBUT_Read()&0x03));
+				virtual_drive_number = 4-((unsigned char)(_driveShift&0x03));
 			}
 			else
 			{
@@ -1485,7 +1497,7 @@ set_number_of_sectors_to_buffer_1_2:
 					atari_sector_size=XEX_SECTOR_SIZE;
 				}
 
-               if(1){
+               if(0){
                     DebugPrintf("Put Atari sector: \r\n");
                     int i = 0;
                     for(i = 0; i < atari_sector_size;i+=16)
@@ -1551,7 +1563,7 @@ set_number_of_sectors_to_buffer_1_2:
 			} //switch
 		} // disketove operace
 		else
-		if( command[0] == (unsigned char)0x71 +3-((unsigned char)(SWBUT_Read()&0x03)))
+		if( command[0] == (unsigned char)0x71 +3-((unsigned char)(_driveShift&0x03)))
 		{
 			// SDRIVE OPERACE 
 
@@ -1708,7 +1720,7 @@ set_number_of_sectors_to_buffer_1_2:
 					do { *dptr++=*sptr++; i--; } while(i>0);
 					//tzv. lokalni vDisk
 					sptr=(u08*)&FileInfo.vDisk;
-					i=sizeof(virtual_disk_t);				//15
+					i=sizeof(virtual_disk_t);				//21
 					do { *dptr++=*sptr++; i--; } while(i>0);
 
 					//celkem 26 bytu
@@ -1726,7 +1738,7 @@ set_number_of_sectors_to_buffer_1_2:
 
 			case 0xDC:	//$DC xl xh	fatClusterToSector xl xh [<4]
 				{
-					FOURBYTESTOLONG(atari_sector_buffer) = fatClustToSect(TWOBYTESTOWORD(command+2));
+					FOURBYTESTOLONG(&atari_sector_buffer) = fatClustToSect((u32) TWOBYTESTOWORD(command+2));  // todo check!!! should be 4 bytes long
 					USART_Send_cmpl_and_atari_sector_buffer_and_check_sum(4);
 				}
 				break;
@@ -2150,7 +2162,7 @@ Different_char:
 
 				//Prepnuti prislusneho drive do Dsdrivenum:
 				//(if >=5) SetDefault
-				actual_drive_number = ( command[2] < DEVICESNUM )? command[2] : (unsigned char)4-((unsigned char)(SWBUT_Read()&0x03));
+				actual_drive_number = ( command[2] < DEVICESNUM )? command[2] : (unsigned char)4-((unsigned char)(_driveShift&0x03));
 				set_display(actual_drive_number);
 				goto Send_CMPL_and_Delay;
 				break;

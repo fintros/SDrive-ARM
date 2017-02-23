@@ -388,11 +388,11 @@ struct winentry {
 #define FLAGS_DRIVEON			0x01
 
 // Stuctures
-typedef struct						//2+2+2+2+2+4+1=15
+typedef struct						//4+4+4+2+2+4+1=21
 {
-	unsigned short start_cluster;		//< file starting cluster
-	unsigned short dir_cluster;
-	unsigned short current_cluster;
+	unsigned long start_cluster;		//< file starting cluster
+	unsigned long dir_cluster;
+	unsigned long current_cluster;
 	unsigned short ncluster;
 	unsigned short file_index;			//< file index
 	unsigned long size;					//< file size
@@ -426,9 +426,9 @@ struct GlobalSystemValues			//4+4+2+2+1=13 bytes
 
 
 unsigned char fatInit();
-unsigned long fatClustToSect(unsigned short clust);
+unsigned long fatClustToSect(unsigned long clust);
 unsigned char fatChangeDirectory(unsigned short entry);
 unsigned char fatGetDirEntry(unsigned short entry, unsigned char use_long_names);
-unsigned short nextCluster(unsigned short cluster);
+unsigned long nextCluster(unsigned long clust);
 
 #endif

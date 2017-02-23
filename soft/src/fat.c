@@ -34,7 +34,7 @@
 #include <string.h>
 
 #include "fat.h"
-#include "mmc.h"
+#include "mmcsd.h"
 
 void USART_SendString(char *buff);
 u08 mmcReadCached(u32 sector);
@@ -47,32 +47,29 @@ extern struct GlobalSystemValues GS;
 extern struct FileInfoStruct FileInfo;			//< file information for last file accessed
 
 
-unsigned long fatClustToSect(unsigned short clust)
+unsigned long fatClustToSect(unsigned long clust)
 {
-	u32 ret;
+    
 	if(clust==MSDOSFSROOT)
 		return (u32)((u32)(FirstDataSector) - (u32)(RootDirSectors));
-	
-	ret = (u32)(clust-2);
-	ret *= (u32)SectorsPerCluster;
-	ret += (u32)FirstDataSector;
-	return ((unsigned long)ret);
-}
 
+	return ((clust-2) * SectorsPerCluster) + FirstDataSector;
+}
 
 //POZOR - DEBUG !!!
 //prvne definovana promenna
 u32 debug_endofvariables;		//promenna co je v pameti jako posledni (za ni je uz jen stack)
 //POZOR - DEBUG !!!
 
-unsigned short last_dir_start_cluster;
+unsigned long last_dir_start_cluster;
 unsigned char last_dir_valid;
 unsigned short last_dir_entry=0x0;
 unsigned long last_dir_sector=0;
 unsigned char last_dir_sector_count=0;
-unsigned short last_dir_cluster=0;
+unsigned long last_dir_cluster=0;
 unsigned char last_dir_index=0;
 
+unsigned char Fat32Enabled = 0;
 
 unsigned char fatInit()
 {
@@ -102,28 +99,55 @@ unsigned char fatInit()
 
 	RootDirSectors = bpb->bpbRootDirEnts>>4; // /16 ; 512/16 = 32  (sector size / max entries in one sector = number of sectors)
 
-	// bpbFATsecs is non-zero and is therefore valid
-	FirstDataSector	+= bpb->bpbResSectors + bpb->bpbFATs * bpb->bpbFATsecs + RootDirSectors;
+	if(bpb->bpbFATsecs)
+	{
+		// bpbFATsecs is non-zero and is therefore valid
+		FirstDataSector	+= bpb->bpbResSectors + bpb->bpbFATs * bpb->bpbFATsecs + RootDirSectors;
+	}
+	else
+	{
+		// bpbFATsecs is zero, real value is in bpbBigFATsecs
+		FirstDataSector	+= bpb->bpbResSectors + bpb->bpbFATs * bpb->bpbBigFATsecs + RootDirSectors;
+	}
 
 	SectorsPerCluster	= bpb->bpbSecPerClust;
 	BytesPerSector		= bpb->bpbBytesPerSec;
 	FirstFATSector		= bpb->bpbResSectors + PartInfo.prStartLBA;
 
 	// set current directory to root (\)
-	FileInfo.vDisk.dir_cluster = MSDOSFSROOT; //RootDirStartCluster;
+	// FileInfo.vDisk.dir_cluster = MSDOSFSROOT; //RootDirStartCluster;
 
-    last_dir_start_cluster=0xffff;
+    last_dir_start_cluster=0xffffffff;
 	//last_dir_valid=0;		//<-- neni potreba, protoze na zacatku fatGetDirEntry se pri zjisteni
 							//ze je (FileInfo.vDisk.dir_cluster!=last_dir_start_cluster)
 							//vynuluje last_dir_valid=0;
 
-	if (   PartInfo.prPartType==PART_TYPE_DOSFAT16
-		|| PartInfo.prPartType==PART_TYPE_FAT16
-		|| PartInfo.prPartType==PART_TYPE_FAT16LBA
-	   )
-		return 1; //je to ok
-	else
-		return 0; //neni to zadny filesystem co umime
+    
+	switch (PartInfo.prPartType)
+	{
+		case PART_TYPE_DOSFAT16:
+		case PART_TYPE_FAT16:
+		case PART_TYPE_FAT16LBA:
+			// first directory cluster is 2 by default (clusters range 2->big)
+			FileInfo.vDisk.dir_cluster	= MSDOSFSROOT;
+			// push data sector pointer to end of root directory area
+			//FirstDataSector += (bpb->bpbRootDirEnts)/DIRENTRIES_PER_SECTOR;
+			Fat32Enabled = FALSE;
+			break;
+		case PART_TYPE_FAT32LBA:
+		case PART_TYPE_FAT32:
+			// bpbRootClust field exists in FAT32 bpb710, but not in lesser bpb's
+			FileInfo.vDisk.dir_cluster = bpb->bpbRootClust;
+			// push data sector pointer to end of root directory area
+			// need this? FirstDataSector += (bpb->bpbRootDirEnts)/DIRENTRIES_PER_SECTOR;
+			Fat32Enabled = TRUE;
+			break;
+		default:
+			return 0;
+			break;
+	}
+    
+    return 1;
 }
 
 //////////////////////////////////////////////////////////////
@@ -138,7 +162,7 @@ unsigned char fatGetDirEntry(unsigned short entry, unsigned char use_long_names)
 	unsigned short b;
 	u08 index;
 	unsigned short entrycount = 0;
-	unsigned short actual_cluster = FileInfo.vDisk.dir_cluster;
+	unsigned long actual_cluster = FileInfo.vDisk.dir_cluster;
 	unsigned char seccount=0;
 
 	haveLongNameEntry = 0;
@@ -176,13 +200,13 @@ unsigned char fatGetDirEntry(unsigned short entry, unsigned char use_long_names)
 	{
 		if(index==16)	// time for next sector ?
 		{
-			if ( actual_cluster==MSDOSFSROOT )
-			{
+			//if ( actual_cluster==MSDOSFSROOT )
+			//{
 				//v MSDOSFSROOT se nerozlisuji clustery
 				//protoze MSDOSFSROOT ma sektory stale dal za sebou bez clusterovani
-				if (seccount>=RootDirSectors) return 0; //prekrocil maximalni pocet polozek v MSDOSFSROOT
-			}
-			else //MUSI BYT!!! (aby neporovnaval seccount je-li actual_cluster==MSDOSFSROOT)
+			//	if (seccount>=RootDirSectors) return 0; //prekrocil maximalni pocet polozek v MSDOSFSROOT
+			//}
+			//else //MUSI BYT!!! (aby neporovnaval seccount je-li actual_cluster==MSDOSFSROOT)
 			if( seccount>=SectorsPerCluster )
 			{
 				//next cluster
@@ -294,7 +318,7 @@ fat_read_from_last_entry:
 						u08 i;
 						unsigned char *dptr;
 
-						dptr = &FileNameBuffer;
+						dptr = &FileNameBuffer[0];
 						for (i=0;i<11;i++)	*dptr++ = de->deName[i];		// copy name+ext
 						*dptr=0;	//ukonceni za nazvem
 
@@ -312,7 +336,7 @@ fat_read_from_last_entry:
 							i=4; do { sptr=dptr-1; *dptr=*sptr; dptr=sptr; i--; } while(i>0);
 							if (FileNameBuffer[0]!='.') *dptr='.'; //jen pro jine nez '.' a '..'
 							//NAME    .EXT => NAME.EXT
-							sptr=dptr=&FileNameBuffer;
+							sptr=dptr=&FileNameBuffer[0];
 							do
 							{
 							 if ((*sptr)!=' ') *dptr++=*sptr;
@@ -338,7 +362,7 @@ fat_next_dir_entry:
 	
 	// we have a file/dir to return
 	// store file/dir starting cluster (start of data)
-	FileInfo.vDisk.start_cluster = (unsigned short) (de->deStartCluster);
+	FileInfo.vDisk.start_cluster = (unsigned long) ((unsigned long)de->deHighClust << 16) +  (de->deStartCluster);
 	// fileindex
 	FileInfo.vDisk.file_index = entry;	//fileindex teto polozky
 	// store file/dir size (note: size field for subdirectory entries is always zero)
@@ -364,15 +388,29 @@ fat_next_dir_entry:
 }
 
 
-unsigned short nextCluster(unsigned short cluster)
+unsigned long nextCluster(unsigned long cluster)
 {
-	  unsigned short nextCluster;
+	  unsigned long nextCluster;
+      unsigned long fatMask;
 	  unsigned long fatOffset;
 	  unsigned long sector;
 	  unsigned long offset;
 
-	  // two FAT bytes (16 bits) for every cluster
-	  fatOffset = ((u32)cluster) << 1;
+    	// get fat offset in bytes
+    	if(Fat32Enabled)
+    	{
+    		// four FAT bytes (32 bits) for every cluster
+    		fatOffset = cluster << 2;
+    		// set the FAT bit mask
+    		fatMask = FAT32_MASK;
+    	}
+    	else
+    	{
+    		// two FAT bytes (16 bits) for every cluster
+    		fatOffset = cluster << 1;
+    		// set the FAT bit mask
+    		fatMask = FAT16_MASK;
+    	}
 
 	  // calculate the FAT sector that we're interested in
 	  sector = FirstFATSector + (fatOffset / ((u32)BytesPerSector));
@@ -384,11 +422,11 @@ unsigned short nextCluster(unsigned short cluster)
   	  mmcReadCached( sector );
 
 	  // read the nextCluster value
-	  nextCluster = (*((unsigned short*) &((char*)mmc_sector_buffer)[offset])) & FAT16_MASK;
+	  nextCluster = (*((unsigned long*) &((char*)mmc_sector_buffer)[offset])) & fatMask;
 
 	  // check to see if we're at the end of the chain
-	  if (nextCluster == (CLUST_EOFE & FAT16_MASK))
+	  if (nextCluster == (CLUST_EOFE & fatMask))
 		nextCluster = 0;
 
-	return (nextCluster&0xFFFF);
+	return nextCluster;
 }
