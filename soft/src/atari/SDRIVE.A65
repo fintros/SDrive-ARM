@@ -62,7 +62,7 @@ screeneoffs		equ screen_empty-screen		;(zaporny offset)
 videovf			equ $4800			;$4800-$4bff	(1024 b) video pro view file
 videovf_end		equ videovf+25*40
 ;
-CFGMAXSIZE		equ 1016
+CFGMAXSIZE		equ 2016
 ;vzdy trojice sectorlb,sectorhb(vcetne ID dir polozky),pocet dat v sektoru
 configsectors	equ $4f00			;$4f00-...
 configsectorslb	equ $4f00			;$4f00-4f09		(max. 9)
@@ -753,7 +753,7 @@ kww2
 	bne kww3
 ;down
 	ldx currentdrive
-	cpx #4
+	cpx #8
 	bcs kww2a
 	inx
 kww2a
@@ -807,18 +807,30 @@ kee3
 	beq key3
 	cmp #24		;'4' nebo Shift+'4'
 	beq key4
+	cmp #29		;'5' nebo Shift+'5'
+	beq key5
+	cmp #27		;'6' nebo Shift+'6'
+	beq key6
+	cmp #51 	;'7' nebo Shift+'7'
+	beq key7
+	cmp #53		;'8' nebo Shift+'8'
+	beq key8
 	jmp kee4
+key8 inx
+key7 inx
+key6 inx
+key5 inx
 key4 inx
 key3 inx
 key2 inx
 key1
 	lda shiftcontrolkey
-	beq key1to4
-;shift+key1to4
+	beq key1to8
+;shift+key1to8
 	stx currentdrive
 	jsr ShowCurrentDrive
 	jmp swapdrive
-key1to4
+key1to8
 	stx currentdrive
 	lda attryposc
 	cmp #$01	;file?
@@ -852,14 +864,14 @@ kee4b
 	jmp activatedirectory
 ;	
 setdeviceX
-	;v X je cislo device 1 az 4 (nebo 0)
+	;v X je cislo device 1 az 8 (nebo 0)
 	stx xsdev
 	lda attryposc
 	bpl sv01	;neni to directory =>skok
 	ldx #$0f	;X=$0f ! device $0f je pro nastavovani adresaru
 sv01
 	txa
-	ora #$F0	;command $F1..$F4 pro set (nebo $F0), nebo $FF pro nastaveni adresare
+	ora #$F0	;command $F1..$F8 pro set (nebo $F0), nebo $FF pro nastaveni adresare
 	jsr Set300UniCommandA
 	lda #1
 	sta $303	;neceka zadna data
@@ -1394,7 +1406,7 @@ hex
 ;
 ShowCurrentDrive
 ;ukaze sipku podle aktualniho drive
-	ldx #4
+	ldx #8
 shc1
 	lda #0
 	cpx currentdrive
@@ -1402,8 +1414,12 @@ shc1
 	ldy action
 	lda tabact,y
 shc2 ldy mul40,x	;nasobky 40
+	cpx #$5
+	bpl shc3
 	sta video2devcurrdrive,y
-	dex
+	jmp shc4
+shc3 sta video2devcurrdrive+40*4,y
+shc4 dex
 	bpl shc1
 	rts
 tabact
@@ -1465,7 +1481,7 @@ shd2
 	rts
 ;
 ShowDeviceA_ByYposc
-	tay ;device 1-4
+	tay ;device 1-8
 	lda YposDeviceLb,y
 	sta vptr
 	lda YposDeviceHb,y
@@ -1501,9 +1517,9 @@ GetAndShowPath
 	sta siobuffer+0
 	lda #$EB	;$EB get path
 	jsr Set300UniCommandA
-	lda #120	;120bytes
+	lda #84		;120bytes
 	sta $308	;lendb
-	lda #10		;10 updirs
+	lda #7		;10 updirs
 	sta $30a	;aux1
 	jsr SIOV
 	lda siobuffer+0
@@ -1533,7 +1549,7 @@ pth4
 	iny
 	cpy #12
 	bne pth3
-	cpx #10*12		;10 podadresaru
+	cpx #7*12		;7 podadresaru
 	bne pth1
 	rts
 ;
@@ -1970,12 +1986,12 @@ YposHb
 :FILESONEPAGE	dta h([*-YposHb]*40+video2p1)
 ;
 YposDeviceLb
-:5	dta l(video2dev+40*[*-YposDeviceLb])
+:9	dta l(video2dev+40*[*-YposDeviceLb])
 ;
 YposDeviceHb
-:5	dta h(video2dev+40*[*-YposDeviceHb])
+:9	dta h(video2dev+40*[*-YposDeviceHb])
 ;
-mul40 dta 0,40,80,120,160
+mul40 dta 0,40,80,120,160,40,80,120,160
 ;
 ;
 ;	org [>[*+255]]*256
@@ -1987,7 +2003,7 @@ screen_empty
 video	equ *
 ;	      0123456789012345678901234567890123456789	
 ;	dta c"QRRRRRRRRRRRRRRWRRRRRRRRRRRRRRRRRRRRRRRE"
-	dta d"| Page $0000   | SDrive by C.P.U.   #? |"	
+	dta d"| Page $0000   | SDrive-ARM by AlSp #? |"	
 	dta c"ARRRRRRRRRRRRRRSRRRRRRRRRRRRRRRRRRRRRRRD"
 video2
 	dta d"|              |                       |"	
@@ -1995,8 +2011,12 @@ video2
 	dta d"|              |  D2:                  |"
 	dta d"|              |  D3:                  |"
 	dta d"|              |  D4:                  |"
+	dta d"|              |  D5:                  |"
+	dta d"|              |  D6:                  |"
+	dta d"|              |  D7:                  |"
+	dta d"|              |  D8:                  |"
 	dta d"|              |                       |"
-:[FILESONEPAGE-9]	dta d"|              |                       |"
+:[FILESONEPAGE-13]	dta d"|              |                       |"
 video2p1 equ video2+1
 	dta d"|              ",c"ARRRRRRRRRRRRRRRRRRRRRRRD"
 video2p2
@@ -2015,7 +2035,7 @@ videopageprev equ videopage+4
 videopagenext equ videopage+5
 videosdrive equ video+40*0+37
 video2dev equ video2+40*0+20+1
-video2path equ video2+40*5+20-4
+video2path equ video2+40*9+20-4
 video2devcurrdrive equ video2dev-4
 video2parameters  equ video2p2+17
 video2fastsiomode equ video2p2+26
@@ -2640,10 +2660,10 @@ rc12
 	sta driveidx
 ;
 rc13
-	inc driveidx	;1:-4:
+	inc driveidx	;1:-8:
 	lda driveidx
-	cmp #5
-	beq rc20		;>4 => skok, konec nastavovani cest a souboru
+	cmp #5 ; should be 9!
+	beq rc20		;>8 => skok, konec nastavovani cest a souboru
 ;
 	lda #$FE	;root dir cmd
 	jsr Set300UniCommandA
@@ -2675,10 +2695,10 @@ rc17
 	lda #12
 	ldy siobuffer+11	;bud '/' za adresarem nebo $9b za souborem
 	bpl rc17b	;<128 => '/' => skok
-	ldx driveidx	;1-4 => set file to D1:-D4:
+	ldx driveidx	;1-8 => set file to D1:-D8:
 	lda #11
 rc17b
-	stx $30a	;aux1 ; n=$00..$04 for vD0:..vD4: or n=$0f  for change of current directory (same as commands $F0..$F4 or $FF)
+	stx $30a	;aux1 ; n=$00..$08 for vD0:..vD8: or n=$0f  for change of current directory (same as commands $F0..$F8 or $FF)
 	pha	;PHA1
 	inc $30b	;=1 aux2 ; m!=0 => Set file or directory to vDn:
 	lda #$80
@@ -2692,8 +2712,8 @@ rc17b
 	cpy #0
 	bpl rc19	;Ok => skok
 	;neproslo nastaveni cesty nebo souboru
-	lda driveidx	;1-4
-	ora #$10	;'1'-'4' znak
+	lda driveidx	;1-8
+	ora #$10	;'1'-'8' znak
 	sta txtdxfailed
 	ldy #msgid_configdxfailed
 	jsr clearbottompanelandShowMessageIdY
@@ -2761,8 +2781,8 @@ wc10
 	cpy #0 ;status
 	bpl wc10b ;ok=>skok
 wc10a ;err
-	lda driveidx	;1-4
-	ora #$10	;'1'-'4' znak
+	lda driveidx	;1-8
+	ora #$10	;'1'-'8' znak
 	sta txtdxfailed
 	ldy #msgid_configdxfailed
 	jsr clearbottompanelandShowMessageIdY
@@ -2808,7 +2828,7 @@ wc12
 wc13
 	ldx driveidx
 	inx
-	cpx #5
+	cpx #5		; should be 9
 	beq wc13a
 	jmp wc10
 wc13a

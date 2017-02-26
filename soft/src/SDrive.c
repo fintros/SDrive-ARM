@@ -507,13 +507,25 @@ void set_display(unsigned char n)
         case 1:
             LEDREG_Write((LEDREG_Read() | 0x3C) & ~0x04);
             break;
-        case 3:
-            LEDREG_Write((LEDREG_Read() | 0x3C) & ~0x10);
-            break;
         case 2:
             LEDREG_Write((LEDREG_Read() | 0x3C) & ~0x08);
             break;
+        case 3:
+            LEDREG_Write((LEDREG_Read() | 0x3C) & ~0x0C);
+            break;
         case 4:
+            LEDREG_Write((LEDREG_Read() | 0x3C) & ~0x10);
+            break;        
+        case 5:
+            LEDREG_Write((LEDREG_Read() | 0x3C) & ~0x14);
+            break;        
+        case 6:
+            LEDREG_Write((LEDREG_Read() | 0x3C) & ~0x18);
+            break;        
+        case 7:
+            LEDREG_Write((LEDREG_Read() | 0x3C) & ~0x1C);
+            break;        
+        case 8:
             LEDREG_Write((LEDREG_Read() | 0x3C) & ~0x20);
             break;        
     }    
@@ -563,7 +575,7 @@ uint8_t system_percomtable[]= {
 
 
 
-#define DEVICESNUM	5	//	//D0:-D4:
+#define DEVICESNUM	9	//	//D0:-D4:
 static virtual_disk_t vDisk[DEVICESNUM];
 
 virtual_disk_t* GetvDiskPtr(u08 devicenum)
@@ -860,7 +872,7 @@ ST_IDLE:
 							actual_drive_number=4;
 						break;
 					case 3: //0x80^0xe0: //RIGHT
-						if(actual_drive_number<4)
+						if(actual_drive_number<8)
 							actual_drive_number++;
 						else
 							actual_drive_number=1;
@@ -2236,6 +2248,10 @@ Different_char:
 			case 0xF2:	// set direntry to vD2:
 			case 0xF3:	// set direntry to vD3:
 			case 0xF4:	// set direntry to vD4:
+			case 0xF5:	// set direntry to vD5:
+			case 0xF6:	// set direntry to vD6:
+			case 0xF7:	// set direntry to vD7:
+			case 0xF8:	// set direntry to vD8:
 			case 0xFF:  // set actual directory
 				{
 				unsigned char ret;
