@@ -14886,6 +14886,68 @@ Surface Mounting type.</description>
 </deviceset>
 </devicesets>
 </library>
+<library name="diode">
+<description>&lt;b&gt;Diodes&lt;/b&gt;&lt;p&gt;
+Based on the following sources:
+&lt;ul&gt;
+&lt;li&gt;Motorola : www.onsemi.com
+&lt;li&gt;Fairchild : www.fairchildsemi.com
+&lt;li&gt;Philips : www.semiconductors.com
+&lt;li&gt;Vishay : www.vishay.de
+&lt;/ul&gt;
+&lt;author&gt;Created by librarian@cadsoft.de&lt;/author&gt;</description>
+<packages>
+<package name="SOD123">
+<description>&lt;b&gt;Diode&lt;/b&gt;</description>
+<wire x1="-1.1" y1="0.7" x2="1.1" y2="0.7" width="0.254" layer="51"/>
+<wire x1="1.1" y1="0.7" x2="1.1" y2="-0.7" width="0.254" layer="51"/>
+<wire x1="1.1" y1="-0.7" x2="-1.1" y2="-0.7" width="0.254" layer="51"/>
+<wire x1="-1.1" y1="-0.7" x2="-1.1" y2="0.7" width="0.254" layer="51"/>
+<smd name="C" x="-1.9" y="0" dx="1.4" dy="1.4" layer="1"/>
+<smd name="A" x="1.9" y="0" dx="1.4" dy="1.4" layer="1"/>
+<text x="-1.1" y="1" size="1.27" layer="25">&gt;NAME</text>
+<text x="-1.1" y="-2.3" size="1.27" layer="27">&gt;VALUE</text>
+<rectangle x1="-1.95" y1="-0.45" x2="-1.2" y2="0.4" layer="51"/>
+<rectangle x1="1.2" y1="-0.45" x2="1.95" y2="0.4" layer="51"/>
+<rectangle x1="-1.05" y1="-0.65" x2="-0.15" y2="0.7" layer="51"/>
+</package>
+</packages>
+<symbols>
+<symbol name="D">
+<wire x1="-1.27" y1="-1.27" x2="1.27" y2="0" width="0.254" layer="94"/>
+<wire x1="1.27" y1="0" x2="-1.27" y2="1.27" width="0.254" layer="94"/>
+<wire x1="1.27" y1="1.27" x2="1.27" y2="0" width="0.254" layer="94"/>
+<wire x1="-1.27" y1="1.27" x2="-1.27" y2="-1.27" width="0.254" layer="94"/>
+<wire x1="1.27" y1="0" x2="1.27" y2="-1.27" width="0.254" layer="94"/>
+<text x="2.54" y="0.4826" size="1.778" layer="95">&gt;NAME</text>
+<text x="2.54" y="-2.3114" size="1.778" layer="96">&gt;VALUE</text>
+<pin name="A" x="-2.54" y="0" visible="off" length="short" direction="pas"/>
+<pin name="C" x="2.54" y="0" visible="off" length="short" direction="pas" rot="R180"/>
+<text x="-2.54" y="0" size="0.4064" layer="99" align="center">SpiceOrder 1</text>
+<text x="2.54" y="0" size="0.4064" layer="99" align="center">SpiceOrder 2</text>
+</symbol>
+</symbols>
+<devicesets>
+<deviceset name="MBR0520LT" prefix="D">
+<description>&lt;b&gt;SCHOTTKY BARRIER RECTIFIER&lt;/b&gt;&lt;p&gt;
+Source: http://onsemi.com .. MBR0520LT1-D.pdf</description>
+<gates>
+<gate name="G$1" symbol="D" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="SOD123">
+<connects>
+<connect gate="G$1" pin="A" pad="A"/>
+<connect gate="G$1" pin="C" pad="C"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+</devicesets>
+</library>
 </libraries>
 <attributes>
 </attributes>
@@ -14924,8 +14986,8 @@ Surface Mounting type.</description>
 <part name="GND7" library="supply1" deviceset="GND" device=""/>
 <part name="+3V1" library="supply1" deviceset="+3V3" device=""/>
 <part name="IC1" library="v-reg" deviceset="LD117A?*" device="S" technology="33TR"/>
-<part name="C7" library="resistor" deviceset="CPOL-EU" device="A/3216-18W" value="10 uF"/>
-<part name="C8" library="resistor" deviceset="CPOL-EU" device="A/3216-18W" value="10 uF"/>
+<part name="-C7" library="resistor" deviceset="CPOL-EU" device="A/3216-18W" value="10 uF"/>
+<part name="+C8" library="resistor" deviceset="CPOL-EU" device="A/3216-18W" value="10 uF"/>
 <part name="+3V2" library="supply1" deviceset="+3V3" device=""/>
 <part name="SUPPLY5" library="supply2" deviceset="VDD" device=""/>
 <part name="GND8" library="supply1" deviceset="GND" device=""/>
@@ -14966,6 +15028,7 @@ Surface Mounting type.</description>
 <part name="GND13" library="supply1" deviceset="GND" device=""/>
 <part name="BL_ACTIVATE" library="testpad" deviceset="TP" device="B1,27" value="TPB1,27"/>
 <part name="DEBUG_TX" library="testpad" deviceset="TP" device="B1,27" value="TPB1,27"/>
+<part name="D1" library="diode" deviceset="MBR0520LT" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -14984,7 +15047,7 @@ Surface Mounting type.</description>
 <text x="116.84" y="170.18" size="2.54" layer="97">MicroSD card</text>
 <text x="116.84" y="96.52" size="2.54" layer="97">Interface</text>
 <text x="10.16" y="170.18" size="2.54" layer="97">Processor</text>
-<text x="53.34" y="50.8" size="2.54" layer="97">ATARI port</text>
+<text x="35.56" y="50.8" size="2.54" layer="97">ATARI port</text>
 <text x="127" y="48.26" size="1.27" layer="97">Reset</text>
 <text x="246.38" y="91.44" size="1.27" layer="97">LEDS</text>
 <text x="119.38" y="10.16" size="1.778" layer="97">Pull to ground to activate bootloader</text>
@@ -15039,8 +15102,8 @@ Female connectors</text>
 <instance part="GND7" gate="1" x="203.2" y="114.3"/>
 <instance part="+3V1" gate="G$1" x="218.44" y="157.48"/>
 <instance part="IC1" gate="G$1" x="142.24" y="139.7"/>
-<instance part="C7" gate="G$1" x="121.92" y="134.62"/>
-<instance part="C8" gate="G$1" x="162.56" y="134.62"/>
+<instance part="-C7" gate="G$1" x="121.92" y="134.62"/>
+<instance part="+C8" gate="G$1" x="162.56" y="134.62"/>
 <instance part="+3V2" gate="G$1" x="162.56" y="147.32"/>
 <instance part="SUPPLY5" gate="G$1" x="121.92" y="144.78"/>
 <instance part="GND8" gate="1" x="142.24" y="124.46"/>
@@ -15158,6 +15221,9 @@ Female connectors</text>
 <attribute name="NAME" x="174.498" y="42.164" size="1.778" layer="95"/>
 <attribute name="TP_SIGNAL_NAME" x="171.45" y="40.894" size="1.778" layer="97" rot="R270"/>
 </instance>
+<instance part="D1" gate="G$1" x="55.88" y="48.26" smashed="yes">
+<attribute name="NAME" x="58.166" y="49.2506" size="1.778" layer="95"/>
+</instance>
 </instances>
 <busses>
 </busses>
@@ -15254,9 +15320,9 @@ Female connectors</text>
 <pinref part="IC1" gate="G$1" pin="ADJ"/>
 <wire x1="142.24" y1="132.08" x2="142.24" y2="127" width="0.1524" layer="91"/>
 <pinref part="GND8" gate="1" pin="GND"/>
-<pinref part="C7" gate="G$1" pin="-"/>
+<pinref part="-C7" gate="G$1" pin="-"/>
 <wire x1="121.92" y1="129.54" x2="121.92" y2="127" width="0.1524" layer="91"/>
-<pinref part="C8" gate="G$1" pin="-"/>
+<pinref part="+C8" gate="G$1" pin="-"/>
 <wire x1="162.56" y1="129.54" x2="162.56" y2="127" width="0.1524" layer="91"/>
 <wire x1="121.92" y1="127" x2="142.24" y2="127" width="0.1524" layer="91"/>
 <junction x="142.24" y="127"/>
@@ -15638,9 +15704,9 @@ Female connectors</text>
 <label x="50.546" y="94.234" size="1.27" layer="95" rot="R90"/>
 </segment>
 <segment>
-<pinref part="F1" gate="G$$1" pin="DATA_INPUT"/>
-<wire x1="38.1" y1="43.18" x2="48.26" y2="43.18" width="0.1524" layer="91"/>
-<label x="46.228" y="43.688" size="1.27" layer="95"/>
+<pinref part="D1" gate="G$1" pin="C"/>
+<wire x1="58.42" y1="48.26" x2="68.834" y2="48.26" width="0.1524" layer="91"/>
+<label x="65.278" y="49.022" size="1.27" layer="95"/>
 </segment>
 </net>
 <net name="P3_2" class="0">
@@ -15781,7 +15847,7 @@ Female connectors</text>
 <pinref part="IC1" gate="G$1" pin="IN"/>
 <wire x1="134.62" y1="139.7" x2="121.92" y2="139.7" width="0.1524" layer="91"/>
 <wire x1="121.92" y1="139.7" x2="121.92" y2="142.24" width="0.1524" layer="91"/>
-<pinref part="C7" gate="G$1" pin="+"/>
+<pinref part="-C7" gate="G$1" pin="+"/>
 <wire x1="121.92" y1="139.7" x2="121.92" y2="137.16" width="0.1524" layer="91"/>
 <pinref part="SUPPLY5" gate="G$1" pin="VDD"/>
 <junction x="121.92" y="139.7"/>
@@ -15879,7 +15945,7 @@ Female connectors</text>
 <pinref part="IC1" gate="G$1" pin="OUT"/>
 <wire x1="149.86" y1="139.7" x2="162.56" y2="139.7" width="0.1524" layer="91"/>
 <wire x1="162.56" y1="139.7" x2="162.56" y2="144.78" width="0.1524" layer="91"/>
-<pinref part="C8" gate="G$1" pin="+"/>
+<pinref part="+C8" gate="G$1" pin="+"/>
 <wire x1="162.56" y1="139.7" x2="162.56" y2="137.16" width="0.1524" layer="91"/>
 <pinref part="+3V2" gate="G$1" pin="+3V3"/>
 <junction x="162.56" y="139.7"/>
@@ -15939,6 +16005,15 @@ Female connectors</text>
 <pinref part="F1" gate="G$$1" pin="AUDIO_INPUT"/>
 <wire x1="38.1" y1="40.64" x2="50.8" y2="40.64" width="0.1524" layer="91"/>
 <pinref part="C10" gate="G$1" pin="2"/>
+</segment>
+</net>
+<net name="N$3" class="0">
+<segment>
+<pinref part="F1" gate="G$$1" pin="DATA_INPUT"/>
+<wire x1="38.1" y1="43.18" x2="52.07" y2="43.18" width="0.1524" layer="91"/>
+<wire x1="52.07" y1="43.18" x2="52.07" y2="48.26" width="0.1524" layer="91"/>
+<pinref part="D1" gate="G$1" pin="A"/>
+<wire x1="52.07" y1="48.26" x2="53.34" y2="48.26" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
