@@ -40,6 +40,12 @@ void USART_SendString(char *buff);
 u08 mmcReadCached(u32 sector);
 
 
+#ifdef DEBUG
+extern void DebugPrintf(const char* msg, ...);   
+#else
+#define DebugPrintf(X,...)  
+#endif    
+
 #define FileNameBuffer atari_sector_buffer
 extern unsigned char atari_sector_buffer[256];
 extern unsigned char mmc_sector_buffer[512];	// one sector
@@ -183,6 +189,7 @@ unsigned char fatGetDirEntry(unsigned short entry, unsigned char use_long_names)
 		//musi zacit od zacatku
 		sector = fatClustToSect(FileInfo.vDisk.dir_cluster);
 		//index = 0;
+        DebugPrintf("Read from begin\r\n");
 		goto fat_read_from_begin;
 	}
 	else
@@ -382,7 +389,13 @@ fat_next_dir_entry:
 		last_dir_cluster = actual_cluster;
 		last_dir_sector_count = seccount; //skace se az za inkrementaci seccount, takze tady se 1 neodecita!
 		last_dir_valid=gotEntry;
+        
+        DebugPrintf("DE %s: ec:%d, ind: %d, sec: %d, ac: %d, sc: %d\r\n",FileNameBuffer, entrycount, index, last_dir_sector, last_dir_cluster, last_dir_sector_count);
 	}
+    else
+    {
+        DebugPrintf("No entry\r\n");
+    }
 
 	return gotEntry;
 }

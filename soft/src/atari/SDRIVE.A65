@@ -161,27 +161,27 @@ fis0
 	sta siobuffer+0
 	lda #$e0	;SDRIVE status
 	jsr Set300UniCommandA
-	lda #8		;delka "SDriveVV"
+	lda #13		;delka "SDrive-ARM-VV"
 	sta $30a	;aux1
 	sta $308	;len
 	jsr SIOV
-	ldx #5		;delka "SDrive"-1
+	ldx #9		;delka "SDrive-ARM"-1
 fis1
 	lda siobuffer,x
 	cmp sdriveidentification,x	;souhlasi?
 	bne findsdrive 	;nesouhlasi => jde hledat na dalsim cisle #
 	dex
 	bpl fis1
-	;nasel pristroj odpovidajici "SDrive"
+	;nasel pristroj odpovidajici "SDrive-ARM"
 ;nyni porovnat cislo verze firmware "VV"
 ;firmware musi byt >= nez verze sdrive.xex
-	lda siobuffer+6	;VV prvni znak
+	lda siobuffer+11	;VV prvni znak
 	cmp #"0"
 	bcc bav1	;je mensi, takze skok uncompatible
 	bne restart		;je vetsi, takze je to OK!
 	;je roven, nutno porovnat druhy byte
-	lda siobuffer+7	;VV druhy znak
-	cmp #"1"
+	lda siobuffer+12	;VV druhy znak
+	cmp #"2"
 	bcs restart	;je roven nebo vetsi, takze OK!
 bav1
 	;bad SDrive version (VV firmware je mensi nez sdrive.xex)
@@ -190,7 +190,7 @@ bav1
 	jsr clearbottompanelandShowMessageIdY
 	ldx #7
 bav3
-	lda siobuffer,x	;SDriveVV
+	lda siobuffer,x	;SDrive-ARM-VV
 	jsr convert
 	sta video3+txtuncompatiblelen+1,x
 	dex
@@ -211,7 +211,7 @@ fis9
 	jmp findsdrive0
 fis9z
 	jmp quit_yes
-sdriveidentification dta c"SDrive"
+sdriveidentification dta c"SDrive-ARM"
 ;
 ;
 restart

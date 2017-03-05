@@ -531,7 +531,7 @@ void set_display(unsigned char n)
     }    
 }
 
-uint8_t system_info[]="SDrive01 20161202 AlSp based on Bob!k & Raster, C.P.U.";	//SDriveVersion info
+uint8_t system_info[]="SDrive-ARM-02 20170305 AlSp based on Bob!k & Raster, C.P.U.";	//SDriveVersion info
 //                                 VVYYYYMMDD
 //                                 VV cislo nove oficialne vydane verze, meni se jen pri vydani noveho oficialniho firmware
 //									  s rozsirenymi/zmenenymi funkcemi zpetne nekompatibilni
@@ -983,27 +983,12 @@ disk_operations_direct_d0_d4:
 
 			if ( last_used_virtual_drive != virtual_drive_number )
 			{
-				//chce pracovat s jinym vDx nez se pracovalo posledne
-				unsigned char i;
-				unsigned char *p1;
-				unsigned char *p2;
 				if ( last_used_virtual_drive < DEVICESNUM )
-				{
-				 p2=((unsigned char *)&FileInfo.vDisk);
-				 p1=((unsigned char *)&vDisk[last_used_virtual_drive]);
-				 // vDisk[last_used_virtual_drive] <- vDisk
-				 //for(i=0; i<sizeof(virtual_disk_t); i++) p1[i]=p2[i];
-				 //i=sizeof(virtual_disk_t); do { *p1++=*p2++; i--; } while(i);
-				 for(i=0; i<sizeof(virtual_disk_t); i++) *p1++=*p2++;
-				}
-				p2=((unsigned char *)&FileInfo.vDisk);
-				p1=((unsigned char *)&vDisk[virtual_drive_number]);
-				// vDisk <- vDisk[virtual_drive_number]
-				//for(i=0; i<sizeof(virtual_disk_t); i++) p2[i]=p1[i];
-				//i=sizeof(virtual_disk_t); do { *p2++=*p1++; i--; } while(i);
-				for(i=0; i<sizeof(virtual_disk_t); i++) *p2++=*p1++;
-				//zmena last_used_virtual_drive
-				last_used_virtual_drive=virtual_drive_number; //zmena
+                    vDisk[last_used_virtual_drive] = FileInfo.vDisk;
+                
+                FileInfo.vDisk = vDisk[virtual_drive_number];
+
+                last_used_virtual_drive=virtual_drive_number; //zmena
                 //DebugPrintf("[0]Set luvd to %d\r\n", last_used_virtual_drive);
 			}
 
@@ -1599,20 +1584,11 @@ set_number_of_sectors_to_buffer_1_2:
 				//predtim pracoval s nejakym Dx:
 				//musi uschovat jeho stav do vDisk[]
 				if ( last_used_virtual_drive < DEVICESNUM )
-				{
-				 unsigned char i;
-				 unsigned char *p1;
-				 unsigned char *p2;
-				 p2=((unsigned char *)&FileInfo.vDisk);
-				 p1=((unsigned char *)&vDisk[last_used_virtual_drive]);
-				 // vDisk[last_used_virtual_drive] <- vDisk
-				 //for(i=0; i<sizeof(virtual_disk_t); i++) p1[i]=p2[i];
-				 for(i=0; i<sizeof(virtual_disk_t); i++) *p1++=*p2++;
-				}
-				//zmena last_used_virtual_drive
+                    vDisk[last_used_virtual_drive] = FileInfo.vDisk;
+
+                //zmena last_used_virtual_drive
 				last_used_virtual_drive=0x0f; //zmena
                 //DebugPrintf("[1]Set luvd to %d\r\n", last_used_virtual_drive);
-
 			}
 
 
@@ -1735,6 +1711,8 @@ set_number_of_sectors_to_buffer_1_2:
 					sptr=(u08*)&FileInfo.vDisk;
 					i=sizeof(virtual_disk_t);				//21
 					do { *dptr++=*sptr++; i--; } while(i>0);
+                    
+                    DebugPrintf("!!!Unable to be displayed!\r\n");
 
 					//celkem 26 bytu
 					USART_Send_cmpl_and_atari_sector_buffer_and_check_sum( (sizeof(struct GlobalSystemValues)+sizeof(virtual_disk_t)) );
@@ -1868,9 +1846,6 @@ set_number_of_sectors_to_buffer_1_2:
 
 			case 0xE3: //$E3  n ??	Set actual directory by device Dn: and get filename. 8.3 + attribute + fileindex [11+1+2=14]
 			   {
-				unsigned char *p1;
-				unsigned char *p2;
-				unsigned char i;
 				if ( command[2] >= DEVICESNUM) goto Send_ERR_and_Delay;
 				//if (!(vDisk[command[2]].flags & FLAGS_DRIVEON))
 				if (!(GetvDiskPtr(command[2])->flags & FLAGS_DRIVEON))
@@ -1890,10 +1865,8 @@ Command_ED_notfound:	//sem skoci z commandu ED kdyz nenajde hledany nazev soubor
 					USART_Send_cmpl_and_atari_sector_buffer_and_check_sum(14);
 					break;
 				}
-				p1=((unsigned char *)&FileInfo.vDisk);
-				p2=((unsigned char *)&vDisk[ command[2] ]);
 				// vDisk <- vDisk[ command[2] ]
-				for(i=0; i<sizeof(virtual_disk_t); i++) p1[i]=p2[i];
+                FileInfo.vDisk = vDisk[ command[2] ];
 			   }
 
 				// VOLANI GET DETAILED FILENAME
@@ -2058,7 +2031,7 @@ Command_ED_found:	//sem skoci z commandu ED kdyz najde hledane filename a chce v
 						//         	Get path (/DIRECTOREXT/../DIRECTOREXT pokracuje 0x00) (nemeni aktualni adresar!)
          				//			Pokud je cesta do rootu delsi nez pozadovany pocet skoku, prvni znak je '?'
 			   {
-			     unsigned short ocluster, acluster;
+			     unsigned long ocluster, acluster;
 				 unsigned char pdi;
 				 u08 updirs;
 				 if (command[2]==0 || command[2]>20) command[2]=20; //maximum [<240]
