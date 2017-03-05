@@ -1374,6 +1374,7 @@ percom_prepared:
 					{
 						//read
 						proceeded_bytes = faccess_offset(FILE_ACCESS_READ,n_data_offset,atari_sector_size);
+                        DebugPrintf("Read result %d, offset=%d, secsize=%d\r\n", proceeded_bytes,n_data_offset, atari_sector_size);
 						if(proceeded_bytes==0)
 						{
 							goto Send_ERR_and_Delay;

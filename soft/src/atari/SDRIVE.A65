@@ -62,14 +62,14 @@ screeneoffs		equ screen_empty-screen		;(zaporny offset)
 videovf			equ $4800			;$4800-$4bff	(1024 b) video pro view file
 videovf_end		equ videovf+25*40
 ;
-CFGMAXSIZE		equ 2016
+CFGMAXSIZE		equ 2020
 ;vzdy trojice sectorlb,sectorhb(vcetne ID dir polozky),pocet dat v sektoru
 configsectors	equ $4f00			;$4f00-...
 configsectorslb	equ $4f00			;$4f00-4f09		(max. 9)
 configsectorshb	equ $4f20			;$4f20-4f29		(max. 9)
 configsectorsbs	equ $4f40			;$4f40-4f49		(max. 9)
 configsectorslen equ $60
-configdata		equ $5000			;$5000-$54ff	(max 5 stranek)
+configdata		equ $5000			;$5000-$57ff	(max 8 stranek)
 ;
 SIOV		equ $e459
 POWEROFFON	equ $33d	;PUPBT1 - jeho zmenou nasleduje pri rebootu totalni reset
@@ -263,7 +263,7 @@ nrc2
 	sta ns
 uzo1
 	lda ns
-	cmp #5
+	cmp #9
 	beq uzo2
 	;1-4
 	jsr GetAndShowDeviceA
@@ -2564,11 +2564,11 @@ rc04a
 	lda vfgsecn+1
 	sta configsectorshb,x
 	lda siobuffer+0,y	;3.od konce (hb dalsiho sektoru)
-;	ano, neorezava!   and #$03			;jen dolni 3 bity
-	sta vfgsecn+1		;hb sektoru co bude nacitat priste
+	and #$03			;jen dolni 3 bity
+	sta vfgsecn+1		;hb sektoru co bude nacitat priste // next time sector no hb
 	sta configsectorshb+1,x	;hb dalsiho si ulozi, protoze u posledniho schazelo ID dir polozky
-	lda siobuffer+1,y	;predposledni byte (lb next sect)
-	sta vfgsecn+0		;lb sektoru co bude nacitat priste
+	lda siobuffer+1,y	;predposledni byte (lb next sect)  
+	sta vfgsecn+0		;lb sektoru co bude nacitat priste // next time sector no lb
 	sta configsectorslb+1,x ;ulozi si taky
 	lda siobuffer+2,y	;posledni byte v sektoru
 	sta configsectorsbs,x	;pocet bytu v sektoru
@@ -2579,7 +2579,7 @@ rc04
 	lda siobuffer,y
 	sta (ns),y
 	iny
-	cpy secbts	;pocet dat v sektoru
+	cpy secbts	;pocet dat v sektoru // number of bytes in sector
 	bne rc04
 ;posun ns o pocet dat v sektoru
 	;Y=secbts
@@ -2662,7 +2662,7 @@ rc12
 rc13
 	inc driveidx	;1:-8:
 	lda driveidx
-	cmp #5 ; should be 9!
+	cmp #9 ; should be 9!
 	beq rc20		;>8 => skok, konec nastavovani cest a souboru
 ;
 	lda #$FE	;root dir cmd
@@ -2741,7 +2741,7 @@ rc20
 ;
 ;
 wc01
-;WRITE CONFIG - pokracovani po uspesnem nacteni vsech sektoru konfigu
+;WRITE CONFIG - pokracovani po uspesnem nacteni vsech sektoru konfigu // continue after success loading of all config sectors
 ;
 	lda #<[configdata+8]
 	sta ns
@@ -2828,7 +2828,7 @@ wc12
 wc13
 	ldx driveidx
 	inx
-	cpx #5		; should be 9
+	cpx #9		; should be 9
 	beq wc13a
 	jmp wc10
 wc13a
