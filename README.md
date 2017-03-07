@@ -28,11 +28,13 @@ Atari800 disk drives emulator based on C.P.U. project SDrive
 - Cypress KitProg is needed to program ARM chip. Easiest way is to buy CY8CKIT-043 ($10) or similar kit  
 
 ## ToDo list
-- Fix an issue with daisy-chain connection (add switchng diode to SIO data in line)
-- Add "Update from SD" feature
-- Apply Hias patches to firmware
-- Increase number of usable drives up to 8
-- Implement cassete recorder functionality
+- [X] Fix an issue with daisy-chain connection (add switchng diode to SIO data in line)
+- [X] Implements SDHC support
+- [X] Implement FAT32 support
+- [ ] Add "Update from SD" feature
+- [ ] Apply Hias patches to firmware
+- [X] Increase number of usable drives up to 8
+- [ ] Implement cassete recorder functionality
 
 ## Contacts
 - Please contact me in case of questions by E-Mail: extmail __at__ alsp.net
