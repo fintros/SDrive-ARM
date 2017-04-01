@@ -26,6 +26,13 @@ u08 mmcRead(u32 sector);
 /// Returns zero if successful.
 u08 mmcWrite(u32 sector);
 
+
+u08 mmcWriteCached(unsigned char force);
+
+void mmcWriteCachedFlush();
+
+void mmcReadCached(u32 sector);
+
 #ifdef __cplusplus
 }
 #endif

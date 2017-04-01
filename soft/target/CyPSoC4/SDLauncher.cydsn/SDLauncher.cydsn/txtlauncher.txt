@@ -1,0 +1,97 @@
+00000000, __do_global_dtors_aux
+00000000, frame_dummy
+00000020, _ZL15spiTransferByteh
+0000002e, _ZL8ext_bitsPhii
+00000014, _GLOBAL__sub_I_InitLoaderCTX
+00000002, Launcher_LaunchBootloadable
+00000328, Launcher_HostLink.constprop.0
+00000000, CyDelayCycles_done
+00000000, CyDelayCycles_loop
+00000000, .udivsi3_skip_div0_test
+00000000, appl_start
+00000000, appl1_start
+00000000, CyDelayCycles
+00000002, CyBtldrCommStart
+0000003c, mmcReadCached
+00000084, _ZN8SDAccess11_sd_sectorsEv
+00000062, Launcher_ValidateBootloadable
+00000018, CySoftwareReset
+00000018, _ZN8SDAccessC2Ev
+00000040, mmcWriteCached
+00000000, CyEnterCriticalSection
+00000064, _ZN8SDAccess5_cmdxEii
+0000001c, SPIM_BL_SpiUartWriteTxData
+00000014, SPI_CLK_BL_SetFractionalDividerRegister
+0000000c, __errno
+0000003c, CyBtldr_CheckLaunch
+000001b0, CySysFlashWriteRow
+00000070, _ZN8SDAccess4_cmdEii
+0000000c, SPIM_BL_SpiUartReadRxData
+00000018, Launcher_Calc8BitSum
+00000014, CyIntEnable
+00000014, CyDelayUs
+00000054, CySysWdtClearInterrupt
+00000012, memcpy
+00000050, initialize_psoc
+0000010a, .hidden __udivsi3
+00000030, CySysWdtUnlock
+00000064, _ZN8SDAccess15initialise_cardEv
+00000010, IntDefaultHandler
+000000a0, CySysWdtIsr
+00000012, .hidden __gnu_thumb1_case_uqi
+000000a4, Launcher_GetMetadata
+00000010, CyIntSetVector
+0000004c, Start_c
+00000048, _ZN8SDAccess18initialise_card_v2Ev
+0000004c, __libc_init_array
+00000001, Launcher_Checksum
+00000078, _ZN8SDAccess5_cmd8Ev
+0000001c, CySysWdtLock
+00000124, CySysClkWriteImoFreq
+00000020, mmcRead
+0000002c, CyDelay
+00000006, CyBtldrCommWrite
+0000000a, Reset
+00000014, .hidden __gnu_thumb1_case_shi
+0000004c, _ZN8SDAccess15disk_initializeEv
+00000000, CyExitCriticalSection
+00000010, RomVectors
+0000004e, _ZN8SDAccess9disk_readEPhmm
+0000002c, SPIM_BL_SpiPostEnable
+00000028, fatClustToSect
+00000002, .hidden __aeabi_ldiv0
+000002c8, fatGetDirEntry
+00000088, SPIM_BL_SpiInit
+00000020, SPIM_BL_SpiSetActiveSlaveSelect
+00000010, memset
+00000018, _ZN8SDAccessC1Ev
+00000040, main
+0000004e, _ZN8SDAccess10disk_writeEPKhmm
+00000000, .hidden __aeabi_uidiv
+00000018, mmcReset
+00000000, __cy_interrupt_vector
+00000004, CyHalt
+000001d0, cyfitter_cfg
+0000000c, LEDREG_BL_Write
+0000001c, mmcInit
+0000006c, InitLoaderCTX
+00000002, CyBtldrCommStop
+00000062, _ZN8SDAccess6_writeEPKhm
+00000084, _ZN8SDAccess6_cmd58Ev
+00000020, mmcWriteCachedFlush
+00000012, .hidden __aeabi_uidivmod
+00000020, mmcWrite
+00000010, SPIM_BL_SpiUartGetRxBufferSize
+00000018, SPIM_BL_Enable
+00000064, Launcher_Start
+00000068, nextCluster
+00000002, .hidden __aeabi_idiv0
+00000000, __cy_reset
+00000178, fatInit
+0000001c, SPIM_BL_Start
+00000004, Launcher_SizeBytes
+00000040, _ZN8SDAccess5_readEPhm
+0000000c, LEDREG_BL_Read
+00000038, _ZN8SDAccess18initialise_card_v1Ev
+00000006, CyBtldrCommRead
+,

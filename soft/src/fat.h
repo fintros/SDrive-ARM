@@ -85,7 +85,7 @@
 #define PART_TYPE_DBFS			0xE0
 #define PART_TYPE_BBT			0xFF
 
-struct partrecord // length 16 bytes
+typedef struct _partrecord // length 16 bytes
 {			
 	unsigned char	prIsActive;					// 0x80 indicates active partition
 	unsigned char	prStartHead;				// starting head for partition
@@ -95,10 +95,10 @@ struct partrecord // length 16 bytes
 	unsigned short	prEndCylSect;				// ending cylinder and sector
 	unsigned long	prStartLBA;					// first LBA sector for this partition
 	unsigned long	prSize;						// size of this partition (bytes or sectors ?)
-} __attribute__((packed));
+} __attribute__((packed)) partrecord; 
 
         
-struct partsector
+typedef struct _partsector
 {
 	unsigned char	psPartCode[512-64-2];		// pad so struct is 512b
 	unsigned char	psPart[64];					// four partition records (64 bytes)
@@ -106,7 +106,7 @@ struct partsector
 	unsigned char	psBootSectSig1;
 #define BOOTSIG0        0x55
 #define BOOTSIG1        0xaa
-} __attribute__((packed));
+} __attribute__((packed)) partsector;
 
 
 // Format of a boot sector.  This is the first sector on a DOS floppy disk
@@ -380,55 +380,22 @@ struct winentry {
 #define DD_YEAR_SHIFT			9
 
 
-#define FLAGS_ATRMEDIUMSIZE		0x80
-#define FLAGS_XEXLOADER			0x40
-#define FLAGS_ATRDOUBLESECTORS	0x20
-#define FLAGS_XFDTYPE			0x10
-#define FLAGS_WRITEERROR		0x04
-#define FLAGS_DRIVEON			0x01
-
-// Stuctures
-typedef struct						//4+4+4+2+2+4+1=21
-{
-	unsigned long start_cluster;		//< file starting cluster
-	unsigned long dir_cluster;
-	unsigned long current_cluster;
-	unsigned short ncluster;
-	unsigned short file_index;			//< file index
-	unsigned long size;					//< file size
-	unsigned char flags;				//< file flags
-} __attribute__((packed)) virtual_disk_t ;
-
-struct FileInfoStruct
-{
-	unsigned char Attr;				//< file attr for last file accessed
-	unsigned short Date;			//< last update date
-	unsigned short Time;			//< last update time
-	unsigned char percomstate;		//=0 default, 1=percomwrite ok (single sectors), 2=percomwrite ok (double sectors), 3=percomwrite bad
-	//
-	virtual_disk_t vDisk;
-} __attribute__((packed));;
-
-struct GlobalSystemValues			//4+4+2+2+1=13 bytes
-{
-	unsigned long FirstFATSector;
-	unsigned long FirstDataSector;
-	unsigned short RootDirSectors;
-	unsigned short BytesPerSector;
-	unsigned char SectorsPerCluster;
-};
-
-#define FirstFATSector		GS.FirstFATSector
-#define FirstDataSector		GS.FirstDataSector
-#define RootDirSectors		GS.RootDirSectors
-#define BytesPerSector		GS.BytesPerSector
-#define SectorsPerCluster	GS.SectorsPerCluster
-
-
 unsigned char fatInit();
 unsigned long fatClustToSect(unsigned long clust);
 unsigned char fatChangeDirectory(unsigned short entry);
 unsigned char fatGetDirEntry(unsigned short entry, unsigned char use_long_names);
 unsigned long nextCluster(unsigned long clust);
+
+typedef struct _FatData
+{
+    unsigned long last_dir_start_cluster;
+    unsigned char last_dir_valid;
+    unsigned short last_dir_entry;
+    unsigned long last_dir_sector;
+    unsigned char last_dir_sector_count;
+    unsigned long last_dir_cluster;
+    unsigned char last_dir_index;
+    unsigned char fat32_enabled;
+} FatData;
 
 #endif

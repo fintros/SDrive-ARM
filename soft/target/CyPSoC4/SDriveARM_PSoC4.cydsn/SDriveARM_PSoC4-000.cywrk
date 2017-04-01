@@ -8,7 +8,7 @@
 <files />
 <projects>
 <v>.\SDriveARM_PSoC4.cyprj</v>
-<v>..\UART_Bootloader.cydsn\UART_Bootloader.cyprj</v>
+<v>..\SDLauncher.cydsn\SDLauncher.cydsn\SDLauncher.cyprj</v>
 </projects>
 <workspace_id v="d51987f8-9b75-43e4-992d-da300200397e" />
 <WriteAppVersionLastSavedWith v="4.0.0.432" />

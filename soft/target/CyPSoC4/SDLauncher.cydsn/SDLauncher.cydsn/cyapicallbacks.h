@@ -9,21 +9,11 @@
  *
  * ========================================
 */
-#include "project.h"
-#include "HWContext.h"
-
-int sdrive(void);
-
-int main(void)
-{
+#ifndef CYAPICALLBACKS_H
+#define CYAPICALLBACKS_H
     
-    //CyDelay(5000);
-    CyGlobalIntEnable; /* Enable global interrupts. */
-    UART_1_Start();    
-
-    InitLoadableCTX();
-    sdrive();
-    return 0;
-}
-
-/* [] END OF FILE */
+    /*Define your macro callbacks here */
+    /*For more information, refer to the Macro Callbacks topic in the PSoC Creator Help.*/
+    
+#endif /* CYAPICALLBACKS_H */   
+/* [] */

@@ -10,9 +10,13 @@
  * ========================================
 */
 #include "project.h"
+#include <CyLib.h>
+#include "HWContext.h"
 
 #include "fat.h"
 #include "mmcsd.h"
+#include "dprint.h"
+#include "atari.h"
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -25,21 +29,6 @@ typedef unsigned char uint8_t;
 //#define SWBUT_Read() 3
 
 char _driveShift = 3; // 3 D1 = 0 drive
-
-#ifdef DEBUG
-char buf[255];    
-
-void DebugPrintf(const char* msg, ...)
-{
-    // debug variant 
-	va_list argptr;
-	va_start(argptr, msg);
-	vsnprintf(buf, 255, msg, argptr);    
-    Debug_SpiUartPutArray((const unsigned char*)&buf[0], strlen(&buf[0]));
-}
-#else
-#define DebugPrintf(X,...)  
-#endif  
 
 //*****************************************************************************
 // SDrive
@@ -76,6 +65,8 @@ uint8_t boot_xex_loader[179] = {
 #define US_POKEY_DIV_DEFAULT	0x06		//#6   => 68838 bps
 
 #define US_POKEY_DIV_MAX		(255-6)		//pokeydiv 249 => avrspeed 255 (vic nemuze)
+
+#define FileFindBuffer (atari_sector_buffer+256-11)
 
 /*
 #define SIOSPEED_MODES	9	//pocet fastsio_mode=0..8
@@ -132,28 +123,17 @@ uint8_t boot_xex_loader[179] = {
 
 
 // Aktivita
-#define LED_GREEN_ON	LEDREG_Write(LEDREG_Read() & ~0x1)
-#define LED_GREEN_OFF	LEDREG_Write(LEDREG_Read() | 0x1)
+#define LED_GREEN_ON	((HWContext*)__hwcontext)->LEDREG_Write(((HWContext*)__hwcontext)->LEDREG_Read() & ~0x1)
+#define LED_GREEN_OFF	((HWContext*)__hwcontext)->LEDREG_Write(((HWContext*)__hwcontext)->LEDREG_Read() | 0x1)
 // Zapis
-#define LED_RED_ON		LEDREG_Write(LEDREG_Read() & ~0x2)
-#define LED_RED_OFF		LEDREG_Write(LEDREG_Read() | 0x2)
+#define LED_RED_ON		((HWContext*)__hwcontext)->LEDREG_Write(((HWContext*)__hwcontext)->LEDREG_Read() & ~0x2)
+#define LED_RED_OFF		((HWContext*)__hwcontext)->LEDREG_Write(((HWContext*)__hwcontext)->LEDREG_Read() | 0x2)
 
-unsigned char mmc_sector_buffer[512];	// one SD sector
-u32 n_actual_mmc_sector;
-unsigned char n_actual_mmc_sector_needswrite;
-unsigned char atari_sector_buffer[256];
 
-#define FileFindBuffer (atari_sector_buffer+256-11)		//pri vyhledavani podle nazvu
-
-struct GlobalSystemValues GS;
-struct FileInfoStruct FileInfo;			//< file information for last file accessed
-
-extern u32 debug_endofvariables;
-
-#define send_ACK()	USART_Transmit_Byte('A');  DebugPrintf("Send ACK\r\n"); 
-#define send_NACK()	USART_Transmit_Byte('N');  DebugPrintf("Send NACK\r\n");
-#define send_CMPL()	USART_Transmit_Byte('C');  DebugPrintf("Send CMPL\r\n");
-#define send_ERR()	USART_Transmit_Byte('E');  DebugPrintf("Send ERR\r\n"); 
+#define send_ACK()	USART_Transmit_Byte('A');  dprint("Send ACK\r\n"); 
+#define send_NACK()	USART_Transmit_Byte('N');  dprint("Send NACK\r\n");
+#define send_CMPL()	USART_Transmit_Byte('C');  dprint("Send CMPL\r\n");
+#define send_ERR()	USART_Transmit_Byte('E');  dprint("Send ERR\r\n"); 
 
 #define wait_cmd_HL() { while ( Command_Read() ); }
 #define wait_cmd_LH() { while ( !Command_Read() ); }
@@ -233,7 +213,7 @@ void USART_Init( u08 value )
     Clock_1_SetFractionalDividerRegister(IntDivider, FractDivider);
     UART_1_ClearRxBuffer();
     UART_1_ClearTxBuffer();
-    DebugPrintf("Change UART speed %d: [%d, %d] to %d\r\n", value, IntDivider, FractDivider, (int)(48000000*32/(IntDivider*32 + FractDivider)/8));    
+    dprint("Change UART speed %d: [%d, %d] to %d\r\n", value, IntDivider, FractDivider, (int)(48000000*32/(IntDivider*32 + FractDivider)/8));    
 }
 
 void USART_Transmit_Byte( unsigned char data )
@@ -337,6 +317,9 @@ u08 USART_Get_atari_sector_buffer_and_check_and_send_ACK_or_NACK(u16 len)
 void USART_Send_cmpl_and_atari_sector_buffer_and_check_sum(unsigned short len)
 {
 	u08 check_sum;
+    
+    HWContext* ctx = (HWContext*)__hwcontext;
+    unsigned char* atari_sector_buffer = &ctx->atari_sector_buffer[0];
 
 	//	Delay300us();	//po ACKu pred CMPL pauza 250us - 255sec
 	//	Delay300us();	//po ACKu pred CMPL pauza 250us - 255sec
@@ -356,106 +339,60 @@ void USART_Send_cmpl_and_atari_sector_buffer_and_check_sum(unsigned short len)
     while(UART_1_GetTxBufferSize());
 }
 
-u08 mmcWriteCached(unsigned char force);
-void mmcWriteCachedFlush();
-
-void mmcReadCached(u32 sector)
-{
-	if(sector==n_actual_mmc_sector) return;
-
-	u08 ret,retry;
-	//predtim nez nacte jiny, musi ulozit soucasny
-	mmcWriteCachedFlush();
-	//az ted nacte novy
-	retry=0; //zkusi to maximalne 256x
-	do
-	{
-		ret = mmcRead(sector);	//vraci 0 kdyz ok
-		retry--;
-	} while (ret && retry);
-	while(ret); //a pokud se vubec nepovedlo, tady zustane zablokovany cely SDrive!
-	n_actual_mmc_sector=sector;
-}
-
-u08 mmcWriteCached(unsigned char force)
-{
-	if ( get_readonly() ) return 0xff; //zakazany zapis
-	LED_RED_ON;
-	if (force)
-	{
-		u08 ret,retry;
-		retry=16; //zkusi to maximalne 16x
-		do
-		{
-			ret = mmcWrite(n_actual_mmc_sector); //vraci 0 kdyz ok
-			retry--;
-		} while (ret && retry);
-		while(ret); //a pokud se vubec nepovedlo, tady zustane zablokovany cely SDrive!
-		n_actual_mmc_sector_needswrite = 0;
-		LED_RED_OFF;
-	}
-	else
-	{
-		n_actual_mmc_sector_needswrite=1;
-	}
-	return 0; //vraci 0 kdyz ok
-}
-
-void mmcWriteCachedFlush()
-{
-	if (n_actual_mmc_sector_needswrite)
-	{
-	 while (mmcWriteCached(1)); //pokud je zakazany zapis, tady zustane zablokovany cely SDrive!
-	 							//do okamziku, nez ten zapis nebude povolen (visi mu neco v cache)
-	}
-}
-
-extern unsigned char Fat32Enabled;
-
 unsigned long getClusterN(unsigned short ncluster)
 {
-	if(ncluster<FileInfo.vDisk.ncluster)
+    HWContext* ctx = (HWContext*)__hwcontext;
+    FileInfoStruct* fi = &ctx->file_info;
+    FatData* f = &ctx->fat_data;
+    
+	if(ncluster<fi->vDisk.ncluster)
 	{
-		FileInfo.vDisk.current_cluster=FileInfo.vDisk.start_cluster;
-		FileInfo.vDisk.ncluster=0;
+		fi->vDisk.current_cluster=fi->vDisk.start_cluster;
+		fi->vDisk.ncluster=0;
 	}
 
-	while(FileInfo.vDisk.ncluster!=ncluster)
+	while(fi->vDisk.ncluster!=ncluster)
 	{
-		FileInfo.vDisk.current_cluster=nextCluster(FileInfo.vDisk.current_cluster);
-		FileInfo.vDisk.ncluster++;
+		fi->vDisk.current_cluster=nextCluster(fi->vDisk.current_cluster);
+		fi->vDisk.ncluster++;
 	}
 
-	return (FileInfo.vDisk.current_cluster&(Fat32Enabled?0xFFFFFFFF:0xFFFF));
+	return (fi->vDisk.current_cluster&(f->fat32_enabled?0xFFFFFFFF:0xFFFF));
 }
 
 unsigned short faccess_offset(char mode, unsigned long offset_start, unsigned short ncount)
 {
+    HWContext* ctx = (HWContext*)__hwcontext;
+    FileInfoStruct* fi = &ctx->file_info;
+    GlobalSystemValues* gsv = &ctx->gsv;
+    unsigned char* atari_sector_buffer = &ctx->atari_sector_buffer[0];
+    unsigned char* mmc_sector_buffer = &ctx->mmc_sector_buffer[0];
+        
 	unsigned short j;
 	unsigned long offset=offset_start;
 	unsigned long end_of_file;
 	unsigned long ncluster, nsector, current_sector;
-	unsigned long bytespercluster=((u32)SectorsPerCluster)*((u32)BytesPerSector);
+	unsigned long bytespercluster=((u32)gsv->SectorsPerCluster)*((u32)gsv->BytesPerSector);
 
-	if(offset_start>=FileInfo.vDisk.size)
+	if(offset_start>=fi->vDisk.size)
 		return 0;
 
-	end_of_file = (FileInfo.vDisk.size - offset_start);
+	end_of_file = (fi->vDisk.size - offset_start);
 
 	ncluster = offset/bytespercluster;
 	offset-=ncluster*bytespercluster;
 
-	nsector = offset/((u32)BytesPerSector);
-	offset-=nsector*((u32)BytesPerSector);
+	nsector = offset/((u32)gsv->BytesPerSector);
+	offset-=nsector*((u32)gsv->BytesPerSector);
 
 	getClusterN(ncluster);
 
-	current_sector = fatClustToSect(FileInfo.vDisk.current_cluster) + nsector;
+	current_sector = fatClustToSect(fi->vDisk.current_cluster) + nsector;
 	mmcReadCached(current_sector);
 
 	for(j=0;j<ncount;j++,offset++)
 	{
-			if(offset>=((u32)BytesPerSector) )
+			if(offset>=((u32)gsv->BytesPerSector) )
 			{
 				if(mode==FILE_ACCESS_WRITE && mmcWriteCached(0))
 					return 0;
@@ -463,14 +400,14 @@ unsigned short faccess_offset(char mode, unsigned long offset_start, unsigned sh
 				offset=0;
 				nsector++;
 
-				if(nsector>=((u32)SectorsPerCluster) )
+				if(nsector>=((u32)gsv->SectorsPerCluster) )
 				{
 					nsector=0;
 					ncluster++;
 					getClusterN(ncluster);
 				}
 
-				current_sector = fatClustToSect(FileInfo.vDisk.current_cluster) + nsector;
+				current_sector = fatClustToSect(fi->vDisk.current_cluster) + nsector;
 				mmcReadCached(current_sector);
 			}
 
@@ -498,42 +435,43 @@ unsigned short faccess_offset(char mode, unsigned long offset_start, unsigned sh
 
 void set_display(unsigned char n)
 {
-    DebugPrintf("Set display to %d, %02X\r\n", n, LEDREG_Read());
+    HWContext* ctx = (HWContext*)__hwcontext;
+    dprint("Set display to %d, %02X\r\n", n, ctx->LEDREG_Read());
     switch(n)
     {
         case 0:
-            LEDREG_Write(LEDREG_Read() & ~0x3C);
+            ctx->LEDREG_Write(ctx->LEDREG_Read() & ~0x3C);
             break;
         case 1:
-            LEDREG_Write((LEDREG_Read() | 0x3C) & ~0x04);
+            ctx->LEDREG_Write((ctx->LEDREG_Read() | 0x3C) & ~0x04);
             break;
         case 2:
-            LEDREG_Write((LEDREG_Read() | 0x3C) & ~0x08);
+            ctx->LEDREG_Write((ctx->LEDREG_Read() | 0x3C) & ~0x08);
             break;
         case 3:
-            LEDREG_Write((LEDREG_Read() | 0x3C) & ~0x0C);
+            ctx->LEDREG_Write((ctx->LEDREG_Read() | 0x3C) & ~0x0C);
             break;
         case 4:
-            LEDREG_Write((LEDREG_Read() | 0x3C) & ~0x10);
+            ctx->LEDREG_Write((ctx->LEDREG_Read() | 0x3C) & ~0x10);
             break;        
         case 5:
-            LEDREG_Write((LEDREG_Read() | 0x3C) & ~0x14);
+            ctx->LEDREG_Write((ctx->LEDREG_Read() | 0x3C) & ~0x14);
             break;        
         case 6:
-            LEDREG_Write((LEDREG_Read() | 0x3C) & ~0x18);
+            ctx->LEDREG_Write((ctx->LEDREG_Read() | 0x3C) & ~0x18);
             break;        
         case 7:
-            LEDREG_Write((LEDREG_Read() | 0x3C) & ~0x1C);
+            ctx->LEDREG_Write((ctx->LEDREG_Read() | 0x3C) & ~0x1C);
             break;        
         case 8:
-            LEDREG_Write((LEDREG_Read() | 0x3C) & ~0x20);
+            ctx->LEDREG_Write((ctx->LEDREG_Read() | 0x3C) & ~0x20);
             break;        
     }    
 }
 
 uint8_t system_info[]="SDrive-ARM-02 20170305 AlSp based on Bob!k & Raster, C.P.U.";	//SDriveVersion info
-//                                 VVYYYYMMDD
-//                                 VV cislo nove oficialne vydane verze, meni se jen pri vydani noveho oficialniho firmware
+//                                   VVYYYYMMDD
+//                                VV cislo nove oficialne vydane verze, meni se jen pri vydani noveho oficialniho firmware
 //									  s rozsirenymi/zmenenymi funkcemi zpetne nekompatibilni
 //									  rostouci posloupnost 01 .. 09 0A 0B .. 0Z .. 0a 0b .. 0y 0z 10 11 ..... zz
 
@@ -575,7 +513,7 @@ uint8_t system_percomtable[]= {
 
 
 
-#define DEVICESNUM	9	//	//D0:-D4:
+#define DEVICESNUM	9	//	//D0:-D8:
 static virtual_disk_t vDisk[DEVICESNUM];
 
 virtual_disk_t* GetvDiskPtr(u08 devicenum)
@@ -586,8 +524,9 @@ virtual_disk_t* GetvDiskPtr(u08 devicenum)
 void Clear_atari_sector_buffer(u16 len)
 {
 	//Maze atari_sector_buffer
+    HWContext* ctx = (HWContext*)__hwcontext;
 	u08 *ptr;
-	ptr=atari_sector_buffer;
+	ptr=&ctx->atari_sector_buffer[0];
 	do { *ptr++=0; len--; } while (len);
 }
 
@@ -600,8 +539,9 @@ void Clear_atari_sector_buffer_256()
 
 void PutDecimalNumberToAtariSectorBuffer(unsigned char num, unsigned char pos)
 {
+    HWContext* ctx = (HWContext*)__hwcontext;
 	u08 *ptr;
-	ptr = (atari_sector_buffer+pos);
+	ptr = &ctx->atari_sector_buffer[pos];
 	*ptr++=0x30|(num/10);
 	*ptr=0x30|(num%10);
 }
@@ -627,23 +567,31 @@ struct SDriveParameters
 //----- Begin Code ------------------------------------------------------------
 int sdrive(void)
 {
+    dprint("SDrive started\r\n");
+
+    HWContext* ctx = (HWContext*)__hwcontext;
+    unsigned char* atari_sector_buffer = &ctx->atari_sector_buffer[0];
+    unsigned char* mmc_sector_buffer = &ctx->mmc_sector_buffer[0];
+    FileInfoStruct* fi = &ctx->file_info;
+
 	unsigned char command[5];
 	unsigned char last_used_virtual_drive;
 
     LED_OFF;
 	//Parameters
 	struct SDriveParameters sdrparams;
-    UART_1_Start();
-    Debug_Start();
+
 #ifdef CAPSENSE
     CapSense_Start();
     CapSense_InitializeAllBaselines();
     CapSense_ScanAllWidgets();
 #endif
 
+    Debug_B_Start();
+
     LED_ON;
     
-    DebugPrintf("SDrive started\r\n");
+    dprint("SDrive initialized\r\n");
 
 SD_CARD_EJECTED:
 
@@ -652,7 +600,7 @@ SD_CARD_EJECTED:
 	fastsio_active=0;
 	bootloader_relocation=0;
 	//actual_drive_number=0;	//nastavovano kousek dal (za SET_BOOT_DRIVE)
-	FileInfo.percomstate=0;	//inicializace
+	fi->percomstate=0;	//inicializace
 	fastsio_pokeydiv= system_fastsio_pokeydiv_default; //definovano v EEPROM
     
 	USART_Init(ATARI_SPEED_STANDARD);
@@ -678,7 +626,7 @@ SD_CARD_EJECTED:
 	while(mmcReset());	//dokud nenulove, tak smycka (return 0 => ok!)
 	//n_actual_mmc_sector=0xFFFFFFFF; //presunuto do mmcReset
     LED_GREEN_OFF;
-    DebugPrintf("SD card inititialized\r\n");
+    dprint("SD card inititialized\r\n");
 
 	// set SPI speed on maximum (F_CPU/2)
 	//sbi(SPSR, SPI2X);
@@ -689,7 +637,7 @@ SD_CARD_EJECTED:
 	 u08 i;
 	 for(i=0; i<DEVICESNUM; i++) GetvDiskPtr(i)->flags=0;	//vDisk[i].flags=0;
 	}
-	FileInfo.vDisk.flags=0;		//special_xex_loader=0;
+	fi->vDisk.flags=0;		//special_xex_loader=0;
 
 SET_BOOT_DRIVE:
 
@@ -705,7 +653,7 @@ SET_SDRIVEATR_TO_D0:	//pro nastaveni SDRIVE.ATR do vD0: bez zmeny actual_drive_n
 		unsigned char i;
 		unsigned char *p1;
 		unsigned char *p2;
-		p2=((unsigned char *)&FileInfo.vDisk);
+		p2=((unsigned char *)&fi->vDisk);
 		if ( last_used_virtual_drive < DEVICESNUM )
 		{
 		 p1=((unsigned char *)&vDisk[last_used_virtual_drive]);
@@ -729,7 +677,7 @@ SET_SDRIVEATR_TO_D0:	//pro nastaveni SDRIVE.ATR do vD0: bez zmeny actual_drive_n
 		goto SD_CARD_EJECTED;
 	}
     
-    DebugPrintf("FAT FS inititialized\r\n");
+    dprint("FAT FS inititialized\r\n");
 
 	//Vyhledani a nastaveni image SDRIVE.ATR do vD0:
 	{
@@ -752,28 +700,28 @@ SET_SDRIVEATR_TO_D0:	//pro nastaveni SDRIVE.ATR do vD0: bez zmeny actual_drive_n
 
             LED_ON;
             
-            DebugPrintf("SDRIVE.ATR found\r\n");
+            dprint("SDRIVE.ATR found\r\n");
 
 
-			FileInfo.vDisk.current_cluster=FileInfo.vDisk.start_cluster;
-			FileInfo.vDisk.ncluster=0;
-			//FileInfo.vDisk.file_index = i; //dela se uvnitr fatGetDirEntry
+			fi->vDisk.current_cluster=fi->vDisk.start_cluster;
+			fi->vDisk.ncluster=0;
+			//fi->vDisk.file_index = i; //dela se uvnitr fatGetDirEntry
 
 			faccess_offset(FILE_ACCESS_READ,0,16); //ATR hlavicka vzdy
 
-			FileInfo.vDisk.flags=FLAGS_DRIVEON;
+			fi->vDisk.flags=FLAGS_DRIVEON;
 			if ( (atari_sector_buffer[4]|atari_sector_buffer[5])==0x01 )
-				FileInfo.vDisk.flags|=FLAGS_ATRDOUBLESECTORS;
+				fi->vDisk.flags|=FLAGS_ATRDOUBLESECTORS;
 
 			{
 				unsigned long compute;
 				unsigned long tmp;
 
-				compute = FileInfo.vDisk.size - 16;		//je to vzdy ATR
-				tmp = (FileInfo.vDisk.flags & FLAGS_ATRDOUBLESECTORS)? 0x100:0x80;
+				compute = fi->vDisk.size - 16;		//je to vzdy ATR
+				tmp = (fi->vDisk.flags & FLAGS_ATRDOUBLESECTORS)? 0x100:0x80;
 				compute /=tmp;
 
-				if(compute>720) FileInfo.vDisk.flags|=FLAGS_ATRMEDIUMSIZE;
+				if(compute>720) fi->vDisk.flags|=FLAGS_ATRMEDIUMSIZE;
 			}
 			goto find_sdrive_atr_finished;
 			//
@@ -782,7 +730,7 @@ find_sdrive_atr_next_entry:
 		} //end while
 
 		//nenasel SDRIVE.ATR
-		FileInfo.vDisk.flags=0; //ve vD0: neni aktivni disk
+		fi->vDisk.flags=0; //ve vD0: neni aktivni disk
 		//takze nastavi jednotku dle cisla SDrive (1-4)
 		if (actual_drive_number==0)
 		{
@@ -855,7 +803,7 @@ ST_IDLE:
                
 			if(actual_key != last_key)
 			{
-                DebugPrintf("Key: %02X\r\n", actual_key);
+                dprint("Key: %02X\r\n", actual_key);
 				//if (inb(PIND)&0x04) goto SD_CARD_EJECTED;
 				//nyni je bit 0x04 vzdy 0 , protoze karta je vlozena
 				switch(actual_key)	//&0xfe)
@@ -912,9 +860,9 @@ ST_IDLE:
 			err=USART_Get_Buffer_And_Check(command,4,CMD_STATE_L);
 
             if(err)
-                DebugPrintf("Command error: [%02X]\r\n", err);
+                dprint("Command error: [%02X]\r\n", err);
             else
-                DebugPrintf("Command: [%02X %02X %02X %02X]\r\n", command[0], command[1], command[2], command[3]);
+                dprint("Command: [%02X %02X %02X %02X]\r\n", command[0], command[1], command[2], command[3]);
 
 
             //pokud je duvodem zmena cmd na H, nemusi cekat na wait_cmd_LH()
@@ -979,20 +927,20 @@ disk_operations_direct_d0_d4:
 				virtual_drive_number = command[0]&0xf;
 			}
             
-            //DebugPrintf("Disk op luvd:%d, vd:%d\r\n",last_used_virtual_drive, virtual_drive_number);
+            //dprint("Disk op luvd:%d, vd:%d\r\n",last_used_virtual_drive, virtual_drive_number);
 
 			if ( last_used_virtual_drive != virtual_drive_number )
 			{
 				if ( last_used_virtual_drive < DEVICESNUM )
-                    vDisk[last_used_virtual_drive] = FileInfo.vDisk;
+                    vDisk[last_used_virtual_drive] = fi->vDisk;
                 
-                FileInfo.vDisk = vDisk[virtual_drive_number];
+                fi->vDisk = vDisk[virtual_drive_number];
 
                 last_used_virtual_drive=virtual_drive_number; //zmena
-                //DebugPrintf("[0]Set luvd to %d\r\n", last_used_virtual_drive);
+                //dprint("[0]Set luvd to %d\r\n", last_used_virtual_drive);
 			}
 
-			if (!(FileInfo.vDisk.flags & FLAGS_DRIVEON))
+			if (!(fi->vDisk.flags & FLAGS_DRIVEON))
 			{
 				//do daneho Dx neni vlozen disk
 				goto ST_IDLE;
@@ -1001,7 +949,7 @@ disk_operations_direct_d0_d4:
 			//LED_GREEN_ON;	// LED on
 
 			//pro cokoli jineho nez 0x53 (get status) nuluje FLAGS_WRITEERROR
-			if (command[1]!=0x53) FileInfo.vDisk.flags &= (~FLAGS_WRITEERROR); //vynuluje FLAGS_WRITEERROR bit
+			if (command[1]!=0x53) fi->vDisk.flags &= (~FLAGS_WRITEERROR); //vynuluje FLAGS_WRITEERROR bit
 
 			//formatovaci povely zpracovava v predsunu tady kvuli ACK/NACK
 			switch(command[1])
@@ -1016,10 +964,10 @@ disk_operations_direct_d0_d4:
 				{
 				 u32 singlesize;
 				 singlesize = (u32)92160;
-				 if ( !(FileInfo.vDisk.flags & FLAGS_XFDTYPE) ) singlesize+=(u32)16; //je to ATRko
+				 if ( !(fi->vDisk.flags & FLAGS_XFDTYPE) ) singlesize+=(u32)16; //je to ATRko
 
-				 if (   ( FileInfo.percomstate==3 ) //snazil se zapsat neodpovidajici percom
-					|| ( (FileInfo.percomstate==0) && (FileInfo.vDisk.size!=singlesize) ) //neni single disketa
+				 if (   ( fi->percomstate==3 ) //snazil se zapsat neodpovidajici percom
+					|| ( (fi->percomstate==0) && (fi->vDisk.size!=singlesize) ) //neni single disketa
 				   )
 				 {
 					goto Send_NACK_and_set_FLAGS_WRITEERROR_and_ST_IDLE;
@@ -1028,7 +976,7 @@ disk_operations_direct_d0_d4:
 
 				{
 					unsigned short i,size;
-					if ( FileInfo.percomstate == 2)
+					if ( fi->percomstate == 2)
 					{
 						size=256;
 					}
@@ -1038,10 +986,10 @@ format_medium:
 						size=128;
 					}
 
-					FileInfo.percomstate=0; //po prvnim formatu pozbyva percom ucinnost
+					fi->percomstate=0; //po prvnim formatu pozbyva percom ucinnost
 
 					//XEX formatovat nelze
-					if (FileInfo.vDisk.flags & FLAGS_XEXLOADER)
+					if (fi->vDisk.flags & FLAGS_XEXLOADER)
 					{
 						goto Send_NACK_and_set_FLAGS_WRITEERROR_and_ST_IDLE;
 					}
@@ -1057,8 +1005,8 @@ format_medium:
 					 {
 					  unsigned long maz,psize;
 					  maz=0;
-					  if ( !(FileInfo.vDisk.flags & FLAGS_XFDTYPE) ) maz+=16;
-					  while( (psize=(FileInfo.vDisk.size-maz))>0 )
+					  if ( !(fi->vDisk.flags & FLAGS_XFDTYPE) ) maz+=16;
+					  while( (psize=(fi->vDisk.size-maz))>0 )
 					  {
 					   if (psize>256) psize=256;
 					   if (!faccess_offset(FILE_ACCESS_WRITE,maz,(u16)psize))
@@ -1082,7 +1030,7 @@ format_medium:
 					 {
 					  atari_sector_buffer[0]=0x00; //err
 					  atari_sector_buffer[1]=0x00; //err
-					  FileInfo.vDisk.flags |= FLAGS_WRITEERROR;	//nastavi FLAGS_WRITEERROR
+					  fi->vDisk.flags |= FLAGS_WRITEERROR;	//nastavi FLAGS_WRITEERROR
 					 }
 					}
 
@@ -1096,12 +1044,12 @@ format_medium:
 			case 0x22: // format medium
 				// 	Formats medium density on an Atari 1050. Format medium density cannot be achieved via PERCOM block settings!
 
-				if (! (FileInfo.vDisk.flags & FLAGS_ATRMEDIUMSIZE))
+				if (! (fi->vDisk.flags & FLAGS_ATRMEDIUMSIZE))
 				{
-					//FileInfo.percomstate=0;
+					//fi->percomstate=0;
 					//goto Send_ERR_and_Delay;
 Send_NACK_and_set_FLAGS_WRITEERROR_and_ST_IDLE:
-					FileInfo.vDisk.flags |= FLAGS_WRITEERROR;	//nastavi FLAGS_WRITEERROR
+					fi->vDisk.flags |= FLAGS_WRITEERROR;	//nastavi FLAGS_WRITEERROR
 					goto Send_NACK_and_ST_IDLE;
 				}
 
@@ -1145,7 +1093,7 @@ device_command_accepted:
 
 			case 0x3f:	// read speed index
 				{
-                    DebugPrintf("Ask for speed\r\n");
+                    dprint("Ask for speed\r\n");
 					atari_sector_buffer[0]=fastsio_pokeydiv;	//primo vraci Pokey divisor
 					USART_Send_cmpl_and_atari_sector_buffer_and_check_sum(1);
 					/*
@@ -1188,8 +1136,8 @@ device_command_accepted:
 				{
 					unsigned long s;
 					// 16 bytu za ATR neni potreba odecitat, nebot pri deleni 40 to vyjde stejne!
-					s= FileInfo.vDisk.size / 40;
-					if (FileInfo.vDisk.flags & FLAGS_ATRDOUBLESECTORS)
+					s= fi->vDisk.size / 40;
+					if (fi->vDisk.flags & FLAGS_ATRDOUBLESECTORS)
 					 s=(s>>8)+1; //s=s/256; +1, protoze prvni 3 sektory jsou 128 a tudiz by se melo k size pripocitat 384 a to pak delit 40 a 256, ale vyjde nastejno pricist 1 k vyslednym sektorum
 					else
 					 s=(s>>7); //s=s/128;
@@ -1198,8 +1146,8 @@ device_command_accepted:
 					atari_sector_buffer[4] = (s>>16) & 0xff; //pocet stran - 1  (0=> jedna strana)
 				}
 				//[5] =0 pro single, =4 pro mediumtype nebo doublesize sectors
-				atari_sector_buffer[5] = (FileInfo.vDisk.flags & (FLAGS_ATRMEDIUMSIZE|FLAGS_ATRDOUBLESECTORS))? 0x04 : 0x00;
-				if (FileInfo.vDisk.flags & FLAGS_ATRDOUBLESECTORS)
+				atari_sector_buffer[5] = (fi->vDisk.flags & (FLAGS_ATRMEDIUMSIZE|FLAGS_ATRDOUBLESECTORS))? 0x04 : 0x00;
+				if (fi->vDisk.flags & FLAGS_ATRDOUBLESECTORS)
 				{
 					atari_sector_buffer[6]=0x01;	//sector size HB
 					atari_sector_buffer[7]=0x00;	//sector size LB
@@ -1221,11 +1169,11 @@ device_command_accepted:
 				u16 secsize;
 				u32 fs;
 
-				isxex = ( FileInfo.vDisk.flags & FLAGS_XEXLOADER );
+				isxex = ( fi->vDisk.flags & FLAGS_XEXLOADER );
 
-				fs=FileInfo.vDisk.size;
+				fs=fi->vDisk.size;
 
-				secsize=(FileInfo.vDisk.flags & FLAGS_ATRDOUBLESECTORS)? 0x100:0x80;
+				secsize=(fi->vDisk.flags & FLAGS_ATRDOUBLESECTORS)? 0x100:0x80;
 				
 				ptr = system_percomtable;
 
@@ -1258,7 +1206,7 @@ device_command_accepted:
 				 secsize=125; //-=3; //=125
 				 fs+=(u32)46125;		//((u32)0x171*(u32)125);
 				}
-				if ( FileInfo.vDisk.flags & FLAGS_ATRDOUBLESECTORS )
+				if ( fi->vDisk.flags & FLAGS_ATRDOUBLESECTORS )
 				{
 				 fs+=(u32)(3*128); //+384 bytu za prvni tri sektory s velikosti 128
 				}
@@ -1300,18 +1248,18 @@ percom_prepared:
 						 * ( (u32) ( (((u16)atari_sector_buffer[2])<<8) + ((u16)atari_sector_buffer[3]) ) )
 						 * (((u32)atari_sector_buffer[4])+1)
 						 * ( (u32) ( (((u16)atari_sector_buffer[6])<<8) + ((u16)atari_sector_buffer[7]) ) );
-					if ( !(FileInfo.vDisk.flags & FLAGS_XFDTYPE) ) s+=16; //ATRko 16 bytu
-					if ( FileInfo.vDisk.flags & FLAGS_ATRDOUBLESECTORS ) s-=384;	//prvni 3 sektory v double jsou jen 128bytu => odpocitat 3*128
-					if (s!=FileInfo.vDisk.size)
+					if ( !(fi->vDisk.flags & FLAGS_XFDTYPE) ) s+=16; //ATRko 16 bytu
+					if ( fi->vDisk.flags & FLAGS_ATRDOUBLESECTORS ) s-=384;	//prvni 3 sektory v double jsou jen 128bytu => odpocitat 3*128
+					if (s!=fi->vDisk.size)
 					{
-						FileInfo.percomstate=3;	//percom write bad
+						fi->percomstate=3;	//percom write bad
 						//goto Send_ERR_and_Delay;
 						goto Send_CMPL_and_Delay; //percom zapis je ok, ale hodnoty neodpovidaji
 					}
 				}
 
-				FileInfo.percomstate=1;		//ok
-				if ( (atari_sector_buffer[6]|atari_sector_buffer[7])==0x01) FileInfo.percomstate++; //=2 ok (double)
+				fi->percomstate=1;		//ok
+				if ( (atari_sector_buffer[6]|atari_sector_buffer[7])==0x01) fi->percomstate++; //=2 ok (double)
 
 				goto Send_CMPL_and_Delay;
 				break;
@@ -1327,14 +1275,14 @@ percom_prepared:
 				u16 n_sector;
 				u16 file_sectors;
 
-				FileInfo.percomstate=0;
+				fi->percomstate=0;
 
 				n_sector = TWOBYTESTOWORD(command+2);	//2,3
 
 				if(n_sector==0)
 					goto Send_ERR_and_Delay;
 
-				if( !(FileInfo.vDisk.flags & FLAGS_XEXLOADER) )
+				if( !(fi->vDisk.flags & FLAGS_XEXLOADER) )
 				{
 					//ATRko nebo XFDcko
 					if(n_sector<4)
@@ -1348,18 +1296,18 @@ percom_prepared:
 					else
 					{
 						//sektor 4 nebo dalsi
-						atari_sector_size = (FileInfo.vDisk.flags & FLAGS_ATRDOUBLESECTORS)? ((unsigned short)0x100):((unsigned short)0x80);	//FileInfo.vDisk.atr_sector_size;
+						atari_sector_size = (fi->vDisk.flags & FLAGS_ATRDOUBLESECTORS)? ((unsigned short)0x100):((unsigned short)0x80);	//fi->vDisk.atr_sector_size;
 						n_data_offset = (u32) ( ((u32)(((u32)n_sector)-4) ) * ((u32)atari_sector_size)) + ((u32)384);
 					}
 
 					//ATR nebo XFD?
-					if (! (FileInfo.vDisk.flags & FLAGS_XFDTYPE) ) n_data_offset+= (u32)16; //ATR header;
+					if (! (fi->vDisk.flags & FLAGS_XFDTYPE) ) n_data_offset+= (u32)16; //ATR header;
 
 					if(command[1]==0x52)
 					{
 						//read
 						proceeded_bytes = faccess_offset(FILE_ACCESS_READ,n_data_offset,atari_sector_size);
-                        DebugPrintf("Read result %d, offset=%d, secsize=%d\r\n", proceeded_bytes,n_data_offset, atari_sector_size);
+                        dprint("Read result %d, offset=%d, secsize=%d\r\n", proceeded_bytes,n_data_offset, atari_sector_size);
 						if(proceeded_bytes==0)
 						{
 							goto Send_ERR_and_Delay;
@@ -1429,7 +1377,7 @@ percom_prepared:
 
 					//file_sectors se pouzije pro sektory $168 i $169 (optimalizace)
 					//zarovnano nahoru, tj. =(size+124)/125
-					file_sectors = ((FileInfo.vDisk.size+(u32)(XEX_SECTOR_SIZE-3-1))/((u32)XEX_SECTOR_SIZE-3));
+					file_sectors = ((fi->vDisk.size+(u32)(XEX_SECTOR_SIZE-3-1))/((u32)XEX_SECTOR_SIZE-3));
 
 					if(n_sector==0x168)
 					{
@@ -1440,8 +1388,8 @@ percom_prepared:
 					else
 					if(n_sector==0x169)
 					{
-						//fatGetDirEntry(FileInfo.vDisk.file_index,5,0);
-						fatGetDirEntry(FileInfo.vDisk.file_index,0); //ale musi to posunout o 5 bajtu doprava
+						//fatGetDirEntry(fi->vDisk.file_index,5,0);
+						fatGetDirEntry(fi->vDisk.file_index,0); //ale musi to posunout o 5 bajtu doprava
 			
 						{
 							u08 i,j;
@@ -1496,11 +1444,11 @@ set_number_of_sectors_to_buffer_1_2:
 				}
 
                if(0){
-                    DebugPrintf("Put Atari sector: \r\n");
+                    dprint("Put Atari sector: \r\n");
                     int i = 0;
                     for(i = 0; i < atari_sector_size;i+=16)
                     {
-                        DebugPrintf("%02X %02X %02X %02X  %02X %02X %02X %02X  %02X %02X %02X %02X  %02X %02X %02X %02X\r\n",
+                        dprint("%02X %02X %02X %02X  %02X %02X %02X %02X  %02X %02X %02X %02X  %02X %02X %02X %02X\r\n",
                             atari_sector_buffer[i],
                             atari_sector_buffer[i+1],
                             atari_sector_buffer[i+2],
@@ -1531,16 +1479,16 @@ set_number_of_sectors_to_buffer_1_2:
 
 			case 0x53:	//get status
 
-				FileInfo.percomstate=0;
+				fi->percomstate=0;
 
 				atari_sector_buffer[0] = 0x10;	//0x00 motor off	0x10 motor on
-				if (FileInfo.vDisk.flags & FLAGS_ATRMEDIUMSIZE) atari_sector_buffer[0]|=0x80;		//(FileInfo.vDisk.atr_medium_size);	// medium/single
-				if (FileInfo.vDisk.flags & FLAGS_ATRDOUBLESECTORS) atari_sector_buffer[0]|=0x20;	//((FileInfo.vDisk.atr_sector_size==256)?0x20:0x00); //	double/normal sector size
-				if (FileInfo.vDisk.flags & FLAGS_WRITEERROR)
+				if (fi->vDisk.flags & FLAGS_ATRMEDIUMSIZE) atari_sector_buffer[0]|=0x80;		//(fi->vDisk.atr_medium_size);	// medium/single
+				if (fi->vDisk.flags & FLAGS_ATRDOUBLESECTORS) atari_sector_buffer[0]|=0x20;	//((fi->vDisk.atr_sector_size==256)?0x20:0x00); //	double/normal sector size
+				if (fi->vDisk.flags & FLAGS_WRITEERROR)
 				{
 				 atari_sector_buffer[0]|=0x04;			//Write error status bit
 				 //vynuluje FLAGS_WRITEERROR bit
-				 FileInfo.vDisk.flags &= (~FLAGS_WRITEERROR);
+				 fi->vDisk.flags &= (~FLAGS_WRITEERROR);
 				}
 				if (get_readonly()) atari_sector_buffer[0]|=0x08;	//write protected bit
 
@@ -1551,7 +1499,7 @@ set_number_of_sectors_to_buffer_1_2:
 
 				USART_Send_cmpl_and_atari_sector_buffer_and_check_sum(4);
 
-                DebugPrintf("Send status: [%02X %02X %02X %02X]\r\n", 
+                dprint("Send status: [%02X %02X %02X %02X]\r\n", 
                     atari_sector_buffer[0], 
                     atari_sector_buffer[1],
                     atari_sector_buffer[2],
@@ -1584,11 +1532,11 @@ set_number_of_sectors_to_buffer_1_2:
 				//predtim pracoval s nejakym Dx:
 				//musi uschovat jeho stav do vDisk[]
 				if ( last_used_virtual_drive < DEVICESNUM )
-                    vDisk[last_used_virtual_drive] = FileInfo.vDisk;
+                    vDisk[last_used_virtual_drive] = fi->vDisk;
 
                 //zmena last_used_virtual_drive
 				last_used_virtual_drive=0x0f; //zmena
-                //DebugPrintf("[1]Set luvd to %d\r\n", last_used_virtual_drive);
+                //dprint("[1]Set luvd to %d\r\n", last_used_virtual_drive);
 			}
 
 
@@ -1657,7 +1605,7 @@ set_number_of_sectors_to_buffer_1_2:
 						}
 					 	j=11; //8+3znaku=11
 						do { *dpt++=*spt++; j--; } while(j);
-						*dpt++=FileInfo.Attr; //na pozici[11] da atribut
+						*dpt++=fi->Attr; //na pozici[11] da atribut
 					}// while(i);
 					//a ted posunout 241 bajtu o 12 dolu [12-252] => [0-240]
 					spt=atari_sector_buffer+12;
@@ -1704,25 +1652,25 @@ set_number_of_sectors_to_buffer_1_2:
 					dptr=atari_sector_buffer;
 					//
 					//Globalni sada promennych
-					sptr=(u08*)&GS;
-					i=sizeof(struct GlobalSystemValues);	//13
+					sptr=(u08*)&ctx->gsv;
+					i=sizeof(GlobalSystemValues);	//13
 					do { *dptr++=*sptr++; i--; } while(i>0);
 					//tzv. lokalni vDisk
-					sptr=(u08*)&FileInfo.vDisk;
+					sptr=(u08*)&fi->vDisk;
 					i=sizeof(virtual_disk_t);				//21
 					do { *dptr++=*sptr++; i--; } while(i>0);
                     
-                    DebugPrintf("!!!Unable to be displayed!\r\n");
+                    dprint("!!!Unable to be displayed!\r\n");
 
 					//celkem 26 bytu
-					USART_Send_cmpl_and_atari_sector_buffer_and_check_sum( (sizeof(struct GlobalSystemValues)+sizeof(virtual_disk_t)) );
+					USART_Send_cmpl_and_atari_sector_buffer_and_check_sum( (sizeof(GlobalSystemValues)+sizeof(virtual_disk_t)) );
 				}				
 				break;
 
 			case 0xDB:	//get vDisk flag [<1]
 				{
-					//atari_sector_buffer[0] = (command[2]<DEVICESNUM)? GetvDiskPtr(command[2])->flags : FileInfo.vDisk.flags;
-					atari_sector_buffer[0] = FileInfo.vDisk.flags;
+					//atari_sector_buffer[0] = (command[2]<DEVICESNUM)? GetvDiskPtr(command[2])->flags : fi->vDisk.flags;
+					atari_sector_buffer[0] = fi->vDisk.flags;
 					USART_Send_cmpl_and_atari_sector_buffer_and_check_sum(1);
 				}
 				break;
@@ -1866,12 +1814,12 @@ Command_ED_notfound:	//sem skoci z commandu ED kdyz nenajde hledany nazev soubor
 					break;
 				}
 				// vDisk <- vDisk[ command[2] ]
-                FileInfo.vDisk = vDisk[ command[2] ];
+                fi->vDisk = vDisk[ command[2] ];
 			   }
 
 				// VOLANI GET DETAILED FILENAME
-				command[2]=(unsigned char)(FileInfo.vDisk.file_index & 0xff);
-				command[3]=(unsigned char)(FileInfo.vDisk.file_index >> 8);
+				command[2]=(unsigned char)(fi->vDisk.file_index & 0xff);
+				command[3]=(unsigned char)(fi->vDisk.file_index >> 8);
 
 				// a pokracuje dal!!!
 
@@ -1892,15 +1840,15 @@ Command_ED_found:	//sem skoci z commandu ED kdyz najde hledane filename a chce v
 					ret=1;
 				}
 
-				atari_sector_buffer[11]=(unsigned char)FileInfo.Attr;
+				atari_sector_buffer[11]=(unsigned char)fi->Attr;
 				if (command[1] == 0xE3)
 				{
 					//command 0xE3
 					/*
-					atari_sector_buffer[12]=(unsigned char)(FileInfo.vDisk.file_index&0xff);
-					atari_sector_buffer[13]=(unsigned char)(FileInfo.vDisk.file_index>>8);
+					atari_sector_buffer[12]=(unsigned char)(fi->vDisk.file_index&0xff);
+					atari_sector_buffer[13]=(unsigned char)(fi->vDisk.file_index>>8);
 					*/
-					TWOBYTESTOWORD(atari_sector_buffer+12)=FileInfo.vDisk.file_index; //12,13
+					TWOBYTESTOWORD(atari_sector_buffer+12)=fi->vDisk.file_index; //12,13
 					len=14;
 				}
 				else
@@ -1909,26 +1857,26 @@ Command_ED_found:	//sem skoci z commandu ED kdyz najde hledane filename a chce v
 					unsigned char i;
 					//command 0xE5
 					/*
-					atari_sector_buffer[12]=(unsigned char)(FileInfo.vDisk.Size&0xff);
-					atari_sector_buffer[13]=(unsigned char)(FileInfo.vDisk.Size>>8);
-					atari_sector_buffer[14]=(unsigned char)(FileInfo.vDisk.Size>>16);
-					atari_sector_buffer[15]=(unsigned char)(FileInfo.vDisk.Size>>24);
+					atari_sector_buffer[12]=(unsigned char)(fi->vDisk.Size&0xff);
+					atari_sector_buffer[13]=(unsigned char)(fi->vDisk.Size>>8);
+					atari_sector_buffer[14]=(unsigned char)(fi->vDisk.Size>>16);
+					atari_sector_buffer[15]=(unsigned char)(fi->vDisk.Size>>24);
 					*/
-					FOURBYTESTOLONG(atari_sector_buffer+12)=FileInfo.vDisk.size; //12,13,14,15
-					//atari_sector_buffer[16]=(unsigned char)(FileInfo.Date&0xff);
-					//atari_sector_buffer[17]=(unsigned char)(FileInfo.Date>>8);
-					TWOBYTESTOWORD(atari_sector_buffer+16)=FileInfo.Date; //16,17
-					//atari_sector_buffer[18]=(unsigned char)(FileInfo.Time&0xff);
-					//atari_sector_buffer[19]=(unsigned char)(FileInfo.Time>>8);
-					TWOBYTESTOWORD(atari_sector_buffer+18)=FileInfo.Time; //18,19
+					FOURBYTESTOLONG(atari_sector_buffer+12)=fi->vDisk.size; //12,13,14,15
+					//atari_sector_buffer[16]=(unsigned char)(fi->Date&0xff);
+					//atari_sector_buffer[17]=(unsigned char)(fi->Date>>8);
+					TWOBYTESTOWORD(atari_sector_buffer+16)=fi->Date; //16,17
+					//atari_sector_buffer[18]=(unsigned char)(fi->Time&0xff);
+					//atari_sector_buffer[19]=(unsigned char)(fi->Time>>8);
+					TWOBYTESTOWORD(atari_sector_buffer+18)=fi->Time; //18,19
 
 					//1234567890 YYYY-MM-DD HH:MM:SS
 					//20-49
 					//20-29 string decimal size
 					for(i=20; i<=49; i++) atari_sector_buffer[i]=' ';
 					{
-					 unsigned long size=FileInfo.vDisk.size;
-					 if ( !(FileInfo.Attr & (ATTR_DIRECTORY|ATTR_VOLUME)) )
+					 unsigned long size=fi->vDisk.size;
+					 if ( !(fi->Attr & (ATTR_DIRECTORY|ATTR_VOLUME)) )
 					 {
 					 	//pokud to neni directory nebo nazev disku (volume to ani nemuze byt - getFatDirEntry VOLUME vynechava)
 						//zapise na posledni pozici "0" (jakoze velikost souboru = 0 bytes)
@@ -1955,24 +1903,24 @@ Command_ED_found:	//sem skoci z commandu ED kdyz najde hledane filename a chce v
 					{
 					 unsigned short d;
 					 //date
-					 d=(FileInfo.Date>>9)+1980;
+					 d=(fi->Date>>9)+1980;
 					 PutDecimalNumberToAtariSectorBuffer(d/100,31);
 					 PutDecimalNumberToAtariSectorBuffer(d%100,33);
 					 //
-					 PutDecimalNumberToAtariSectorBuffer((FileInfo.Date>>5)&0x0f,36);
+					 PutDecimalNumberToAtariSectorBuffer((fi->Date>>5)&0x0f,36);
 					 //atari_sector_buffer[36]=0x30|(d/10);
 					 //atari_sector_buffer[37]=0x30|(d%10);
-					 PutDecimalNumberToAtariSectorBuffer((FileInfo.Date)&0x1f,39);
+					 PutDecimalNumberToAtariSectorBuffer((fi->Date)&0x1f,39);
 					 //atari_sector_buffer[39]=0x30|(d/10);
 					 //atari_sector_buffer[40]=0x30|(d%10);
 					 //time
-					 PutDecimalNumberToAtariSectorBuffer((FileInfo.Time>>11),42);
+					 PutDecimalNumberToAtariSectorBuffer((fi->Time>>11),42);
 					 //atari_sector_buffer[42]=0x30|(d/10);
 					 //atari_sector_buffer[43]=0x30|(d%10);
-					 PutDecimalNumberToAtariSectorBuffer((FileInfo.Time>>5)&0x3f,45);
+					 PutDecimalNumberToAtariSectorBuffer((fi->Time>>5)&0x3f,45);
 					 //atari_sector_buffer[45]=0x30|(d/10);
 					 //atari_sector_buffer[46]=0x30|(d%10);
-					 PutDecimalNumberToAtariSectorBuffer(((FileInfo.Time)&0x1f)<<1,48);	//doubleseconds
+					 PutDecimalNumberToAtariSectorBuffer(((fi->Time)&0x1f)<<1,48);	//doubleseconds
 					 //atari_sector_buffer[48]=0x30|(d/10);
 					 //atari_sector_buffer[49]=0x30|(d%10);
 					}
@@ -2037,9 +1985,9 @@ Command_ED_found:	//sem skoci z commandu ED kdyz najde hledane filename a chce v
 				 if (command[2]==0 || command[2]>20) command[2]=20; //maximum [<240]
 				 updirs=command[2]; //pocet updir skoku
 				 pdi=0; //index do bufferu kam zapisuje podadresare
-				 ocluster=FileInfo.vDisk.dir_cluster; //pro obnoveni na konec
+				 ocluster=fi->vDisk.dir_cluster; //pro obnoveni na konec
 				 while ( fatGetDirEntry(0,0) //0.polozka by mela byt ".." ("." se vynechava)		//fatGetDirEntry(1,0)
-				 	  && (FileInfo.Attr & ATTR_DIRECTORY)
+				 	  && (fi->Attr & ATTR_DIRECTORY)
 					  && atari_sector_buffer[0]=='.' && atari_sector_buffer[1]=='.' )
 				 {
 					if (!updirs)	//pocet updir skoku
@@ -2052,14 +2000,14 @@ Command_ED_found:	//sem skoci z commandu ED kdyz najde hledane filename a chce v
 					}
 					updirs--;
 					//Schova si cluster zacatku nynejsiho adresare
-					acluster=FileInfo.vDisk.dir_cluster;
+					acluster=fi->vDisk.dir_cluster;
 					//Meni adresar
-					FileInfo.vDisk.dir_cluster=FileInfo.vDisk.start_cluster;
+					fi->vDisk.dir_cluster=fi->vDisk.start_cluster;
 					//jde najit nazev opusteneho adresare a ulozi ho na konec bufferu "/8+3"
 					unsigned short i;
 					for(i=0; fatGetDirEntry(i,0); i++)
 					{
-						if (acluster==FileInfo.vDisk.start_cluster)
+						if (acluster==fi->vDisk.start_cluster)
 						{
 						 //nasel ho, zkopiruje na konec bufferu
 						 u08 *spt,*dpt;
@@ -2074,7 +2022,7 @@ Command_ED_found:	//sem skoci z commandu ED kdyz najde hledane filename a chce v
 					}
 				  }
 				  //nastavi zpatky puvodni adresar
-				  FileInfo.vDisk.dir_cluster=ocluster;
+				  fi->vDisk.dir_cluster=ocluster;
 				  //posune nalezenou cestu na zacatek bufferu
 				  {
 				   unsigned short k;
@@ -2168,14 +2116,14 @@ Different_char:
 			case 0xFD:	//$FD  n ??	Change actual directory up (..). If n<>0 => get dirname. 8+3+attribute+fileindex [<14]
 				 if (fatGetDirEntry(0,0))	//0.polozka by mela byt ".." ("." se vynechava)		//fatGetDirEntry(1,0)
 				 {
-					if ( (FileInfo.Attr & ATTR_DIRECTORY)
+					if ( (fi->Attr & ATTR_DIRECTORY)
 						&& atari_sector_buffer[0]=='.' && atari_sector_buffer[1]=='.')
 					{
 						//Schova si cluster zacatku nynejsiho adresare
 						unsigned short acluster;
-						acluster=FileInfo.vDisk.dir_cluster;
+						acluster=fi->vDisk.dir_cluster;
 						//Meni adresar
-						FileInfo.vDisk.dir_cluster=FileInfo.vDisk.start_cluster;
+						fi->vDisk.dir_cluster=fi->vDisk.start_cluster;
 						//aux1 ?
 						if (command[2])
 						{
@@ -2183,7 +2131,7 @@ Different_char:
 						 unsigned short i;
 						 for(i=0; fatGetDirEntry(i,0); i++)
 						 {
-							if (acluster==FileInfo.vDisk.start_cluster)
+							if (acluster==fi->vDisk.start_cluster)
 							{
 							 //skoci do casti predavani jmena 8+3+atribut+fileindex
 							 goto Command_FD_E3_ok; //nasel ho!
@@ -2212,7 +2160,7 @@ Different_char:
 				 break;
 
 			case 0xFE:	//$FE ?? ??	Change actual directory to rootdir.
-				FileInfo.vDisk.dir_cluster=MSDOSFSROOT;
+				fi->vDisk.dir_cluster=MSDOSFSROOT;
 				fatGetDirEntry(0,0);
 				goto Send_CMPL_and_Delay;
 				break;
@@ -2235,16 +2183,16 @@ Different_char:
 				if(ret)
 				{
 Command_EC_F0_FF_found:
-					if( (FileInfo.Attr & ATTR_DIRECTORY) )
+					if( (fi->Attr & ATTR_DIRECTORY) )
 					{
 						//Meni adresar
-						FileInfo.vDisk.dir_cluster=FileInfo.vDisk.start_cluster;
+						fi->vDisk.dir_cluster=fi->vDisk.start_cluster;
 					}
 					else
 					{
 						//Aktivuje soubor
-						FileInfo.vDisk.current_cluster=FileInfo.vDisk.start_cluster;
-						FileInfo.vDisk.ncluster=0;
+						fi->vDisk.current_cluster=fi->vDisk.start_cluster;
+						fi->vDisk.ncluster=0;
 
 						if( atari_sector_buffer[8]=='A' &&
 							 atari_sector_buffer[9]=='T' &&
@@ -2256,15 +2204,15 @@ Command_EC_F0_FF_found:
 
 							faccess_offset(FILE_ACCESS_READ,0,16); //je to ATR
 									
-							FileInfo.vDisk.flags=FLAGS_DRIVEON;
-							//FileInfo.vDisk.atr_sector_size = (atari_sector_buffer[4]+(atari_sector_buffer[5]<<8));
+							fi->vDisk.flags=FLAGS_DRIVEON;
+							//fi->vDisk.atr_sector_size = (atari_sector_buffer[4]+(atari_sector_buffer[5]<<8));
 							if ( (atari_sector_buffer[4]|atari_sector_buffer[5])==0x01 )
-								FileInfo.vDisk.flags|=FLAGS_ATRDOUBLESECTORS;
+								fi->vDisk.flags|=FLAGS_ATRDOUBLESECTORS;
 
-							compute = FileInfo.vDisk.size - 16;		//je to ATR
-							tmp = (FileInfo.vDisk.flags & FLAGS_ATRDOUBLESECTORS)? 0x100:0x80;		//FileInfo.vDisk.atr_sector_size;
+							compute = fi->vDisk.size - 16;		//je to ATR
+							tmp = (fi->vDisk.flags & FLAGS_ATRDOUBLESECTORS)? 0x100:0x80;		//fi->vDisk.atr_sector_size;
 							compute /=tmp;
-							if(compute>720) FileInfo.vDisk.flags|=FLAGS_ATRMEDIUMSIZE; //atr_medium_size = 0x80;
+							if(compute>720) fi->vDisk.flags|=FLAGS_ATRMEDIUMSIZE; //atr_medium_size = 0x80;
 						}
 						else
 						if( atari_sector_buffer[8]=='X' &&
@@ -2272,26 +2220,26 @@ Command_EC_F0_FF_found:
 							  atari_sector_buffer[10]=='D' )
 						{
 							//XFD
-							FileInfo.vDisk.flags=(FLAGS_DRIVEON|FLAGS_XFDTYPE);
-							//if ( FileInfo.vDisk.Size == 92160 ) //normal XFD
-							if ( FileInfo.vDisk.size>92160)
+							fi->vDisk.flags=(FLAGS_DRIVEON|FLAGS_XFDTYPE);
+							//if ( fi->vDisk.Size == 92160 ) //normal XFD
+							if ( fi->vDisk.size>92160)
 							{
-							 	if ( FileInfo.vDisk.size<=133120)
+							 	if ( fi->vDisk.size<=133120)
 							 	{
 									// Medium size
-									FileInfo.vDisk.flags|=FLAGS_ATRMEDIUMSIZE;
+									fi->vDisk.flags|=FLAGS_ATRMEDIUMSIZE;
 							  	}
 								else
 								{
-							   		// Double (FileInfo.vDisk.Size == 183936)
-									FileInfo.vDisk.flags|=FLAGS_ATRDOUBLESECTORS;
+							   		// Double (fi->vDisk.Size == 183936)
+									fi->vDisk.flags|=FLAGS_ATRDOUBLESECTORS;
 							  	}
 							}
 						}
 						else
 						{
 							// XEX
-							FileInfo.vDisk.flags=FLAGS_DRIVEON|FLAGS_XEXLOADER|FLAGS_ATRMEDIUMSIZE;
+							fi->vDisk.flags=FLAGS_DRIVEON|FLAGS_XEXLOADER|FLAGS_ATRMEDIUMSIZE;
 						}
 					}
 
@@ -2305,7 +2253,7 @@ Command_EC_F0_FF_found:
 						unsigned char *p1;
 						unsigned char *p2;
 						p1=((unsigned char *)&vDisk[ret]);
-						p2=((unsigned char *)&FileInfo.vDisk);
+						p2=((unsigned char *)&fi->vDisk);
 						// vDisk[ret] <- vDisk
 						//for(i=0; i<sizeof(virtual_disk_t); i++) p1[i]=p2[i];
 						for(i=0; i<sizeof(virtual_disk_t); i++) *p1++=*p2++;
