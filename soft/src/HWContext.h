@@ -64,6 +64,9 @@ typedef struct _HWContext
     void    (*LEDREG_Write)(uint8 control);
     uint8   (*LEDREG_Read)(void);
     
+    // lib functions
+    void  (*Delay)(uint32 milliseconds);
+    
     // global data
     GlobalSystemValues gsv;
     

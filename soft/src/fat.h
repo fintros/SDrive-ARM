@@ -386,6 +386,11 @@ unsigned char fatChangeDirectory(unsigned short entry);
 unsigned char fatGetDirEntry(unsigned short entry, unsigned char use_long_names);
 unsigned long nextCluster(unsigned long clust);
 
+unsigned long getClusterN(unsigned short ncluster);
+unsigned short faccess_offset(char mode, unsigned long offset_start, unsigned short ncount);
+
+
+
 typedef struct _FatData
 {
     unsigned long last_dir_start_cluster;
@@ -397,5 +402,9 @@ typedef struct _FatData
     unsigned char last_dir_index;
     unsigned char fat32_enabled;
 } FatData;
+
+#define FILE_ACCESS_READ	0
+#define FILE_ACCESS_WRITE	1
+
 
 #endif

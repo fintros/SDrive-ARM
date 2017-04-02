@@ -3,7 +3,6 @@
 .text.*memcpy$
 .text.*dprint$
 .text.*mmcRead$
-.text.*CyDelay$
 .text.*memchr$
 .text.*fatClustToSect$
 .text.*fatGetDirEntry$
@@ -14,6 +13,8 @@
 .text.*mmcWrite$
 .text.*nextCluster$
 .text.*fatInit$
+.text.*getClusterN$
+.text.*faccess_offset$
 .text.*strlen$
 .text.*_ZN8SDAccessC1Ev$
 .text.*CySysClkWriteImoFreq

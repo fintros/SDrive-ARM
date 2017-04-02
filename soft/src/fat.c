@@ -39,6 +39,7 @@
 #include <string.h>
 
 #include "fat.h"
+#include "atari.h"
 #include "HWContext.h"
 #include "mmcsd.h"
 #include "dprint.h"
@@ -439,4 +440,96 @@ unsigned long nextCluster(unsigned long cluster)
 		nextCluster = 0;
 
 	return nextCluster;
+}
+
+
+unsigned long getClusterN(unsigned short ncluster)
+{
+    HWContext* ctx = (HWContext*)__hwcontext;
+    FileInfoStruct* fi = &ctx->file_info;
+    FatData* f = &ctx->fat_data;
+    
+	if(ncluster<fi->vDisk.ncluster)
+	{
+		fi->vDisk.current_cluster=fi->vDisk.start_cluster;
+		fi->vDisk.ncluster=0;
+	}
+
+	while(fi->vDisk.ncluster!=ncluster)
+	{
+		fi->vDisk.current_cluster=nextCluster(fi->vDisk.current_cluster);
+		fi->vDisk.ncluster++;
+	}
+
+	return (fi->vDisk.current_cluster&(f->fat32_enabled?0xFFFFFFFF:0xFFFF));
+}
+
+unsigned short faccess_offset(char mode, unsigned long offset_start, unsigned short ncount)
+{
+    HWContext* ctx = (HWContext*)__hwcontext;
+    FileInfoStruct* fi = &ctx->file_info;
+    GlobalSystemValues* gsv = &ctx->gsv;
+    unsigned char* atari_sector_buffer = &ctx->atari_sector_buffer[0];
+    unsigned char* mmc_sector_buffer = &ctx->mmc_sector_buffer[0];
+        
+	unsigned short j;
+	unsigned long offset=offset_start;
+	unsigned long end_of_file;
+	unsigned long ncluster, nsector, current_sector;
+	unsigned long bytespercluster=((u32)gsv->SectorsPerCluster)*((u32)gsv->BytesPerSector);
+
+	if(offset_start>=fi->vDisk.size)
+		return 0;
+
+	end_of_file = (fi->vDisk.size - offset_start);
+
+	ncluster = offset/bytespercluster;
+	offset-=ncluster*bytespercluster;
+
+	nsector = offset/((u32)gsv->BytesPerSector);
+	offset-=nsector*((u32)gsv->BytesPerSector);
+
+	getClusterN(ncluster);
+
+	current_sector = fatClustToSect(fi->vDisk.current_cluster) + nsector;
+	mmcReadCached(current_sector);
+
+	for(j=0;j<ncount;j++,offset++)
+	{
+			if(offset>=((u32)gsv->BytesPerSector) )
+			{
+				if(mode==FILE_ACCESS_WRITE && mmcWriteCached(0))
+					return 0;
+
+				offset=0;
+				nsector++;
+
+				if(nsector>=((u32)gsv->SectorsPerCluster) )
+				{
+					nsector=0;
+					ncluster++;
+					getClusterN(ncluster);
+				}
+
+				current_sector = fatClustToSect(fi->vDisk.current_cluster) + nsector;
+				mmcReadCached(current_sector);
+			}
+
+		if(!end_of_file)
+			break; //return (j&0xFFFF);
+
+		if(mode==FILE_ACCESS_WRITE)
+			mmc_sector_buffer[offset]=atari_sector_buffer[j]; //SDsektor<-atarisektor
+		else
+			atari_sector_buffer[j]=mmc_sector_buffer[offset]; //atarisektor<-SDsektor
+
+		end_of_file--;
+
+	}
+	
+
+	if(mode==FILE_ACCESS_WRITE && mmcWriteCached(0))
+		return 0;
+
+	return (j&0xFFFF);
 }

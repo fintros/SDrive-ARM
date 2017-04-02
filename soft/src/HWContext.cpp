@@ -63,6 +63,8 @@ void InitLoadableCTX(void)
     _staticVars._context.LEDREG_Write = LEDREG_B_Write;
 #endif
 
+    _staticVars._context.Delay = CyDelay;
+
     _staticVars._context.sdAccess = &_staticVars._sdAccess;
 
     _staticVars._context._StaticVarsSize = sizeof (_staticVars);

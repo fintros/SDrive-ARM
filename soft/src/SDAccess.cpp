@@ -113,7 +113,6 @@
  * +------+---------+---------+- -  - -+---------+-----------+----------+
  */
 extern "C" {
-#include <CyLib.h>
 #include "HWContext.h"
 #include "dprint.h"
 }
@@ -195,8 +194,10 @@ int SDAccess::initialise_card_v1() {
 }
 
 int SDAccess::initialise_card_v2() {
+    HWContext* ctx = (HWContext*)__hwcontext;
+
     for (int i = 0; i < SD_COMMAND_TIMEOUT; i++) {
-        CyDelay(50);
+        ctx->Delay(50);
         _cmd58();
         _cmd(55, 0);
         if (_cmd(41, 0x40000000) == 0) {
