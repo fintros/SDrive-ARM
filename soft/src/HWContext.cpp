@@ -29,7 +29,6 @@ void InitLoadableCTX(void)
     __hwcontext = &_staticVars._context;    
 
  #ifdef LOADER   
-    SPI_CLK_BL_Start();
     _staticVars._context.SPI_CLK_SetFractionalDividerRegister = SPI_CLK_BL_SetFractionalDividerRegister;
     _staticVars._context.SPIM_Start = SPIM_BL_Start;
     _staticVars._context.SPIM_WriteTxData = SPIM_BL_SpiUartWriteTxData;
@@ -46,7 +45,6 @@ void InitLoadableCTX(void)
     _staticVars._context.LEDREG_Read = LEDREG_BL_Read;
     _staticVars._context.LEDREG_Write = LEDREG_BL_Write;
 #else
-    SPI_CLK_B_Start();
     _staticVars._context.SPI_CLK_SetFractionalDividerRegister = SPI_CLK_B_SetFractionalDividerRegister;
     _staticVars._context.SPIM_Start = SPIM_B_Start;
     _staticVars._context.SPIM_WriteTxData = SPIM_B_SpiUartWriteTxData;

@@ -66,8 +66,6 @@ uint8_t boot_xex_loader[179] = {
 
 #define US_POKEY_DIV_MAX		(255-6)		//pokeydiv 249 => avrspeed 255 (vic nemuze)
 
-#define FileFindBuffer (atari_sector_buffer+256-11)
-
 /*
 #define SIOSPEED_MODES	9	//pocet fastsio_mode=0..8
 #define US_POKEY_DIV_DEFAULT	US_POKEY_DIV_7
@@ -1512,6 +1510,8 @@ set_number_of_sectors_to_buffer_1_2:
 		if( command[0] == (unsigned char)0x71 +3-((unsigned char)(_driveShift&0x03)))
 		{
 			// SDRIVE OPERACE 
+            
+            char FileFindBuffer[11];
 
 			//if ( command[1]==0x50 || command[1]==0x52 || command[1]==0x53)
 			if ( command[1]<=0x53 && command[1]>=0x50 )	//schvalne prehozeno poradi kvuli rychlosti (pri normalnich operacich s SDrive nebude platit hned prvni cast podminky)

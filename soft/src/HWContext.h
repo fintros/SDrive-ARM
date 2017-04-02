@@ -46,10 +46,11 @@ typedef struct _HWContext
     uint32 (*SPIM_ReadRxData)(void);
     
     // data processing 
-    unsigned char mmc_sector_buffer[512];
-    unsigned char atari_sector_buffer[256];
     unsigned long n_actual_mmc_sector;
+    unsigned char atari_sector_buffer[256] __attribute__ ((aligned (4)));
+    unsigned char mmc_sector_buffer[512] __attribute__ ((aligned (4)));
     unsigned char n_actual_mmc_sector_needswrite;
+
     
     // SDAccess object
     void *sdAccess;

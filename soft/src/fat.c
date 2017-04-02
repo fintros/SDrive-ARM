@@ -171,7 +171,7 @@ unsigned char fatGetDirEntry(unsigned short entry, unsigned char use_long_names)
 		f->last_dir_valid=0;
 	}
 
-	if ( f->last_dir_valid
+	if (!f->last_dir_valid
 		 || (entry<=f->last_dir_entry && (entry!=f->last_dir_entry || f->last_dir_valid!=1 || use_long_names!=0))
 	   )
 	{
