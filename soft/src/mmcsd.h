@@ -1,3 +1,13 @@
+/*
+ * ---------------------------------------------------------------------------
+ * -- (c) 2017 Alexey Spirkov
+ * -- I am happy for anyone to use this for non-commercial use.
+ * -- If my verilog/vhdl/c files are used commercially or otherwise sold,
+ * -- please contact me for explicit permission at me _at_ alsp.net.
+ * -- This applies for source and binary form and derived works.
+ * ---------------------------------------------------------------------------
+ */
+
 #ifndef MMCSD_H
 #define MMCSD_H
 
@@ -25,6 +35,13 @@ u08 mmcRead(u32 sector);
 //! Write 512-byte sector from buffer to card
 /// Returns zero if successful.
 u08 mmcWrite(u32 sector);
+
+
+u08 mmcWriteCached(unsigned char force);
+
+void mmcWriteCachedFlush();
+
+void mmcReadCached(u32 sector);
 
 #ifdef __cplusplus
 }

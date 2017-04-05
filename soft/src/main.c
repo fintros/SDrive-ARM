@@ -1,38 +1,28 @@
-/* ========================================
- *
- * Copyright YOUR COMPANY, THE YEAR
- * All Rights Reserved
- * UNPUBLISHED, LICENSED SOFTWARE.
- *
- * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
- *
- * ========================================
-*/
+/*
+ * ---------------------------------------------------------------------------
+ * -- (c) 2017 Alexey Spirkov
+ * -- I am happy for anyone to use this for non-commercial use.
+ * -- If my verilog/vhdl/c files are used commercially or otherwise sold,
+ * -- please contact me for explicit permission at me _at_ alsp.net.
+ * -- This applies for source and binary form and derived works.
+ * ---------------------------------------------------------------------------
+ */
+
 #include "project.h"
+#include "HWContext.h"
 
 int sdrive(void);
 
 int main(void)
 {
     
-    //if(BL_Init_Read() == 0)
-   // {
-    //    Bootloadable_Load();    // start bootloader in case of pin detect
-    //}
-        
+    //CyDelay(5000);
     CyGlobalIntEnable; /* Enable global interrupts. */
+    UART_1_Start();    
 
-    /* Place your initialization/startup code here (e.g. MyInst_Start()) */
-   
-    UART_1_Start();
-    
+    InitLoadableCTX();
     sdrive();
-    
-    for(;;)
-    {
-        /* Place your application code here. */
-    }
+    return 0;
 }
 
 /* [] END OF FILE */
