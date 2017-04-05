@@ -7,7 +7,7 @@
 // Date			: 11/07/2000
 // Revised		: 23/03/2017
 // Version		: 1.0
-// Target MCU	: ATmega103 (should work for Atmel AVR Series)
+// Target MCU	: ARM-Cortex-M 
 // Editor Tabs	: 4
 //
 // This code is based in part on work done by Jesper Hansen for his

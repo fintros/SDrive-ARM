@@ -1,14 +1,15 @@
-/* ========================================
- *
- * Copyright YOUR COMPANY, THE YEAR
- * All Rights Reserved
- * UNPUBLISHED, LICENSED SOFTWARE.
- *
- * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
- *
- * ========================================
-*/
+/*
+ * ---------------------------------------------------------------------------
+ * -- (c) 2017 Alexey Spirkov
+ * -- Based on Bob!k & Raster, C.P.U., SDrive 2008 project
+ * -- I am happy for anyone to use this for non-commercial use.
+ * -- If my verilog/vhdl/c files are used commercially or otherwise sold,
+ * -- please contact me for explicit permission at me _at_ alsp.net.
+ * -- This applies for source and binary form and derived works.
+ * ---------------------------------------------------------------------------
+ */
+
+
 #include "project.h"
 #include <CyLib.h>
 #include "HWContext.h"
@@ -26,14 +27,7 @@
 
 typedef unsigned char uint8_t;
 
-//#define SWBUT_Read() 3
-
 char _driveShift = 3; // 3 D1 = 0 drive
-
-//*****************************************************************************
-// SDrive
-// Bob!k & Raster, C.P.U., 2008
-//*****************************************************************************
 
 //
 // XEX Bootloader
@@ -66,63 +60,16 @@ uint8_t boot_xex_loader[179] = {
 
 #define US_POKEY_DIV_MAX		(255-6)		//pokeydiv 249 => avrspeed 255 (vic nemuze)
 
-/*
-#define SIOSPEED_MODES	9	//pocet fastsio_mode=0..8
-#define US_POKEY_DIV_DEFAULT	US_POKEY_DIV_7
-#define ATARI_SPEED_DEFAULT		ATARI_SPEED_7
-
-//sio 1x standard
-#define US_POKEY_DIV_STANDARD	0x28		//=> 19040 bps
-#define ATARI_SPEED_STANDARD	46			// normal speed
-//=46 => F_CPU/16/(46+1) = 19040
-
-//sio2x
-#define US_POKEY_DIV_2		0x10			//=> 38908 bps
-#define ATARI_SPEED_2		22				// sio2x speed
-//=22 => F_CPU/16/(22+1) = 38908
-
-//Happy
-#define US_POKEY_DIV_3		0x0a			//=> 52641 bps
-#define ATARI_SPEED_3		16				// happy
-//=16 => F_CPU/16/(16+1) = 52640
-
-//Speedy
-#define US_POKEY_DIV_4		0x09		//=> 55931 bps
-#define ATARI_SPEED_4		15			// speedy TOTO FUNGUJE
-//=15 => F_CPU/16/(15+1) = 55930
-
-//sio3x
-#define US_POKEY_DIV_5		0x08			//=> 59660 bps
-#define ATARI_SPEED_5		14				// sio3x speed
-//=14 => F_CPU/16/(14+1) = 59659
-
-//sio 64000
-#define US_POKEY_DIV_6		0x07			//=> 63921 bps
-#define ATARI_SPEED_6		13				// sio3x speed
-//=13 => F_CPU/16/(13+1) = 63920
-
-// works great!
-#define US_POKEY_DIV_7		0x06			//=> 68838 bps
-#define ATARI_SPEED_7		12				// ULTRA speed - closest match for both systems (AVR,ATARI)
-//=12 => F_CPU/16/(12+1) = 68837
-
-//sio 75000
-#define US_POKEY_DIV_8		0x05			//=> 74575 bps
-#define ATARI_SPEED_8		11				// sio4x speed
-//=11 => F_CPU/16/(11+1) = 74574
-*/
-
 #define LED_ON     
 #define LED_OFF    
 
-
-// Aktivita
+// Activity
 #define LED_GREEN_ON	((HWContext*)__hwcontext)->LEDREG_Write(((HWContext*)__hwcontext)->LEDREG_Read() & ~0x1)
 #define LED_GREEN_OFF	((HWContext*)__hwcontext)->LEDREG_Write(((HWContext*)__hwcontext)->LEDREG_Read() | 0x1)
-// Zapis
+
+// Writing
 #define LED_RED_ON		((HWContext*)__hwcontext)->LEDREG_Write(((HWContext*)__hwcontext)->LEDREG_Read() & ~0x2)
 #define LED_RED_OFF		((HWContext*)__hwcontext)->LEDREG_Write(((HWContext*)__hwcontext)->LEDREG_Read() | 0x2)
-
 
 #define send_ACK()	USART_Transmit_Byte('A');  dprint("Send ACK\r\n"); 
 #define send_NACK()	USART_Transmit_Byte('N');  dprint("Send NACK\r\n");
@@ -137,8 +84,6 @@ uint8_t boot_xex_loader[179] = {
 #define get_cmd_H()		( Command_Read() )
 #define get_cmd_L()		( !(Command_Read()) )
 #define get_readonly()	(SWBUT_Read() & 0x01) 
-
-#define read_key()		0 //((SWBUT_Read()>>4) & 0x07) 
 
 unsigned char last_key;
 
@@ -155,15 +100,6 @@ unsigned char get_checksum(unsigned char* buffer, u16 len)
 	}
 	return sum;
 }
-
-/*
-//pouziva se jen jednou v USART_Init, takze vlozena primo do teto funkce (uspora 10bytu)
-void USART_Flush( void )
-{
-	unsigned char dummy;
-	while ( UCSRA & (1<<RXC) ) dummy = UDR;
-}
-*/
 
 void USART_Init( u08 value )
 {     
@@ -232,13 +168,6 @@ void USART_Send_Buffer(unsigned char *buff, u16 len)
     while(UART_1_GetTxBufferSize());
 }
 
-/*
-void USART_Get_Buffer(unsigned char *buff, u16 len)
-{
-	while(len>0) { *buff++=USART_Receive_Byte(); len--; }
-}
-*/
-
 u08 USART_Get_Buffer_And_Check(unsigned char *buff, u16 len, u08 cmd_state)
 {
 	//prebere len bytu + 1 byte checksum
@@ -266,7 +195,6 @@ u08 USART_Get_Buffer_And_Check(unsigned char *buff, u16 len, u08 cmd_state)
         value = UART_1_ReadRxData();
             
 		// Get and return received data from buffer
-		//return UDR;
 		b = value & 0xff;
 		if (!n)
 		{
@@ -299,12 +227,6 @@ u08 USART_Get_buffer_and_check_and_send_ACK_or_NACK(unsigned char *buff, u16 len
 	return 0;	//kdyz je ok vraci 0
 }
 
-/*
-u08 USART_Get_atari_sector_buffer_and_check_and_send_ACK_or_NACK(u16 len)
-{
-	USART_Get_buffer_and_check_and_send_ACK_or_NACK(atari_sector_buffer,len);
-}
-*/
 #define USART_Get_atari_sector_buffer_and_check_and_send_ACK_or_NACK(len)	USART_Get_buffer_and_check_and_send_ACK_or_NACK(atari_sector_buffer,len)
 
 
@@ -372,14 +294,10 @@ void set_display(unsigned char n)
     }    
 }
 
-uint8_t system_info[]="SDrive-ARM-02 20170305 AlSp based on Bob!k & Raster, C.P.U.";	//SDriveVersion info
-//                                   VVYYYYMMDD
-//                                VV cislo nove oficialne vydane verze, meni se jen pri vydani noveho oficialniho firmware
-//									  s rozsirenymi/zmenenymi funkcemi zpetne nekompatibilni
-//									  rostouci posloupnost 01 .. 09 0A 0B .. 0Z .. 0a 0b .. 0y 0z 10 11 ..... zz
+uint8_t system_info[]="SDrive-ARM-02 20170405 by AlSp based on Bob!k & Raster, C.P.U.";	//SDriveVersion info
+//                                VV VVYYYYMMDD
 
-//nasledujici parametry se daji modifiovat pres EEPROM configure
-//                              |filenameext|
+//                        |filenameext|
 uint8_t system_atr_name[]="SDRIVE  ATR";  //8+3 zamerne deklarovano za system_info,aby bylo pripadne v dosahu pres get status
 //
 uint8_t system_fastsio_pokeydiv_default=US_POKEY_DIV_DEFAULT;
@@ -527,15 +445,10 @@ SD_CARD_EJECTED:
         dprint("Retry\r\n");
 		mmcInit();
 	}
-	while(mmcReset());	//dokud nenulove, tak smycka (return 0 => ok!)
-	//n_actual_mmc_sector=0xFFFFFFFF; //presunuto do mmcReset
+	while(mmcReset());	//Wait for SD card ready
+
     LED_GREEN_OFF;
     dprint("SD card inititialized\r\n");
-
-	// set SPI speed on maximum (F_CPU/2)
-	//sbi(SPSR, SPI2X);
-	//cbi(SPCR, SPR1);
-	//cbi(SPCR, SPR0);
 
 	{
 	 u08 i;
@@ -653,17 +566,13 @@ ST_IDLE:
 
 		LED_GREEN_OFF;	// LED OFF
 
-//		if (debug_endofvariables!=0xaaaaaaaa) set_display(4); //DEBUG!!!
-
 		{
 		 unsigned long autowritecounter;
 //autowritecounter_reset:
 		 autowritecounter=0;
-
             
 		//buttons
 		unsigned char actual_key = 0;
-
             
 		 while( get_cmd_H() )	//dokud je Atari signal command na H
 		 {           
@@ -680,50 +589,33 @@ ST_IDLE:
                         actual_key = 5;
                     else if(CapSense_IsWidgetActive(CapSense_BUTTON2_WDGT_ID))
                         actual_key = 3;
-                    //else
-        			//    actual_key = read_key();                    
                 }                                
                 else
                 {
-    			    actual_key = 0;// read_key();
+    			    actual_key = 0;
                 }
                 CapSense_ScanAllWidgets();
             }
 #endif
-            
-//            else
-//            {
-//			    actual_key = read_key();		//(inb(PIND)&0xe4)
-//            }
-			//read key				bit
-			//PD7 .. RIGHT			0x80
-			//PD6 .. LEFT			0x40
-			//PD5 .. BOOT			0x20		
-			//PD4
-			//PD3 .. WRITE ENABLE 	0x08
-			//PD2 .. CARD INSERTED	0x04
-			//PD1
-			//PD0
                
 			if(actual_key != last_key)
 			{
                 dprint("Key: %02X\r\n", actual_key);
-				//if (inb(PIND)&0x04) goto SD_CARD_EJECTED;
-				//nyni je bit 0x04 vzdy 0 , protoze karta je vlozena
-				switch(actual_key)	//&0xfe)
+
+                switch(actual_key)
 				{
-					case 6: //0x20^0xe0: //BOOT KEY
+					case 6: ///BOOT KEY
 						//actual_drive_number=0;
         				last_key = actual_key;
 						goto SET_BOOT_DRIVE;
 						break;
-					case 5: //0x40^0xe0: //LEFT
+					case 5: //LEFT
 						if(actual_drive_number>1)
 							actual_drive_number--;
 						else
 							actual_drive_number=4;
 						break;
-					case 3: //0x80^0xe0: //RIGHT
+					case 3: //RIGHT
 						if(actual_drive_number<8)
 							actual_drive_number++;
 						else
@@ -763,23 +655,19 @@ ST_IDLE:
             LED_OFF;
 			err=USART_Get_Buffer_And_Check(command,4,CMD_STATE_L);
 
+#ifdef DEBUG
             if(err)
                 dprint("Command error: [%02X]\r\n", err);
             else
                 dprint("Command: [%02X %02X %02X %02X]\r\n", command[0], command[1], command[2], command[3]);
+#endif
 
-
-            //pokud je duvodem zmena cmd na H, nemusi cekat na wait_cmd_LH()
-			//if (err&0x01) goto change_sio_speed; //zvedl se cmd na H, ihned jde menit rychlost
-
-            // todo fix to 800
 			CyDelayUs(800u);	//t1 (650-950us) (Bez tehle pauzy to cele nefunguje!!!)
 			wait_cmd_LH();	//ceka az se zvedne signal command na H
 			CyDelayUs(100u);	//T2=100   (po zvednuti command a pred ACKem)
 
             LED_GREEN_ON;
             LED_ON;
-
             
 			if(err)
 			{
@@ -1000,21 +888,6 @@ device_command_accepted:
                     dprint("Ask for speed\r\n");
 					atari_sector_buffer[0]=fastsio_pokeydiv;	//primo vraci Pokey divisor
 					USART_Send_cmpl_and_atari_sector_buffer_and_check_sum(1);
-					/*
-					Delay800us();	//t5
-					send_CMPL();
-					//Delay800us();	//t6 <-- tohle tady nefungovalo, na Fast neslo bootnout ani pod Qmegem4
-					Delay200us();
-					USART_Transmit_Byte(pdiv);	//US_POKEY_DIV);
-					Delay100usX(6);	//special 600us
-					USART_Transmit_Byte(pdiv);	//US_POKEY_DIV);	// check_sum
-					*/
-					/*
-					send_CMPL();
-					Delay200us(); 	//delay_us(200); //delay_us(COMMAND_DELAY); doesn't work in Qmeg 3.2!
-					USART_Transmit_Byte(US_POKEY_DIV);
-					USART_Transmit_Byte(US_POKEY_DIV);	// check_sum
-					*/
 				}
 				break;
 
@@ -1346,7 +1219,7 @@ set_number_of_sectors_to_buffer_1_2:
 					//sector size vzdy 128 bytu
 					atari_sector_size=XEX_SECTOR_SIZE;
 				}
-
+#ifdef DEBUG
                if(0){
                     dprint("Put Atari sector: \r\n");
                     int i = 0;
@@ -1371,12 +1244,11 @@ set_number_of_sectors_to_buffer_1_2:
                             atari_sector_buffer[i+15]                        
                         );
                     }
-                }                
+                } 
+#endif
                 
 				//posle bud 128 nebo 256 (atr/xfd) nebo 128 (xex)
 				USART_Send_cmpl_and_atari_sector_buffer_and_check_sum(atari_sector_size);
-                
-
 
 				}
 				break;
@@ -1946,7 +1818,7 @@ Command_ED_found:	//sem skoci z commandu ED kdyz najde hledane filename a chce v
 					   // If (m<>0) set fileOrdirectory to vDn:
 
 				//FileFindBuffer <> atari_sector_buffer !!!
-				if (USART_Get_buffer_and_check_and_send_ACK_or_NACK(FileFindBuffer,11))
+				if (USART_Get_buffer_and_check_and_send_ACK_or_NACK(&FileFindBuffer[0],11))
 				{
 					break;
 				}

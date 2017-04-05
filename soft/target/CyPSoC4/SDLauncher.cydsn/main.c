@@ -12,12 +12,12 @@
 #include "project.h"
 #include "stdarg.h"
 
-#include "../../../../src/fat.h"
-#include "../../../../src/mmcsd.h"
-#include "../../../../src/HWContext.h"
-#include "../../../../src/dprint.h"
-#include "../../../../src/Launcher.h"
-#include "../../../../src/Launcher_PVT.h"
+#include "../../../src/fat.h"
+#include "../../../src/mmcsd.h"
+#include "../../../src/HWContext.h"
+#include "../../../src/dprint.h"
+#include "../../../src/Launcher.h"
+#include "../../../src/Launcher_PVT.h"
 
 #if (CY_PSOC4)
     #if defined(__ARMCC_VERSION)
@@ -66,6 +66,8 @@ void CheckLaunch(void) CYSMALL
     }
 }
 
+// end of bootloader flash address - needed to protect itself
+extern void* _etext;
 
 int ProceedUpdate(int isForced)
 {
@@ -88,42 +90,70 @@ int ProceedUpdate(int isForced)
 
     dprint("Found update with version 0x%04X, AppID: 0x%04X, CustID: 0x%08X\r\n", updatedVersion, updatedAppID, updatedCustID);
 
-    if( (isForced>0) || ((currAppID == updatedAppID) && (currCustID == updatedCustID) && ((updatedVersion > currVersion))))
+    // skip update if forced but same and if id's are differ or version lower than existing one
+    if( ((isForced>0) && ((currAppID != updatedAppID) || (currCustID != updatedCustID) || (updatedVersion != currVersion)))  || 
+        ((currAppID == updatedAppID) && (currCustID == updatedCustID) && (updatedVersion > currVersion))
+    )
     {
         dprint("Start update\r\n");
+        ctx->LEDREG_Write(0);   // all on
+        CyDelay(500);
        
         int startOffset = GetUint32Value(Launcher_MD_BTLDB_ADDR_OFFSET(0));
         // allign by row
+             
         int startRowNum = startOffset / CY_FLASH_SIZEOF_ROW;
         int currentOffset = startRowNum*CY_FLASH_SIZEOF_ROW;
-        unsigned int i;
-
-        for(i = startRowNum; i < CY_FLASH_NUMBER_ROWS; i++)
-        {
-          	fi->vDisk.current_cluster=fi->vDisk.start_cluster;
-            fi->vDisk.ncluster=0;
-            if(faccess_offset(FILE_ACCESS_READ,currentOffset,CY_FLASH_SIZEOF_ROW))
-            {
-                CySysFlashWriteRow(i, &ctx->atari_sector_buffer[0]);
-                currentOffset+=CY_FLASH_SIZEOF_ROW;
-                dprint(".");
-            }
-            else
-            {
-                dprint("\r\nUnable to read update file at address %d\r\n",currentOffset);
-                return 0;
-            }
-        }
-        dprint("\r\n");
         
-        return 1;
+        if (currentOffset > (int) _etext)
+        {
+            unsigned int i;
+            unsigned int ledState = 0;
+
+            for(i = startRowNum; i < CY_FLASH_NUMBER_ROWS; i++)
+            {
+              	fi->vDisk.current_cluster=fi->vDisk.start_cluster;
+                fi->vDisk.ncluster=0;
+                if(faccess_offset(FILE_ACCESS_READ,currentOffset,CY_FLASH_SIZEOF_ROW))
+                {
+                    ledState = 1 - ledState;
+                    if(ledState)
+                        ctx->LEDREG_Write(~0x24);
+                    else
+                        ctx->LEDREG_Write(~0x18);
+                        
+                    CySysFlashWriteRow(i, &ctx->atari_sector_buffer[0]);
+                    currentOffset+=CY_FLASH_SIZEOF_ROW;
+                    dprint(".");
+                }
+                else
+                {
+                    dprint("\r\nUnable to read update file at address %d\r\n",currentOffset);
+                    ctx->LEDREG_Write(~2);  // red on
+                    CyDelay(300);
+                    return 0;
+                }
+            }
+            dprint("\r\n");
+            ctx->LEDREG_Write(~0x1); // green;
+            CyDelay(500);
+            
+            return 1;        
+        }
+        else
+        {
+            ctx->LEDREG_Write(~2);  // red on
+            CyDelay(500);
+            dprint("Unable to apply update - illegal start address\r\n");
+        }
     }
     else
     {
+        ctx->LEDREG_Write(~3);  // red + green on
+        CyDelay(100);
         dprint("Skip update\r\n");
-        return 0;
     }
-    
+    return 0;
 }
 
 
@@ -134,10 +164,23 @@ int main(void)
     
     InitLoaderCTX();
     CyGlobalIntEnable; /* Enable global interrupts. */
-    
+#ifdef DEBUG    
     uint16 appVersion = GetUint16Value(Launcher_MD_BTLDB_APP_VERSION_OFFSET(0));
+#endif
     HWContext* ctx = (HWContext*)__hwcontext;
    
+    // switch on red - start of bootloader
+    ctx->LEDREG_Write(~0x2);
+    int ledState = 1;
+    while (CardPresent_Read())
+    { 
+        CyDelay(200);
+        ledState = 1-ledState;
+        if(ledState) ctx->LEDREG_Write(~0x2); 
+        else ctx->LEDREG_Write(~0); 
+    }
+    ctx->LEDREG_Write(~0x2);
+    
     dprint("Bootloader start, app version 0x%04X\r\n", appVersion);
     
     do
@@ -155,7 +198,10 @@ int main(void)
     }
 
     dprint("FAT inited\r\n");
-    
+
+    // switch on green - card initialized and fat readed
+    ctx->LEDREG_Write(~0x1);
+
 	unsigned short i;
 
     // search for update first.
@@ -180,8 +226,8 @@ int main(void)
     if(updateType > 0)
         ProceedUpdate(updateType-1);
         
-    CyDelay(100);
-        
+    ctx->LEDREG_Write(~0);
+    
     // start application
     cyBtldrRunType = Launcher_SCHEDULE_BTLDB;
     CySoftwareReset();

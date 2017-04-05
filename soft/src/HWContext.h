@@ -1,14 +1,12 @@
-/* ========================================
- *
- * Copyright YOUR COMPANY, THE YEAR
- * All Rights Reserved
- * UNPUBLISHED, LICENSED SOFTWARE.
- *
- * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
- *
- * ========================================
-*/
+/*
+ * ---------------------------------------------------------------------------
+ * -- (c) 2017 Alexey Spirkov
+ * -- I am happy for anyone to use this for non-commercial use.
+ * -- If my verilog/vhdl/c files are used commercially or otherwise sold,
+ * -- please contact me for explicit permission at me _at_ alsp.net.
+ * -- This applies for source and binary form and derived works.
+ * ---------------------------------------------------------------------------
+ */
 
 #ifndef _HW_CONTEXT_H_
 #define _HW_CONTEXT_H_
@@ -51,6 +49,8 @@ typedef struct _HWContext
     unsigned char mmc_sector_buffer[512] __attribute__ ((aligned (4)));
     unsigned char n_actual_mmc_sector_needswrite;
 
+    unsigned long sd_init_freq;
+    unsigned long sd_work_freq;
     
     // SDAccess object
     void *sdAccess;
@@ -64,6 +64,9 @@ typedef struct _HWContext
     void    (*LEDREG_Write)(uint8 control);
     uint8   (*LEDREG_Read)(void);
     
+    // readonly switch functions
+    uint8   (*ReadOnly_Read)(void);
+     
     // lib functions
     void  (*Delay)(uint32 milliseconds);
     

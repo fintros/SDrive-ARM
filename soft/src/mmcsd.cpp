@@ -1,7 +1,19 @@
-
+/*
+ * ---------------------------------------------------------------------------
+ * -- (c) 2017 Alexey Spirkov
+ * -- I am happy for anyone to use this for non-commercial use.
+ * -- If my verilog/vhdl/c files are used commercially or otherwise sold,
+ * -- please contact me for explicit permission at me _at_ alsp.net.
+ * -- This applies for source and binary form and derived works.
+ * ---------------------------------------------------------------------------
+ */
+ 
 #include "mmcsd.h"
 #include "SDAccess.h"
 #include "HWContext.h"
+
+#define LED_RED_ON		((HWContext*)__hwcontext)->LEDREG_Write(((HWContext*)__hwcontext)->LEDREG_Read() & ~0x2)
+#define LED_RED_OFF		((HWContext*)__hwcontext)->LEDREG_Write(((HWContext*)__hwcontext)->LEDREG_Read() | 0x2)
 
 
 extern "C" {    
@@ -56,8 +68,8 @@ void mmcReadCached(u32 sector)
 u08 mmcWriteCached(unsigned char force)
 {
     HWContext* ctx = (HWContext*)__hwcontext;
-	//if ( get_readonly() ) return 0xff; //zakazany zapis
-	//LED_RED_ON;
+	if ( ctx->ReadOnly_Read() == 0  ) return 0xff; //zakazany zapis
+	LED_RED_ON;
 	if (force)
 	{
 		u08 ret,retry;
@@ -69,7 +81,7 @@ u08 mmcWriteCached(unsigned char force)
 		} while (ret && retry);
 		while(ret); //a pokud se vubec nepovedlo, tady zustane zablokovany cely SDrive!
 		ctx->n_actual_mmc_sector_needswrite = 0;
-		//LED_RED_OFF;
+		LED_RED_OFF;
 	}
 	else
 	{

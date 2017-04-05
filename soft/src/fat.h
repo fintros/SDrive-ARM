@@ -1,14 +1,14 @@
 /*! \file fat.h \brief FAT16/32 file system driver. */
 //*****************************************************************************
 //
-// File Name	: 'fat.h'
 // Title		: FAT16/32 file system driver
-// Author		: Pascal Stang
+// Author		: Pascal Stang / Alexey Spirkov
 // Date			: 11/07/2000
-// Revised		: 12/12/2000
-// Version		: 0.3
-// Target MCU	: ATmega103 (should work for Atmel AVR Series)
+// Revised		: 23/03/2017
+// Version		: 1.0
+// Target MCU	: ARM-Cortex-M 
 // Editor Tabs	: 4
+//
 //
 // NOTE: This code is currently below version 1.0, and therefore is considered
 // to be lacking in some functionality or documentation, or may not be fully
@@ -35,6 +35,11 @@
 // Original code was modified especially for the SDrive device. 
 // Some parts of code have been added, removed, rewrited or optimized due to
 // lack of MCU AVR Atmega8 memory.
+// ----------------------------------------------------------------------------
+// 23.03.2017
+// Alexey Spirkov (AlSp).
+// Original code ported to ARM, added work with global context for bootloader
+// compatibility
 // ----------------------------------------------------------------------------
 //
 // This code is distributed under the GNU Public License

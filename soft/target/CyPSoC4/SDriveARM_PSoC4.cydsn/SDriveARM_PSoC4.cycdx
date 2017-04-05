@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <blockRegMap version="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://cypress.com/xsd/cyblockregmap cyblockregmap.xsd" xmlns="http://cypress.com/xsd/cyblockregmap">
-  <block name="LED_Y3" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="CapSense" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
     <block name="CSD" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="ZeroTerminal_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
@@ -31,11 +30,15 @@
     <block name="ISR" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   </block>
   <block name="Analog" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="LED_Y2" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="LED_R" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="BL_Init" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="LED_Y3" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="LED_Y0" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="LED_Y1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="BL_Init" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="LED_Y2" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="CardPresent" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="ReadOnly_B" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="cy_boot" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="cy_lfclk" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="Debug_B" BASE="0x0" SIZE="0x0" desc="Serial Communication Block" visible="true" hidden="false">
     <block name="clock_VM" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="sclk_s_VM" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
@@ -374,10 +377,6 @@
       <field name="BREAK_DETECT" from="11" to="11" access="RW" resetVal="" desc="Logical and of corresponding request and mask bits" hidden="false" />
     </register>
   </block>
-  <block name="cy_boot" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="cy_lfclk" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="SPI_CLK_B" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="CardPresent" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="Bootloadable_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="SPIM_B" BASE="0x0" SIZE="0x0" desc="Serial Communication Block" visible="true" hidden="false">
     <block name="mosi_s_VM" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
@@ -719,6 +718,7 @@
       <field name="BREAK_DETECT" from="11" to="11" access="RW" resetVal="" desc="Logical and of corresponding request and mask bits" hidden="false" />
     </register>
   </block>
+  <block name="SPI_CLK_B" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="LEDREG_B" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
     <register name="LEDREG_B_CONTROL_REG" address="0x400F0072" bitWidth="8" desc="" hidden="false" />
   </block>
@@ -751,7 +751,6 @@
     </register>
   </block>
   <block name="Proceed" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="ClockInput" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="SWBUT" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
     <register name="SWBUT_STATUS_REG" address="0x400F0060" bitWidth="8" desc="" hidden="false" />
     <register name="SWBUT_MASK_REG" address="0x400F0080" bitWidth="8" desc="" hidden="false" />
@@ -783,8 +782,9 @@
     </register>
   </block>
   <block name="Clock_2" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="AtariInt" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="LED_R" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="ClockInput" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="MotorControl" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="RW" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="ClockOutput" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="AtariInt" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
 </blockRegMap>

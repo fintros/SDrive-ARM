@@ -1,4 +1,4 @@
-/* mbed Microcontroller Library
+ /* mbed Microcontroller Library
  * Copyright (c) 2006-2012 ARM Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -137,8 +137,6 @@ SDAccess::SDAccess() :
     _is_initialized(0) {
  
     // Set default to 100kHz for initialisation and 8MHz for data transfer
-    _init_sck = 100000;
-    _transfer_sck = 8000000;
 }
 
 #define R1_IDLE_STATE           (1 << 0)
@@ -154,7 +152,7 @@ int SDAccess::initialise_card() {
 
     HWContext* ctx = (HWContext*)__hwcontext;
 
-    ctx->SPI_CLK_SetFractionalDividerRegister(48000000/_init_sck, 0);
+    ctx->SPI_CLK_SetFractionalDividerRegister(48000000/ctx->sd_init_freq, 0);
 	ctx->SPIM_Start();
 
     for (int i = 0; i < 16; i++) {
@@ -230,7 +228,7 @@ int SDAccess::disk_initialize() {
     }
 
     // Set SCK for data transfer
-    ctx->SPI_CLK_SetFractionalDividerRegister(48000000/_transfer_sck, 0);
+    ctx->SPI_CLK_SetFractionalDividerRegister(48000000/ctx->sd_work_freq, 0);
     return 0;
 }
 

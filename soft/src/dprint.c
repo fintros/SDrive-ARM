@@ -4,6 +4,7 @@
 #include "string.h"
 #include "HWContext.h"
 
+#ifdef DEBUG
 #undef dprint
 __attribute__((section(".keep")))
 void dprint(const char* msg, ...)
@@ -19,4 +20,5 @@ void dprint(const char* msg, ...)
 
     }
 } 
+#endif
 
