@@ -31,7 +31,7 @@ Atari800 disk drives emulator based on C.P.U. project SDrive
 - [X] Fix an issue with daisy-chain connection (add switchng diode to SIO data in line)
 - [X] Implements SDHC support
 - [X] Implement FAT32 support
-- [ ] Add "Update from SD" feature
+- [X] Add "Update from SD" feature
 - [ ] Apply Hias patches to firmware
 - [X] Increase number of usable drives up to 8
 - [ ] Implement cassete recorder functionality
