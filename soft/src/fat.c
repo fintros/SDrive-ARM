@@ -406,6 +406,7 @@ unsigned long nextCluster(unsigned long cluster)
 	  unsigned long fatOffset;
 	  unsigned long sector;
 	  unsigned long offset;
+      unsigned long tmp;
 
     	// get fat offset in bytes
     	if(f->fat32_enabled)
@@ -432,8 +433,9 @@ unsigned long nextCluster(unsigned long cluster)
 	  // read sector of FAT table
   	  mmcReadCached( sector );
 
+      memcpy(&tmp, &((char*)mmc_sector_buffer)[offset], sizeof(tmp));
 	  // read the nextCluster value
-	  nextCluster = (*((unsigned long*) &((char*)mmc_sector_buffer)[offset])) & fatMask;
+	  nextCluster = tmp & fatMask;
 
 	  // check to see if we're at the end of the chain
 	  if (nextCluster == (CLUST_EOFE & fatMask))
