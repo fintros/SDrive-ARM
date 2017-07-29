@@ -383,6 +383,24 @@ struct SDriveParameters
 #define bootloader_relocation sdrparams.p3
 #define extraSDcommands_readwritesectornumber	sdrparams.p4_5_6_7
 
+void setAtrVdiskFlags()
+{
+    HWContext* ctx = (HWContext*)__hwcontext;
+    FileInfoStruct* fi = &ctx->file_info;
+    unsigned char* atari_sector_buffer = &ctx->atari_sector_buffer[0];
+    
+    
+	faccess_offset(FILE_ACCESS_READ,0,16); //ATR hlavicka vzdy
+
+	fi->vDisk.flags=FLAGS_DRIVEON;
+	if ( (atari_sector_buffer[4]|atari_sector_buffer[5])==0x01 ) {
+		fi->vDisk.flags|=FLAGS_ATRDOUBLESECTORS;
+	} else {
+		if (fi->vDisk.size == (((unsigned long)1040)*128 + 16)) {
+			fi->vDisk.flags|=FLAGS_ATRMEDIUMSIZE;
+		}
+	}
+}
 
 
 //----- Begin Code ------------------------------------------------------------
@@ -524,7 +542,8 @@ SET_SDRIVEATR_TO_D0:	//pro nastaveni SDRIVE.ATR do vD0: bez zmeny actual_drive_n
 			fi->vDisk.ncluster=0;
 			//fi->vDisk.file_index = i; //dela se uvnitr fatGetDirEntry
 
-			faccess_offset(FILE_ACCESS_READ,0,16); //ATR hlavicka vzdy
+			setAtrVdiskFlags();
+            /*faccess_offset(FILE_ACCESS_READ,0,16); //ATR hlavicka vzdy
 
 			fi->vDisk.flags=FLAGS_DRIVEON;
 			if ( (atari_sector_buffer[4]|atari_sector_buffer[5])==0x01 )
@@ -540,6 +559,7 @@ SET_SDRIVEATR_TO_D0:	//pro nastaveni SDRIVE.ATR do vD0: bez zmeny actual_drive_n
 
 				if(compute>720) fi->vDisk.flags|=FLAGS_ATRMEDIUMSIZE;
 			}
+            */
 			goto find_sdrive_atr_finished;
 			//
 find_sdrive_atr_next_entry:
@@ -781,7 +801,7 @@ format_medium:
 					fi->percomstate=0; //po prvnim formatu pozbyva percom ucinnost
 
 					//XEX formatovat nelze
-					if (fi->vDisk.flags & FLAGS_XEXLOADER)
+					if (fi->vDisk.flags & (FLAGS_XEXLOADER | FLAGS_READONLY))
 					{
 						goto Send_NACK_and_set_FLAGS_WRITEERROR_and_ST_IDLE;
 					}
@@ -836,7 +856,7 @@ format_medium:
 			case 0x22: // format medium
 				// 	Formats medium density on an Atari 1050. Format medium density cannot be achieved via PERCOM block settings!
 
-				if (! (fi->vDisk.flags & FLAGS_ATRMEDIUMSIZE))
+				if (! (fi->vDisk.flags & (FLAGS_ATRMEDIUMSIZE | FLAGS_READONLY) ) != FLAGS_ATRMEDIUMSIZE )
 				{
 					//fi->percomstate=0;
 					//goto Send_ERR_and_Delay;
@@ -1056,6 +1076,9 @@ percom_prepared:
 
 				n_sector = TWOBYTESTOWORD(command+2);	//2,3
 
+                if(n_sector == 0x169)
+                   n_sector=0x169;
+                
 				if(n_sector==0)
 					goto Send_ERR_and_Delay;
 
@@ -1098,7 +1121,7 @@ percom_prepared:
 							break;
 						}
 
-						if ( get_readonly() )
+						if ( get_readonly() || (fi->vDisk.flags & FLAGS_READONLY) )
 							 goto Send_ERR_and_Delay; //READ ONLY
 
 						proceeded_bytes = faccess_offset(FILE_ACCESS_WRITE,n_data_offset,atari_sector_size);
@@ -1220,7 +1243,7 @@ set_number_of_sectors_to_buffer_1_2:
 					atari_sector_size=XEX_SECTOR_SIZE;
 				}
 #ifdef DEBUG
-               if(0){
+               if(1){
                     dprint("Put Atari sector: \r\n");
                     int i = 0;
                     for(i = 0; i < atari_sector_size;i+=16)
@@ -1255,7 +1278,7 @@ set_number_of_sectors_to_buffer_1_2:
 
 			case 0x53:	//get status
 
-				fi->percomstate=0;
+				//fi->percomstate=0;
 
 				atari_sector_buffer[0] = 0x10;	//0x00 motor off	0x10 motor on
 				if (fi->vDisk.flags & FLAGS_ATRMEDIUMSIZE) atari_sector_buffer[0]|=0x80;		//(fi->vDisk.atr_medium_size);	// medium/single
@@ -1266,7 +1289,7 @@ set_number_of_sectors_to_buffer_1_2:
 				 //vynuluje FLAGS_WRITEERROR bit
 				 fi->vDisk.flags &= (~FLAGS_WRITEERROR);
 				}
-				if (get_readonly()) atari_sector_buffer[0]|=0x08;	//write protected bit
+				if (get_readonly() || (fi->vDisk.flags & FLAGS_READONLY)) atari_sector_buffer[0]|=0x08;	//write protected bit
 
 				atari_sector_buffer[1] = 0xff;
 				atari_sector_buffer[2] = 0xe0; 		//(244s) timeout pro nejdelsi operaci
@@ -1977,7 +2000,8 @@ Command_EC_F0_FF_found:
 							  atari_sector_buffer[10]=='R' )
 						{
 							// ATR
-							unsigned long compute;
+                            setAtrVdiskFlags();
+							/*unsigned long compute;
 							unsigned long tmp;
 
 							faccess_offset(FILE_ACCESS_READ,0,16); //je to ATR
@@ -1991,6 +2015,7 @@ Command_EC_F0_FF_found:
 							tmp = (fi->vDisk.flags & FLAGS_ATRDOUBLESECTORS)? 0x100:0x80;		//fi->vDisk.atr_sector_size;
 							compute /=tmp;
 							if(compute>720) fi->vDisk.flags|=FLAGS_ATRMEDIUMSIZE; //atr_medium_size = 0x80;
+                            */
 						}
 						else
 						if( atari_sector_buffer[8]=='X' &&
@@ -2019,6 +2044,10 @@ Command_EC_F0_FF_found:
 							// XEX
 							fi->vDisk.flags=FLAGS_DRIVEON|FLAGS_XEXLOADER|FLAGS_ATRMEDIUMSIZE;
 						}
+            			if (fi->Attr & ATTR_READONLY) {
+        					fi->vDisk.flags |= FLAGS_READONLY;
+						}
+			
 					}
 
 					ret=(command[1]&0x0f);	//0..f
