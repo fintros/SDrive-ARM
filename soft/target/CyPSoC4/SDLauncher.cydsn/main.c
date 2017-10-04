@@ -83,13 +83,23 @@ int ProceedUpdate(int isForced)
     uint16 currVersion = GetUint16Value(Launcher_MD_BTLDB_APP_VERSION_OFFSET(0));
     uint16 currAppID = GetUint16Value(Launcher_MD_BTLDB_APP_ID_OFFSET(0));
     uint32 currCustID = GetUint32Value(Launcher_MD_BTLDB_APP_CUST_ID_OFFSET(0));
+    uint16 currVersionBL = currVersion >> 8;       // current bootloader version
 
     uint16 updatedVersion = GetUint16Value((uint32)(&ctx->atari_sector_buffer[0]) + Launcher_MD_BTLDB_APP_VERSION_OFFSET(0) - Launcher_MD_BASE_ADDR(0));
     uint16 updatedAppID = GetUint16Value((uint32)(&ctx->atari_sector_buffer[0]) + Launcher_MD_BTLDB_APP_ID_OFFSET(0) - Launcher_MD_BASE_ADDR(0));
     uint32 updatedCustID = GetUint32Value((uint32)(&ctx->atari_sector_buffer[0]) + Launcher_MD_BTLDB_APP_CUST_ID_OFFSET(0) - Launcher_MD_BASE_ADDR(0));
-
+    uint16 updatedVersionBL = updatedVersion >> 8;       // updated bootloader version
+  
     dprint("Found update with version 0x%04X, AppID: 0x%04X, CustID: 0x%08X\r\n", updatedVersion, updatedAppID, updatedCustID);
 
+    if(currVersionBL != updatedVersionBL)                // unable to update for different bootloader version
+    {
+        ctx->LEDREG_Write(~3);  // red + green on
+        CyDelay(100);
+        dprint("Skip update\r\n");
+        return 0;        
+    }
+    
     // skip update if forced but same and if id's are differ or version lower than existing one
     if( ((isForced>0) && ((currAppID != updatedAppID) || (currCustID != updatedCustID) || (updatedVersion != currVersion)))  || 
         ((currAppID == updatedAppID) && (currCustID == updatedCustID) && (updatedVersion > currVersion))
