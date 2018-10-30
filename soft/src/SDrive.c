@@ -148,7 +148,7 @@ void USART_Init( u08 value )
 
 void USART_Transmit_Byte( unsigned char data )
 {
-    UART_1_WriteTxData(data);
+    UART_1_PutChar(data);
     while(UART_1_GetTxBufferSize());
 }
 
@@ -249,8 +249,8 @@ void USART_Send_cmpl_and_atari_sector_buffer_and_check_sum(unsigned short len)
 	//Delay800us();	//t6
 	CyDelayUs(200u);	//<--pouziva se i u commandu 3F
 
-	USART_Send_Buffer(atari_sector_buffer,len);
 	check_sum = get_checksum(atari_sector_buffer,len);
+	USART_Send_Buffer(atari_sector_buffer,len);
 	USART_Transmit_Byte(check_sum);
     while(UART_1_GetTxBufferSize());
 }

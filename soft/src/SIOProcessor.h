@@ -30,6 +30,13 @@ struct SIOCommand
     unsigned char aux2;
 };
 
+enum CommadLineState
+{
+    CLS_Low = 0,
+    CLS_High = 1
+};
+
+
 class CSIOProcessor
 {
 public:
@@ -47,13 +54,14 @@ public:
  
  private:
     void Init(int pokeyDiv);
-    bool RecvBufferWithState(unsigned char *buff, int len, bool cmd_state = true);
+    bool RecvBufferWithState(unsigned char *buff, int len, CommadLineState cmd_state = CLS_High);
     void SendACK();
     void SendNACK();
     void SendCMPL();
     void SendERR();
     bool WaitCmdLow();
     bool WaitCmdHigh();
+    void SendByteAndWait(unsigned char byte);
     
     HWContext& _context;
     int _hiSpeedDiv;

@@ -8,3 +8,5 @@ codegentemp
 *.cywrk.*
 *.cyprj.*
 *.html
+*.log
+Backup

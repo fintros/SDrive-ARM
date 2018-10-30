@@ -1,5 +1,6 @@
 #include "project.h"
 #include "SIOProcessor.h"
+#include "hal.h"
 
 CSIOProcessor::CSIOProcessor(HWContext& context): _context(context);
 {
@@ -52,14 +53,14 @@ void CSIOProcessor::Init(int pokeyDiv)
     int IntDivider = TargetDivider / 32 ;
     int FractDivider = TargetDivider - IntDivider * 32;
     Clock_1_SetFractionalDividerRegister(IntDivider, FractDivider);
-    UART_1_ClearRxBuffer();
-    UART_1_ClearTxBuffer();
+    HAL::GetSIO().ClearRx();
+    HAL::GetSIO().ClearTx();
 #if DEBUG_SIO    
     dprint("Change UART speed %d: [%d, %d] to %d\r\n", value, IntDivider, FractDivider, (int)(48000000*32/(IntDivider*32 + FractDivider)/8));    
 #endif
 }
 
-unsigned char get_checksum(unsigned char* buffer, int len)
+static unsigned char get_checksum(unsigned char* buffer, int len)
 {
 	int i;
 	unsigned char sumo,sum;
@@ -90,35 +91,47 @@ void CSIOProcessor::Send(unsigned char* ptr, int len)
 	CyDelayUs(800u);
 	SendCMPL();
 	CyDelayUs(100u);
-    UART_1_PutArray(atari_sector_buffer, len);
-	USART_Transmit_Byte(get_checksum(atari_sector_buffer,len));
+    HAL::GetSIO().WriteBuffer(ptr, len);
+
+    HAL::GetSIO().Write(get_checksum(ptr,len));
+    while(HAL::GetSIO().GetTXFIFOSize());
 }
 
 
-
-bool CSIOProcessor::RecvBufferWithState(unsigned char *buff, int len, bool cmd_state)
+/**
+ * @brief receive buffer with len + 1 byte for checksum
+ * 
+ * @param buff pointer to output buffer
+ * @param len length of received data
+ * @param cmd_state proceed while CMD line in given state, otherwise - quit with error
+ * @return true - if error happens
+ * @return false - everything ok
+ * 
+ * TODO: break by key press?
+ */
+bool CSIOProcessor::RecvBufferWithState(unsigned char *buff, int len, CommadLineState cmd_state)
 {
    for(int i = 0; i < len+1; i++)
     {
 		// Wait for data to be received
- 		while(!UART_1_GetRxBufferSize())
+ 		while(!HAL::GetSIO().GetRxBufferSize())
 		{
 			// wait until state will not be changed
-			if ( get_cmd_H()!=(cmd_state?1:0) ) return false;
+			if ( HAL::GetGPIO().GetCMDLineState() != (cmd_state==CLS_High) ) return true;
         }
-        unsigned char value = UART_1_ReadRxData();
+        unsigned char value = HAL::GetSIO().Read();
 
         if(i == len)
-            return value == get_checksum(buff,len) 
+            return value != get_checksum(buff,len) 
 
         buff[i] = value;
     }
-    return false;
+    return true;
 }
 
 bool CSIOProcessor::GetCommand(SIOCommand& command)
 {
-    bool result = RecvBufferWithState(&command, sizeof(SIOCommand), false); 
+    bool result = RecvBufferWithState(&command, sizeof(SIOCommand), CLS_Low); 
 #if DEBUG_SIO
     if(!result)
         dprint("Get command error\r\n");
@@ -129,23 +142,23 @@ bool CSIOProcessor::GetCommand(SIOCommand& command)
                 command.aux1,
                 command.aux2);
 #endif        
-   	CyDelayUs(800u);
+   	HAL::DelayUs(800u);
 	WaitCmdHigh();
-	CyDelayUs(100u);
+	HAL::DelayUs(100u);
 
 
 }
 
 bool CSIOProcessor::Recive(unsigned char *buff, int len)
 {
-	bool result = USART_Get_Buffer_And_Check(buff,len);
+	bool result = RecvBufferWithState(buff,len, HAL::GetGPIO().GetCMDLineState());
 	
-    CyDelayUs(1000u);
+    HAL::DelayUs(1000u);
 
 	if(result)
-        SendACK();
-    else
         SendNACK();
+    else
+        SendACK();
     
     return result;
 }
@@ -170,7 +183,7 @@ bool CSIOProcessor::SetFastIO(int pokeyDiv)
 
 void CSIOProcessor::SendACK()
 {
-    USART_Transmit_Byte('A'); 
+    SendByteAndWait('A'); 
 #if DEBUG_SIO
     dprint("Send ACK\r\n");
 #endif
@@ -178,7 +191,7 @@ void CSIOProcessor::SendACK()
 
 void CSIOProcessor::SendNACK()
 {
-    USART_Transmit_Byte('N');  
+    SendByteAndWait('N');  
 #if DEBUG_SIO
     dprint("Send NACK\r\n");
 #endif
@@ -186,7 +199,7 @@ void CSIOProcessor::SendNACK()
 
 void CSIOProcessor::SendCMPL()
 {
-    USART_Transmit_Byte('C');
+    SendByteAndWait('C');
 #if DEBUG_SIO  
     dprint("Send CMPL\r\n");
 #endif
@@ -194,7 +207,7 @@ void CSIOProcessor::SendCMPL()
 
 void CSIOProcessor::SendERR()
 {
-    USART_Transmit_Byte('E');
+    SendByteAndWait('E');
 #if DEBUG_SIO  
     dprint("Send ERR\r\n");    
 #endif
@@ -202,12 +215,18 @@ void CSIOProcessor::SendERR()
 
 bool CSIOProcessor::WaitCmdLow()
 {
-    while ( Command_Read() );
+    while ( HAL::GetGPIO().GetCMDLineState() );
     return true;
 }
 
 bool CSIOProcessor::WaitCmdHigh()
 {
-    while ( ! Command_Read() );
+    while ( ! HAL::GetGPIO().GetCMDLineState() );
     return true;
+}
+
+void CSIOProcessor::SendByteAndWait(unsigned char byte)
+{
+    HAL::GetSIO().Write(byte);
+    while(HAL::GetSIO().GetTXFIFOSize());
 }
