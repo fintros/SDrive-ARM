@@ -164,7 +164,13 @@ unsigned char USART_Receive_Byte( void )
 
 void USART_Send_Buffer(unsigned char *buff, u16 len)
 {
-    UART_1_PutArray(buff, len);
+    u16 bufIndex = 0u;
+
+    while(bufIndex < len)
+    {
+        UART_1_PutChar(buff[bufIndex]);
+        bufIndex++;
+    }
     while(UART_1_GetTxBufferSize());
 }
 
@@ -294,7 +300,7 @@ void set_display(unsigned char n)
     }    
 }
 
-uint8_t system_info[]="SDrive-ARM-02 20170405 by AlSp based on Bob!k & Raster, C.P.U.";	//SDriveVersion info
+uint8_t system_info[]="SDrive-ARM-02 20181108 by AlSp based on Bob!k & Raster, C.P.U.";	//SDriveVersion info
 //                                VV VVYYYYMMDD
 
 //                        |filenameext|

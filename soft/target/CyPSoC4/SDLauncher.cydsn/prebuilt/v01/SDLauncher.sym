@@ -22,5 +22,4 @@ faccess_offset = 0x00001140;
 mmcWriteCachedFlush = 0x0000061c;
 __aeabi_uidivmod = 0x00001b44;
 mmcWrite = 0x00000580;
-nextCluster = 0x00000d50;
 fatInit = 0x00000bc4;
