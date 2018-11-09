@@ -46,6 +46,27 @@
 <build_action v="SOURCE_C;;;;" />
 <PropertyDeltas />
 </CyGuid_8b8ab257-35d3-4473-b57b-36315200b38b>
+<CyGuid_8b8ab257-35d3-4473-b57b-36315200b38b type_name="CyDesigner.Common.ProjMgmt.Model.CyPrjMgmtFileSerialize" version="3" xml_contents_version="1">
+<CyGuid_31768f72-0253-412b-af77-e7dba74d1330 type_name="CyDesigner.Common.ProjMgmt.Model.CyPrjMgmtItemSerialize" version="2" name="fat.c" persistent="..\..\..\src\fat.c">
+<Hidden v="False" />
+</CyGuid_31768f72-0253-412b-af77-e7dba74d1330>
+<build_action v="SOURCE_C;;;;" />
+<PropertyDeltas />
+</CyGuid_8b8ab257-35d3-4473-b57b-36315200b38b>
+<CyGuid_8b8ab257-35d3-4473-b57b-36315200b38b type_name="CyDesigner.Common.ProjMgmt.Model.CyPrjMgmtFileSerialize" version="3" xml_contents_version="1">
+<CyGuid_31768f72-0253-412b-af77-e7dba74d1330 type_name="CyDesigner.Common.ProjMgmt.Model.CyPrjMgmtItemSerialize" version="2" name="mmcsd.cpp" persistent="..\..\..\src\mmcsd.cpp">
+<Hidden v="False" />
+</CyGuid_31768f72-0253-412b-af77-e7dba74d1330>
+<build_action v="SOURCE_C;;;;" />
+<PropertyDeltas />
+</CyGuid_8b8ab257-35d3-4473-b57b-36315200b38b>
+<CyGuid_8b8ab257-35d3-4473-b57b-36315200b38b type_name="CyDesigner.Common.ProjMgmt.Model.CyPrjMgmtFileSerialize" version="3" xml_contents_version="1">
+<CyGuid_31768f72-0253-412b-af77-e7dba74d1330 type_name="CyDesigner.Common.ProjMgmt.Model.CyPrjMgmtItemSerialize" version="2" name="SDAccess.cpp" persistent="..\..\..\src\SDAccess.cpp">
+<Hidden v="False" />
+</CyGuid_31768f72-0253-412b-af77-e7dba74d1330>
+<build_action v="SOURCE_C;;;;" />
+<PropertyDeltas />
+</CyGuid_8b8ab257-35d3-4473-b57b-36315200b38b>
 </dependencies>
 </CyGuid_0820c2e7-528d-4137-9a08-97257b946089>
 </CyGuid_2f73275c-45bf-46ba-b3b1-00a2fe0c8dd8>
@@ -2115,7 +2136,7 @@
 <name_val_pair name="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM0@Linker@General@Use Nano Lib" v="True" />
 <name_val_pair name="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM0@Linker@General@Enable Float printf" v="False" />
 <name_val_pair name="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM0@Linker@Optimization@Remove Unused Functions" v="True" />
-<name_val_pair name="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM0@Linker@Command Line@Command Line" v="-Wl,--just-symbols=..\SDLauncher.cydsn\prebuilt\v01\SDLauncher.sym" />
+<name_val_pair name="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM0@Linker@Command Line@Command Line" v="" />
 </name>
 </platform>
 <platform>
