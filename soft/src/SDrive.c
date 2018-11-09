@@ -300,7 +300,7 @@ void set_display(unsigned char n)
     }    
 }
 
-uint8_t system_info[]="SDrive-ARM-02 20181108 by AlSp based on Bob!k & Raster, C.P.U.";	//SDriveVersion info
+uint8_t system_info[]="SDrive-ARM-02 20181108blv2 by AlSp based on Bob!k & Raster, C.P.U.";	//SDriveVersion info
 //                                VV VVYYYYMMDD
 
 //                        |filenameext|
