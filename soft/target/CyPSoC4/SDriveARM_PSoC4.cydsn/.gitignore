@@ -1,10 +1,14 @@
+Archive
 CortexM0
 Generated_Source
 Export
 codegentemp
+Backup
 *.rpt
 *.svd
 *.cyfit
 *.cywrk.*
 *.cyprj.*
 *.html
+*.log
+ComponentUpdateLog.txt
