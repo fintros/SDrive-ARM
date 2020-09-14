@@ -1,0 +1,29 @@
+--------------- Rebuild Started: 09/14/2020 21:02:21 Project: sdrive.c, Configuration: ARM GCC 5.4-2016-q2-update Release ---------------
+arm-none-eabi-gcc.exe -mcpu=cortex-m0 -mthumb -I. -IGenerated_Source\PSoC4 -Wa,-alh=.\CortexM0\ARM_GCC_541\Release/sdrive.lst -g -D NDEBUG -Wall -ffunction-sections -ffat-lto-objects -Os -fno-exceptions -c ..\..\..\src\sdrive.c -o .\CortexM0\ARM_GCC_541\Release\sdrive.o
+..\..\..\src\sdrive.c: In function 'set_boot_drive':
+..\..\..\src\sdrive.c:213:17: warning: unused variable 'm' [-Wunused-variable]
+   unsigned char m;
+                 ^
+..\..\..\src\sdrive.c: In function 'sdrive':
+..\..\..\src\sdrive.c:565:71: warning: comparison of constant '128' with boolean expression is always true [-Wbool-compare]
+     if (! (fi->vDisk.flags & (FLAGS_ATRMEDIUMSIZE | FLAGS_READONLY) ) != FLAGS_ATRMEDIUMSIZE )
+                                                                       ^
+..\..\..\src\sdrive.c:565:71: warning: logical not is only applied to the left hand side of comparison [-Wlogical-not-parentheses]
+..\..\..\src\sdrive.c:1187:6: warning: dereferencing type-punned pointer will break strict-aliasing rules [-Wstrict-aliasing]
+      FOURBYTESTOLONG(&atari_sector_buffer) = fatClustToSect((u32) TWOBYTESTOWORD(command+2));  // todo check!!! should be 4 bytes long
+      ^
+..\..\..\src\sdrive.c:1199:5: warning: dereferencing type-punned pointer will break strict-aliasing rules [-Wstrict-aliasing]
+     extraSDcommands_readwritesectornumber = *((u32*)&atari_sector_buffer);
+     ^
+..\..\..\src\sdrive.c:1551:57: warning: pointer targets in passing argument 1 of 'USART_Get_buffer_and_check_and_send_ACK_or_NACK' differ in signedness [-Wpointer-sign]
+     if (USART_Get_buffer_and_check_and_send_ACK_or_NACK(&FileFindBuffer[0],11))
+                                                         ^
+In file included from ..\..\..\src\sdrive.c:24:0:
+..\..\..\src\sio.h:29:15: note: expected 'unsigned char *' but argument is of type 'char *'
+ unsigned char USART_Get_buffer_and_check_and_send_ACK_or_NACK(unsigned char *buff, unsigned short len);
+               ^
+..\..\..\src\sdrive.c: In function 'wait_for_command':
+..\..\..\src\sdrive.c:287:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+--------------- Rebuild Succeeded: 09/14/2020 21:02:22 ---------------

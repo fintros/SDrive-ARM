@@ -1,0 +1,23 @@
+Last Modified Date & Time: 09/06/2020 20:28:15
+
+SDLauncher: SDLauncher.cydwr
+	cy_boot [v5.50] to [v5.90]
+	cy_lfclk [v1.10] to [v1.20]
+	LIN_Dynamic [v3.40] to [v5.0]
+
+SDLauncher: TopDesign.cysch
+	Debug_BL [v3.20] to [v4.0]
+	SPIM_BL [v3.20] to [v4.0]
+
+SDriveARM_PSoC4: SDriveARM_PSoC4.cydwr
+	cy_boot [v5.50] to [v5.90]
+	cy_lfclk [v1.10] to [v1.20]
+	LIN_Dynamic [v3.40] to [v5.0]
+
+SDriveARM_PSoC4: TopDesign.cysch
+	Bootloadable_1 [v1.50] to [v1.60]
+	CapSense [v3.10] to [v7.0]
+	Debug_B [v3.20] to [v4.0]
+	SPIM_B [v3.20] to [v4.0]
+
+

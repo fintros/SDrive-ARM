@@ -9,19 +9,23 @@
  * ---------------------------------------------------------------------------
  */
 
-
 #include "project.h"
+#include <stdio.h>
+#include <stdarg.h>
+#include <math.h>
+
 #include <CyLib.h>
-#include "HWContext.h"
+#include "hwcontext.h"
 
 #include "fat.h"
 #include "mmcsd.h"
 #include "dprint.h"
 #include "atari.h"
-
-#include <stdio.h>
-#include <stdarg.h>
-#include <math.h>
+#include "sio.h"
+#include "gpio.h"
+#include "keys.h"
+#include "helpers.h"
+#include "sdrive.h"
 
 #define CAPSENSE 1
 
@@ -60,248 +64,11 @@ uint8_t boot_xex_loader[179] = {
 
 #define US_POKEY_DIV_MAX		(255-6)		//pokeydiv 249 => avrspeed 255 (vic nemuze)
 
-#define LED_ON     
-#define LED_OFF    
-
-// Activity
-#define LED_GREEN_ON	((HWContext*)__hwcontext)->LEDREG_Write(((HWContext*)__hwcontext)->LEDREG_Read() & ~0x1)
-#define LED_GREEN_OFF	((HWContext*)__hwcontext)->LEDREG_Write(((HWContext*)__hwcontext)->LEDREG_Read() | 0x1)
-
-// Writing
-#define LED_RED_ON		((HWContext*)__hwcontext)->LEDREG_Write(((HWContext*)__hwcontext)->LEDREG_Read() & ~0x2)
-#define LED_RED_OFF		((HWContext*)__hwcontext)->LEDREG_Write(((HWContext*)__hwcontext)->LEDREG_Read() | 0x2)
-
-#define send_ACK()	USART_Transmit_Byte('A');  dprint("Send ACK\r\n"); 
-#define send_NACK()	USART_Transmit_Byte('N');  dprint("Send NACK\r\n");
-#define send_CMPL()	USART_Transmit_Byte('C');  dprint("Send CMPL\r\n");
-#define send_ERR()	USART_Transmit_Byte('E');  dprint("Send ERR\r\n"); 
-
-#define wait_cmd_HL() { while ( Command_Read() ); }
-#define wait_cmd_LH() { while ( !Command_Read() ); }
-
-#define CMD_STATE_H		1
-#define CMD_STATE_L		0
-#define get_cmd_H()		( Command_Read() )
-#define get_cmd_L()		( !(Command_Read()) )
-#define get_readonly()	(SWBUT_Read() & 0x01) 
-
-unsigned char last_key;
-
-unsigned char get_checksum(unsigned char* buffer, u16 len)
-{
-	u16 i;
-	u08 sumo,sum;
-	sum=sumo=0;
-	for(i=0;i<len;i++)
-	{
-		sum+=buffer[i];
-		if(sum<sumo) sum++;
-		sumo = sum;
-	}
-	return sum;
-}
-
-void USART_Init( u08 value )
-{     
-    const unsigned long freq = 48000000;
-    
-    unsigned long TargetSpeed = 0;
-    
-    switch(value-6)
-    {
-        case 0x28:
-            TargetSpeed = 19040;       
-            break;
-        case 0x10:
-            TargetSpeed = 38908;       
-            break;
-        case 0xa:
-            TargetSpeed = 52641;       
-            break;
-        case 0x09:
-            TargetSpeed = 55931;       
-            break;
-        case 0x08:
-            TargetSpeed = 59660;       
-            break;
-        case 0x07:
-            TargetSpeed = 63921;       
-            break;
-        case 0x06:
-            TargetSpeed = 68838;       
-            break;
-        case 0x05:
-            TargetSpeed = 74575;
-            break;
-        default:
-            TargetSpeed = freq / 8 * value / 19040 / 46;
-    }
-
-    unsigned long TargetDivider = freq * 32 / 8 / TargetSpeed;  // fixed point 27.5
-    int IntDivider = TargetDivider / 32 ;
-    int FractDivider = TargetDivider - IntDivider * 32;
-    Clock_1_SetFractionalDividerRegister(IntDivider, FractDivider);
-    UART_1_ClearRxBuffer();
-    UART_1_ClearTxBuffer();
-    dprint("Change UART speed %d: [%d, %d] to %d\r\n", value, IntDivider, FractDivider, (int)(48000000*32/(IntDivider*32 + FractDivider)/8));    
-}
-
-void USART_Transmit_Byte( unsigned char data )
-{
-    UART_1_WriteTxData(data);
-    while(UART_1_GetTxBufferSize());
-}
-
-unsigned char USART_Receive_Byte( void )
-{
-	/* Wait for data to be received */
-    u16 value = 0;
-    while(!UART_1_GetRxBufferSize());
-    value = UART_1_ReadRxData();   
-	return value & 0xff;
-}
+static virtual_disk_t vDisk[DEVICESNUM];
 
 
-void USART_Send_Buffer(unsigned char *buff, u16 len)
-{
-    u16 bufIndex = 0u;
-
-    while(bufIndex < len)
-    {
-        UART_1_PutChar(buff[bufIndex]);
-        bufIndex++;
-    }
-    while(UART_1_GetTxBufferSize());
-}
-
-u08 USART_Get_Buffer_And_Check(unsigned char *buff, u16 len, u08 cmd_state)
-{
-	//prebere len bytu + 1 byte checksum
-	//pokud se behem nacitani zmeni cmd_state => return 0x01
-	//pokud se behem nacitacni zmeni getkey => return 0x02
-	//pak zkontroluje checksum
-	//pokud nesouhlasi checksum, return 0x80
-	//pokud vse ok, return 0x00
-	u08 *ptr;
-	u16 n;
-	u08 b;
-	ptr=buff;
-	n=len;
-	while(1)
-	{ 
-		// Wait for data to be received
-        u16 value = 0;
- 		while(!UART_1_GetRxBufferSize())
-		{
-			//pokud by prisel command L nebo stisknuta klavesa, prerusi prijem
-			if ( get_cmd_H()!=cmd_state ) return 0x01;
-    		//if ( read_key()!=last_key ) return 0x02;
-        }
-        
-        value = UART_1_ReadRxData();
-            
-		// Get and return received data from buffer
-		b = value & 0xff;
-		if (!n)
-		{
-			//v b je checksum (n+1 byte)
-			if ( b!=get_checksum(buff,len) ) return 0x80;	//chyba checksumu
-			return 0x00; //ok
-		}
-		*ptr++=b;
-		n--;
-	}
-}
-
-u08 USART_Get_buffer_and_check_and_send_ACK_or_NACK(unsigned char *buff, u16 len)
-{
-	unsigned char err;
-	//tady pred ctenim zadna pauza
-
-	err = USART_Get_Buffer_And_Check(buff,len,CMD_STATE_H);
-	//vraci 0 kdyz ok, !=0 kdyz chyba
-
-	CyDelayUs(1000u);	//t4
-	if(err)
-	{
-		send_NACK();
-		return 0xff; //kdyz nesouhlasi checksum
-	}
-	send_ACK();
-//	Delay300us(); //po ACKu je pauza (250usec az 255s), protoze se pak posila CMPL nebo ERR
-	// ^ tahle pauza se dela pred CMPL nebo ERR
-	return 0;	//kdyz je ok vraci 0
-}
-
-#define USART_Get_atari_sector_buffer_and_check_and_send_ACK_or_NACK(len)	USART_Get_buffer_and_check_and_send_ACK_or_NACK(atari_sector_buffer,len)
-
-
-void USART_Send_cmpl_and_atari_sector_buffer_and_check_sum(unsigned short len)
-{
-	u08 check_sum;
-    
-    HWContext* ctx = (HWContext*)__hwcontext;
-    unsigned char* atari_sector_buffer = &ctx->atari_sector_buffer[0];
-
-	//	Delay300us();	//po ACKu pred CMPL pauza 250us - 255sec
-	//	Delay300us();	//po ACKu pred CMPL pauza 250us - 255sec
-	//Kdyz bylo jen 300us tak nefungovalo
-	CyDelayUs(800u);	//t5
-	send_CMPL();
-	//	Delay1000us();	//S timhle to bylo doposud (a nefunguje pod Qmegem3 Ultraspeed vubec)
-	//	Delay100us(); 		//Pokusne kratsi pauza
-						//(tato fce se pouziva se i u read SpeedIndex 3F,
-						// coz s delsi pauzou nefunguje (pod Qmegem3 fast)
-	//Delay800us();	//t6
-	CyDelayUs(200u);	//<--pouziva se i u commandu 3F
-
-	USART_Send_Buffer(atari_sector_buffer,len);
-	check_sum = get_checksum(atari_sector_buffer,len);
-	USART_Transmit_Byte(check_sum);
-    while(UART_1_GetTxBufferSize());
-}
-
-
-// DISPLAY
-
-void set_display(unsigned char n)
-{
-    HWContext* ctx = (HWContext*)__hwcontext;
-    dprint("Set display to %d, %02X\r\n", n, ctx->LEDREG_Read());
-    switch(n)
-    {
-        case 0:
-            ctx->LEDREG_Write(ctx->LEDREG_Read() & ~0x3C);
-            break;
-        case 1:
-            ctx->LEDREG_Write((ctx->LEDREG_Read() | 0x3C) & ~0x04);
-            break;
-        case 2:
-            ctx->LEDREG_Write((ctx->LEDREG_Read() | 0x3C) & ~0x08);
-            break;
-        case 3:
-            ctx->LEDREG_Write((ctx->LEDREG_Read() | 0x3C) & ~0x0C);
-            break;
-        case 4:
-            ctx->LEDREG_Write((ctx->LEDREG_Read() | 0x3C) & ~0x10);
-            break;        
-        case 5:
-            ctx->LEDREG_Write((ctx->LEDREG_Read() | 0x3C) & ~0x14);
-            break;        
-        case 6:
-            ctx->LEDREG_Write((ctx->LEDREG_Read() | 0x3C) & ~0x18);
-            break;        
-        case 7:
-            ctx->LEDREG_Write((ctx->LEDREG_Read() | 0x3C) & ~0x1C);
-            break;        
-        case 8:
-            ctx->LEDREG_Write((ctx->LEDREG_Read() | 0x3C) & ~0x20);
-            break;        
-    }    
-}
-
-uint8_t system_info[]="SDrive-ARM-02 20181108 by AlSp based on Bob!k & Raster, C.P.U.";	//SDriveVersion info
-//                                VV VVYYYYMMDD
+uint8_t system_info[]="SDrive-ARM-02 20200912 by AlSp based on Bob!k & Raster, C.P.U.";	//SDriveVersion info
+//                                VV YYYYMMDD
 
 //                        |filenameext|
 uint8_t system_atr_name[]="SDRIVE  ATR";  //8+3 zamerne deklarovano za system_info,aby bylo pripadne v dosahu pres get status
@@ -337,11 +104,6 @@ uint8_t system_percomtable[]= {
 	0x50,0x01,0x00,0x48,0x01,0x04,0x01,0x00, IMSIZE7&0xff,(IMSIZE7>>8)&0xff,(IMSIZE7>>16)&0xff,(IMSIZE7>>24)&0xff,
 	0x01,0x01,0x00,0x00,0x00,0x04,0x01,0x00, 0x00,0x00,0x00,0x00
 	};
-
-
-
-#define DEVICESNUM	9	//	//D0:-D8:
-static virtual_disk_t vDisk[DEVICESNUM];
 
 virtual_disk_t* GetvDiskPtr(u08 devicenum)
 {
@@ -409,6 +171,178 @@ void setAtrVdiskFlags()
 }
 
 
+// TODO optiomize - it seems we should do fill D0 only once at the begining?
+
+int set_boot_drive(struct SDriveParameters* sdrparams, unsigned char* p_last_drive, int skip_drive_change)
+{
+    HWContext* ctx = (HWContext*)__hwcontext;
+    FileInfoStruct* fi = &ctx->file_info;
+    unsigned char* atari_sector_buffer = &ctx->atari_sector_buffer[0];
+        
+    if(skip_drive_change == 0)
+	    sdrparams->p0 = 0;	// set to the boot drive - sdrive.atr
+
+	// save state of current drive if it is not already there
+    if ( *p_last_drive != 0 )
+	{
+		if ( *p_last_drive < DEVICESNUM )
+            vDisk[*p_last_drive] = fi->vDisk;
+
+        *p_last_drive=0; // switch it to 0:
+	}
+
+    LED_OFF;
+	if ( !fatInit() ) //Inicializace FATky
+	{
+		//ta karta co je tam zastrcena neni zadny
+		//filesystem co umime
+		//takze zhasneme zelenou diodu
+		LED_GREEN_OFF;	// LED OFF
+		//a pocka az vytahnes kartu ven
+		//while (!(inb(PIND)&0x04)); //cekani az vysune kartu ven
+		//a jde cekat na jinou
+        CyDelayUs(1000u);
+        return -1;
+	}
+    
+    dprint("FAT FS inititialized\r\n");
+
+	//Vyhledani a nastaveni image SDRIVE.ATR do vD0:
+	{
+		unsigned short i;
+		unsigned char m;
+
+		i=0;
+		while( fatGetDirEntry(i,0) )
+		{
+            if(!strncmp((const char*)&atari_sector_buffer[0], (const char*) &system_atr_name[0], 11))
+            {
+                dprint("SDRIVE.ATR found\r\n");
+    			fi->vDisk.current_cluster=fi->vDisk.start_cluster;
+    			fi->vDisk.ncluster=0;
+    			setAtrVdiskFlags();                           
+                return 0;
+            }
+            i++;
+		}
+        // not found
+		fi->vDisk.flags=0; // set to non active
+		
+        // set active drive to default one
+        // TODO: drive shift
+		if (sdrparams->p0 == 0)
+           sdrparams->p0 = 1;
+	}
+    return 0;    
+}
+
+
+int wait_for_command(struct SDriveParameters* sdrparams, unsigned char* p_last_drive)
+{
+    static unsigned long autowritecounter = 0;
+    static unsigned char last_key = 0;
+
+    while( get_cmd_H() )	//dokud je Atari signal command na H
+    {           
+        unsigned char actual_key = get_actual_key();
+           
+        if(actual_key != last_key)
+        {
+            dprint("Key: %02X\r\n", actual_key);
+
+            switch(actual_key)
+        	{
+        		case 6: ///BOOT KEY
+        			if(set_boot_drive(sdrparams, p_last_drive, 0))
+                        return -1;
+        			break;;
+        		case 5: //LEFT
+        			if(sdrparams->p0>1)
+        				sdrparams->p0--;
+        			else
+        				sdrparams->p0 = DEVICESNUM-1;
+        			break;
+        		case 3: //RIGHT
+        			if(sdrparams->p0 < ( DEVICESNUM-1))
+        				sdrparams->p0++;
+        			else
+        				sdrparams->p0=1;
+        			break;
+        	}
+        	set_display(sdrparams->p0);
+        	last_key = actual_key;
+        	CyDelay(50); //sleep for 50ms
+        }
+
+        if (autowritecounter>1700000)
+        {
+         	mmcWriteCachedFlush();
+        	autowritecounter=0;
+        }
+        else
+         autowritecounter++;
+    }
+    return 0;
+}
+
+
+void change_fast_sio(struct SDriveParameters* sdrparams)
+{
+	 u08 as;
+	 as=ATARI_SPEED_STANDARD;	//default speed
+     // if fastsio
+	 if (sdrparams->p2) as=sdrparams->p3+6;	
+
+	 USART_Init(as);    
+}
+
+
+int get_command(struct SDriveParameters* sdrparams, unsigned char* command)
+{
+    LED_OFF;
+    memset(command, 0, 4);
+	u08 err = USART_Get_Buffer_And_Check(command,4,CMD_STATE_L);
+
+#ifdef DEBUG
+    if(err)
+        dprint("Command error: [%02X]\r\n", err);
+    else
+        dprint("Command: [%02X %02X %02X %02X]\r\n", command[0], command[1], command[2], command[3]);
+#endif
+
+	CyDelayUs(800u);	//t1 (650-950us) (Bez tehle pauzy to cele nefunguje!!!)
+	wait_cmd_LH();	//ceka az se zvedne signal command na H
+	CyDelayUs(100u);	//T2=100   (po zvednuti command a pred ACKem)
+
+    LED_GREEN_ON;
+    LED_ON;
+    
+	if(err)
+	{
+        // if key was pressed
+		if (err&0x02) 
+            return -1;
+
+        // if not standard rate - cheche fastsio flag
+		if (sdrparams->p3!=US_POKEY_DIV_STANDARD)
+			sdrparams->p2 = !sdrparams->p2;
+
+        change_fast_sio(sdrparams);
+        return -1;
+	}
+
+    return 0;
+}
+
+
+int process_drive_emulation(struct SDriveParameters* sdrparams, unsigned char* command)
+{
+
+    
+    return 0;
+}
+
+
 //----- Begin Code ------------------------------------------------------------
 int sdrive(void)
 {
@@ -426,12 +360,8 @@ int sdrive(void)
 	//Parameters
 	struct SDriveParameters sdrparams;
 
-#ifdef CAPSENSE
-    CapSense_Start();
-    CapSense_InitializeAllBaselines();
-    CapSense_ScanAllWidgets();
-#endif
-
+    init_keys();
+    
     Debug_B_Start();
 
     LED_ON;
@@ -440,7 +370,7 @@ int sdrive(void)
 
 SD_CARD_EJECTED:
 
-	last_key=0;
+//	last_key=0;
 	last_used_virtual_drive=0;	//inicializace
 	fastsio_active=0;
 	bootloader_relocation=0;
@@ -480,108 +410,9 @@ SD_CARD_EJECTED:
 	}
 	fi->vDisk.flags=0;		//special_xex_loader=0;
 
-SET_BOOT_DRIVE:
-
-	actual_drive_number=0;	//pro bootovani z jednotky vD0:
-
-SET_SDRIVEATR_TO_D0:	//pro nastaveni SDRIVE.ATR do vD0: bez zmeny actual_drive_number !
-
-	//uschovani aktualne vybraneho drive (po opakovanem stlaceni Boot tlacitka)
-	//protoze obsah vD0: bude menit
-	if ( last_used_virtual_drive != 0 )
-	{
-		//chce pracovat s jinym vDx nez se pracovalo posledne
-		unsigned char i;
-		unsigned char *p1;
-		unsigned char *p2;
-		p2=((unsigned char *)&fi->vDisk);
-		if ( last_used_virtual_drive < DEVICESNUM )
-		{
-		 p1=((unsigned char *)&vDisk[last_used_virtual_drive]);
-		 // vDisk[last_used_virtual_drive] <- vDisk
-		 for(i=0; i<sizeof(virtual_disk_t); i++) p1[i]=p2[i];
-		}
-		last_used_virtual_drive=0; //bude menit vD0:
-	}
-
-    LED_OFF;
-	if ( !fatInit() ) //Inicializace FATky
-	{
-		//ta karta co je tam zastrcena neni zadny
-		//filesystem co umime
-		//takze zhasneme zelenou diodu
-		LED_GREEN_OFF;	// LED OFF
-		//a pocka az vytahnes kartu ven
-		//while (!(inb(PIND)&0x04)); //cekani az vysune kartu ven
-		//a jde cekat na jinou
-        CyDelayUs(1000u);
-		goto SD_CARD_EJECTED;
-	}
+    if(set_boot_drive(&sdrparams, &last_used_virtual_drive, 0))
+        goto SD_CARD_EJECTED;
     
-    dprint("FAT FS inititialized\r\n");
-
-	//Vyhledani a nastaveni image SDRIVE.ATR do vD0:
-	{
-		unsigned short i;
-		unsigned char m;
-
-		i=0;
-		while( fatGetDirEntry(i,0) )
-		{
-			for(m=0;m<11;m++)	//8+3
-			{
-				if(atari_sector_buffer[m]!=system_atr_name[m])
-				{
-					//odlisny znak
-					goto find_sdrive_atr_next_entry;
-				}
-			}
-
-			//Slava, nasel SDRIVE.ATR
-
-            LED_ON;
-            
-            dprint("SDRIVE.ATR found\r\n");
-
-
-			fi->vDisk.current_cluster=fi->vDisk.start_cluster;
-			fi->vDisk.ncluster=0;
-			//fi->vDisk.file_index = i; //dela se uvnitr fatGetDirEntry
-
-			setAtrVdiskFlags();
-            /*faccess_offset(FILE_ACCESS_READ,0,16); //ATR hlavicka vzdy
-
-			fi->vDisk.flags=FLAGS_DRIVEON;
-			if ( (atari_sector_buffer[4]|atari_sector_buffer[5])==0x01 )
-				fi->vDisk.flags|=FLAGS_ATRDOUBLESECTORS;
-
-			{
-				unsigned long compute;
-				unsigned long tmp;
-
-				compute = fi->vDisk.size - 16;		//je to vzdy ATR
-				tmp = (fi->vDisk.flags & FLAGS_ATRDOUBLESECTORS)? 0x100:0x80;
-				compute /=tmp;
-
-				if(compute>720) fi->vDisk.flags|=FLAGS_ATRMEDIUMSIZE;
-			}
-            */
-			goto find_sdrive_atr_finished;
-			//
-find_sdrive_atr_next_entry:
-			i++;
-		} //end while
-
-		//nenasel SDRIVE.ATR
-		fi->vDisk.flags=0; //ve vD0: neni aktivni disk
-		//takze nastavi jednotku dle cisla SDrive (1-4)
-		if (actual_drive_number==0)
-		{
-		 actual_drive_number=(unsigned char)4-((unsigned char)(_driveShift&0x03));
-		}
-	}
-find_sdrive_atr_finished:
-
 	set_display(actual_drive_number);
 
 /////////////////////
@@ -591,132 +422,13 @@ find_sdrive_atr_finished:
 ST_IDLE:
 
 		LED_GREEN_OFF;	// LED OFF
-
-		{
-		 unsigned long autowritecounter;
-//autowritecounter_reset:
-		 autowritecounter=0;
-            
-		//buttons
-		unsigned char actual_key = 0;
-            
-		 while( get_cmd_H() )	//dokud je Atari signal command na H
-		 {           
-			//tak bude zkoumat klavesnici
-#ifdef CAPSENSE
-            if(CapSense_NOT_BUSY == CapSense_IsBusy())
-            {
-                CapSense_ProcessAllWidgets();
-                if(CapSense_IsAnyWidgetActive())
-                {
-                    if(CapSense_IsWidgetActive(CapSense_BUTTON0_WDGT_ID))
-                        actual_key = 6;
-                    else if(CapSense_IsWidgetActive(CapSense_BUTTON1_WDGT_ID))
-                        actual_key = 5;
-                    else if(CapSense_IsWidgetActive(CapSense_BUTTON2_WDGT_ID))
-                        actual_key = 3;
-                }                                
-                else
-                {
-    			    actual_key = 0;
-                }
-                CapSense_ScanAllWidgets();
-            }
-#endif
-               
-			if(actual_key != last_key)
-			{
-                dprint("Key: %02X\r\n", actual_key);
-
-                switch(actual_key)
-				{
-					case 6: ///BOOT KEY
-						//actual_drive_number=0;
-        				last_key = actual_key;
-						goto SET_BOOT_DRIVE;
-						break;
-					case 5: //LEFT
-						if(actual_drive_number>1)
-							actual_drive_number--;
-						else
-							actual_drive_number=4;
-						break;
-					case 3: //RIGHT
-						if(actual_drive_number<8)
-							actual_drive_number++;
-						else
-							actual_drive_number=1;
-						break;
-				}
-				set_display(actual_drive_number);
-				last_key = actual_key;
-				CyDelay(50); //pauza 50ms = 0.05s (kvuli tlacitkum)
-			}
-            
-			if (autowritecounter>1700000)
-			{
-				//  100'000 nebylo temer poznat
-				//1'000'000 odpovida cca 1.75 sekundam
-				//2'000'000 odpovida cca 3.5 sekundam
-				//=>1s = 571428
-				//1'700'000 odpovida cca 3 sekundam
-			 	mmcWriteCachedFlush(); //pokud ceka nejaky sektor na zapis, zapise ho
-				//goto autowritecounter_reset;
-				autowritecounter=0;
-			}
-			else
-			 autowritecounter++;
-		 } //while
-		}
-
+        if(wait_for_command(&sdrparams, &last_used_virtual_drive))
+            goto SD_CARD_EJECTED;            
+        
         LED_GREEN_OFF;
-		//Nacitani command frame
-		{
-			u08 err;
-            command[0] = 0;
-            command[1] = 0;
-            command[2] = 0;
-            command[3] = 0;
-            command[4] = 0;
-            LED_OFF;
-			err=USART_Get_Buffer_And_Check(command,4,CMD_STATE_L);
-
-#ifdef DEBUG
-            if(err)
-                dprint("Command error: [%02X]\r\n", err);
-            else
-                dprint("Command: [%02X %02X %02X %02X]\r\n", command[0], command[1], command[2], command[3]);
-#endif
-
-			CyDelayUs(800u);	//t1 (650-950us) (Bez tehle pauzy to cele nefunguje!!!)
-			wait_cmd_LH();	//ceka az se zvedne signal command na H
-			CyDelayUs(100u);	//T2=100   (po zvednuti command a pred ACKem)
-
-            LED_GREEN_ON;
-            LED_ON;
-            
-			if(err)
-			{
-				//bylo duvodem klepnuti do klavesnice?
-				if (err&0x02) goto ST_IDLE; //klepnul do klavesnice, takze nebude menit rychlost
-
-				if (fastsio_pokeydiv!=US_POKEY_DIV_STANDARD)
-				{
-					//prehodi ze standard na fast nebo naopak
-					fastsio_active=!fastsio_active;
-				}
-
-change_sio_speed_by_fastsio_active:
-				{
-				 u08 as;
-				 as=ATARI_SPEED_STANDARD;	//default speed
-				 if (fastsio_active) as=fastsio_pokeydiv+6;		//vzdy o 6 vic
-
-				 USART_Init(as);
-				}
-				goto ST_IDLE;
-			}
-		}
+        
+        if(get_command(&sdrparams, command))
+            continue;
 
 		if( command[0]>=0x31 && command[0]<(0x30+DEVICESNUM) ) //D1: az D4: (ano, az od D1: !!!)
 		{
@@ -1440,10 +1152,9 @@ set_number_of_sectors_to_buffer_1_2:
 
 				CyDelayUs(800u);	//t5
 				send_CMPL();
-				goto change_sio_speed_by_fastsio_active;
-				//USART_Init(ATARI_SPEED_STANDARD); //a zinicializovat standardni
-				//break;
-
+                
+                change_fast_sio(&sdrparams);
+				break;
 
 			case 0xC2:	//$C2 nn ??	set bootloader relocation = $0700+$nn00
 
@@ -1589,7 +1300,8 @@ set_number_of_sectors_to_buffer_1_2:
 				
 				if ( command[2]==0 ) goto SD_CARD_EJECTED;
 				//goto SET_BOOT_DRIVE; //<--tohle zmeni i actual_drive na 0
-				goto SET_SDRIVEATR_TO_D0; //bez zmeny actual_drive
+				if(set_boot_drive(&sdrparams, &last_used_virtual_drive, 1))
+                    goto SD_CARD_EJECTED;
 				break;
 
 
