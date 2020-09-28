@@ -15,6 +15,7 @@
 #include "gpio.h"
 #include "helpers.h"
 #include "hwcontext.h"
+#include "sdrive.h"
 
 void USART_Init( unsigned char value )
 {     
@@ -136,7 +137,7 @@ unsigned char USART_Get_buffer_and_check_and_send_ACK_or_NACK(unsigned char *buf
 	return 0;
 }
 
-void USART_Send_cmpl_and_atari_sector_buffer_and_check_sum(unsigned short len)
+void USART_Send_cmpl_and_buffer_and_check_sum(unsigned char *buff, unsigned short len)
 {
 	unsigned char check_sum;
     
@@ -147,8 +148,8 @@ void USART_Send_cmpl_and_atari_sector_buffer_and_check_sum(unsigned short len)
 	send_CMPL();
 	CyDelayUs(200u);
 
-	USART_Send_Buffer(atari_sector_buffer,len);
-	check_sum = get_checksum(atari_sector_buffer,len);
+	USART_Send_Buffer(buff, len);
+	check_sum = get_checksum(buff, len);
 	USART_Transmit_Byte(check_sum);
     while(UART_1_GetTxBufferSize());
 }

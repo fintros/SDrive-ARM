@@ -29,6 +29,8 @@ typedef struct _GlobalSystemValues			//4+4+2+2+1=13 bytes
 	unsigned char SectorsPerCluster;
 } GlobalSystemValues;
 
+#define ATARI_BUFFER_SIZE 256
+#define MMC_BUFFER_SIZE 512
 
 typedef struct _HWContext
 {
@@ -45,8 +47,8 @@ typedef struct _HWContext
     
     // data processing 
     unsigned long n_actual_mmc_sector;
-    unsigned char atari_sector_buffer[256] __attribute__ ((aligned (4)));
-    unsigned char mmc_sector_buffer[512] __attribute__ ((aligned (4)));
+    unsigned char atari_sector_buffer[ATARI_BUFFER_SIZE] __attribute__ ((aligned (4)));
+    unsigned char mmc_sector_buffer[MMC_BUFFER_SIZE] __attribute__ ((aligned (4)));
     unsigned char n_actual_mmc_sector_needswrite;
 
     unsigned long sd_init_freq;
@@ -74,9 +76,7 @@ typedef struct _HWContext
     GlobalSystemValues gsv;
     
     FatData fat_data;
-    
-    FileInfoStruct file_info;			//< file information for last file accessed
-    
+        
     unsigned int _StaticVarsSize;
     
 } HWContext;

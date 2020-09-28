@@ -11,6 +11,25 @@
 #ifndef _SDRIVE_H
 #define _SDRIVE_H
 
-#define DEVICESNUM	15	//	//D0:-D14:
-            
+#define DEVICESNUM	13	//	//D0:-D12:
+
+typedef struct _SharedParameters
+{
+	unsigned char actual_drive_number;  // p0
+	unsigned char fastsio_active;       // p1
+	unsigned char fastsio_pokeydiv;     // p2
+	unsigned char bootloader_relocation;// p3
+	unsigned long extraSDcommands_readwritesectornumber; // p4_5_6_7
+} __attribute__((packed)) SharedParameters;
+
+
+typedef struct _SDriveSettings
+{
+    unsigned int emulated_drive_no;
+    unsigned char default_pokey_div;
+} Settings;
+
+extern SharedParameters shared_parameters;
+extern Settings settings;
+
 #endif /* _SDRIVE_H */

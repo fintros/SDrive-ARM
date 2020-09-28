@@ -14,6 +14,7 @@
 #include "helpers.h"
 #include "dprint.h"
 #include "sdrive.h"
+#include "gpio.h"
 
 unsigned char get_checksum(unsigned char* buffer, unsigned short len)
 {
@@ -37,9 +38,30 @@ void set_display(unsigned char n)
     // D0 is boot disk - all LEDs on
     if(!n)  
         n = 15;
-    if(n <= DEVICESNUM)
+    if(n <= 0x0F)
     {
        unsigned char set = ~(n << 2); 
        ctx->LEDREG_Write((ctx->LEDREG_Read() | 0x3C) & set);
     }
+}
+
+
+void StartReadOperation()
+{
+    LED_GREEN_ON;    
+}
+
+void StopReadOperation()
+{
+    LED_GREEN_OFF;    
+}
+
+void StartWriteOperation()
+{
+    LED_RED_ON;    
+}
+
+void StopWriteOperation()
+{
+    LED_RED_OFF;    
 }

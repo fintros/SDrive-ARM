@@ -10,26 +10,27 @@
 #define FLAGS_DRIVEON			0x01
 
 // Stuctures
-typedef struct						//4+4+4+2+2+4+1=21
-{
-	unsigned long start_cluster;		//< file starting cluster
-	unsigned long dir_cluster;
-	unsigned long current_cluster;
-	unsigned short ncluster;
-	unsigned short file_index;			//< file index
-	unsigned long size;					//< file size
-	unsigned char flags;				//< file flags
-} __attribute__((packed)) virtual_disk_t ;
 
-typedef struct _FileInfoStruct
+typedef struct
 {
 	unsigned char Attr;				//< file attr for last file accessed
 	unsigned short Date;			//< last update date
 	unsigned short Time;			//< last update time
 	unsigned char percomstate;		//=0 default, 1=percomwrite ok (single sectors), 2=percomwrite ok (double sectors), 3=percomwrite bad
-	//
-	virtual_disk_t vDisk;
-} __attribute__((packed)) FileInfoStruct ;
+} __attribute__((packed)) fileinfo_t;
     
+typedef struct						//4+4+4+2+2+4+1=21
+{
+    unsigned long dir_cluster;          //< containing directory claster
+    unsigned long start_cluster;		//< file starting cluster
+	unsigned long current_cluster;
+	unsigned short ncluster;
+	unsigned short file_index;			//< file index
+	unsigned long size;					//< file size
+	unsigned char flags;				//< file flags
+    fileinfo_t fi;                     //< additional file information
+} __attribute__((packed)) file_t ;
+
+   
     
 #endif

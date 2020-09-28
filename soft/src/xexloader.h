@@ -7,17 +7,14 @@
  * -- This applies for source and binary form and derived works.
  * ---------------------------------------------------------------------------
  */
-#ifndef _HELPERS_H
-#define _HELPERS_H
+    
+#ifndef _XEXLOADER_H
+#define _XEXLOADER_H
 
-unsigned char get_checksum(unsigned char* buffer, unsigned short len);
+#include "atari.h"
 
-void set_display(unsigned char n);
+#define	XEX_SECTOR_SIZE	128       
+    
+int ReadXEX(file_t* pDisk, unsigned char* buffer, unsigned short sector);
 
-void StartReadOperation();
-void StopReadOperation();
-void StartWriteOperation();
-void StopWriteOperation();
-
-
-#endif /* _HELPERS_H */
+#endif /* _XEXLOADER_H  */

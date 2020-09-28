@@ -69,16 +69,15 @@ void CheckLaunch(void) CYSMALL
 // end of bootloader flash address - needed to protect itself
 extern void* _etext;
 
-int ProceedUpdate(int isForced)
+int ProceedUpdate(file_t* pFile, int isForced)
 {
     HWContext* ctx = (HWContext*)__hwcontext;
-    FileInfoStruct* fi = &ctx->file_info;
     
     // first - get metadata, to check version, appid and checksum?
-	fi->vDisk.current_cluster=fi->vDisk.start_cluster;
-	fi->vDisk.ncluster=0;
+    pFile->current_cluster = pFile->start_cluster;
+	pFile->ncluster=0;
 
-	faccess_offset(FILE_ACCESS_READ,0x7FC0,0x40); // read metadata
+	faccess_offset(pFile, FILE_ACCESS_READ,0x7FC0, &((HWContext*)__hwcontext)->atari_sector_buffer[0], 0x40); // read metadata
     
     uint16 currVersion = GetUint16Value(Launcher_MD_BTLDB_APP_VERSION_OFFSET(0));
     uint16 currAppID = GetUint16Value(Launcher_MD_BTLDB_APP_ID_OFFSET(0));
@@ -122,9 +121,9 @@ int ProceedUpdate(int isForced)
 
             for(i = startRowNum; i < CY_FLASH_NUMBER_ROWS; i++)
             {
-              	fi->vDisk.current_cluster=fi->vDisk.start_cluster;
-                fi->vDisk.ncluster=0;
-                if(faccess_offset(FILE_ACCESS_READ,currentOffset,CY_FLASH_SIZEOF_ROW))
+              	pFile->current_cluster=pFile->start_cluster;
+                pFile->ncluster=0;
+                if(faccess_offset(pFile, FILE_ACCESS_READ, currentOffset, &((HWContext*)__hwcontext)->atari_sector_buffer[0], CY_FLASH_SIZEOF_ROW))
                 {
                     ledState = 1 - ledState;
                     if(ledState)
@@ -178,6 +177,7 @@ int main(void)
     uint16 appVersion = GetUint16Value(Launcher_MD_BTLDB_APP_VERSION_OFFSET(0));
 #endif
     HWContext* ctx = (HWContext*)__hwcontext;
+    FatData* f = &((HWContext*)__hwcontext)->fat_data;
    
     // switch on red - start of bootloader
     ctx->LEDREG_Write(~0x2);
@@ -213,11 +213,14 @@ int main(void)
     ctx->LEDREG_Write(~0x1);
 
 	unsigned short i;
+    file_t file;
+    memset(&file, 0, sizeof(file_t));
+    file.dir_cluster = f->dir_cluster;
 
     // search for update first.
 	i=0;
     int updateType = 0; // no update by default
-	while( fatGetDirEntry(i,0) )
+	while( fatGetDirEntry(&file, &ctx->atari_sector_buffer[0], i, 0) )
 	{
         const char* fileName = (char*)&ctx->atari_sector_buffer[0];
         if(!strncmp("UPD", &fileName[8],3))
@@ -234,7 +237,7 @@ int main(void)
     dprint("FAT readed with resulting updateType=%d\r\n", updateType);
     
     if(updateType > 0)
-        ProceedUpdate(updateType-1);
+        ProceedUpdate(&file, updateType-1);
         
     ctx->LEDREG_Write(~0);
     

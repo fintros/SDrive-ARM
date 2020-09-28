@@ -40,7 +40,7 @@
 
 #include "fat.h"
 #include "atari.h"
-#include "HWContext.h"
+#include "hwcontext.h"
 #include "mmcsd.h"
 #include "dprint.h"
 
@@ -58,7 +58,7 @@ unsigned char fatInit()
     GlobalSystemValues* gsv = &((HWContext*)__hwcontext)->gsv;
     FatData* f = &((HWContext*)__hwcontext)->fat_data;
     unsigned char* mmc_sector_buffer = &((HWContext*)__hwcontext)->mmc_sector_buffer[0];
-    FileInfoStruct* fi = &((HWContext*)__hwcontext)->file_info;
+    //FileInfoStruct* fi = &((HWContext*)__hwcontext)->file_info;
     
 	partrecord PartInfo;
     partrecord *pPartInfo;
@@ -118,7 +118,7 @@ unsigned char fatInit()
 		case PART_TYPE_FAT16:
 		case PART_TYPE_FAT16LBA:
 			// first directory cluster is 2 by default (clusters range 2->big)
-			fi->vDisk.dir_cluster	= MSDOSFSROOT;
+			f->dir_cluster	= MSDOSFSROOT;
 			// push data sector pointer to end of root directory area
 			//FirstDataSector += (bpb->bpbRootDirEnts)/DIRENTRIES_PER_SECTOR;
 			f->fat32_enabled = FALSE;
@@ -126,7 +126,7 @@ unsigned char fatInit()
 		case PART_TYPE_FAT32LBA:
 		case PART_TYPE_FAT32:
 			// bpbRootClust field exists in FAT32 bpb710, but not in lesser bpb's
-			fi->vDisk.dir_cluster = bpb->bpbRootClust;
+			f ->dir_cluster = bpb->bpbRootClust;
 			// push data sector pointer to end of root directory area
 			// need this? FirstDataSector += (bpb->bpbRootDirEnts)/DIRENTRIES_PER_SECTOR;
 			f->fat32_enabled = TRUE;
@@ -141,14 +141,12 @@ unsigned char fatInit()
 
 //////////////////////////////////////////////////////////////
 
-unsigned char fatGetDirEntry(unsigned short entry, unsigned char use_long_names)
+unsigned char fatGetDirEntry(file_t* pDisk, unsigned char* file_name, unsigned short entry, unsigned char use_long_names)
 {
     HWContext* ctx = (HWContext*)__hwcontext;
     GlobalSystemValues* gsv = &ctx->gsv;
     FatData* f = &ctx->fat_data;
-    unsigned char* file_name_buffer = &ctx->atari_sector_buffer[0];
     unsigned char* mmc_sector_buffer = &ctx->mmc_sector_buffer[0];
-    FileInfoStruct* fi = &ctx->file_info;
     
 	unsigned long sector;
 	struct direntry *de = 0;	// avoid compiler warning by initializing
@@ -158,17 +156,17 @@ unsigned char fatGetDirEntry(unsigned short entry, unsigned char use_long_names)
 	unsigned short b;
 	u08 index;
 	unsigned short entrycount = 0;
-	unsigned long actual_cluster = fi->vDisk.dir_cluster;
+	unsigned long actual_cluster = pDisk->dir_cluster;
 	unsigned char seccount=0;
 
 	haveLongNameEntry = 0;
 	gotEntry = 0;
 
-	if (fi->vDisk.dir_cluster!=f->last_dir_start_cluster)
+	if (pDisk->dir_cluster!=f->last_dir_start_cluster)
 	{
 		//zmenil se adresar, takze musi pracovat s nim
 		//a zneplatnit last_dir polozky
-		f->last_dir_start_cluster=fi->vDisk.dir_cluster;
+		f->last_dir_start_cluster=pDisk->dir_cluster;
 		f->last_dir_valid=0;
 	}
 
@@ -177,7 +175,7 @@ unsigned char fatGetDirEntry(unsigned short entry, unsigned char use_long_names)
 	   )
 	{
 		//musi zacit od zacatku
-		sector = fatClustToSect(fi->vDisk.dir_cluster);
+		sector = fatClustToSect(pDisk->dir_cluster);
 		//index = 0;
         dprint("Read from begin\r\n");
 		goto fat_read_from_begin;
@@ -253,7 +251,7 @@ fat_read_from_last_entry:
 				we = (struct winentry *) de;
 				
 				b = WIN_ENTRY_CHARS*( (unsigned short)((we->weCnt-1) & 0x0f));		// index into string
-				fnbPtr = &file_name_buffer[b];
+				fnbPtr = &file_name[b];
 
 				for (i=0;i<5;i++)	*fnbPtr++ = we->wePart1[i*2];	// copy first part
 				for (i=0;i<6;i++)	*fnbPtr++ = we->wePart2[i*2];	// second part
@@ -315,7 +313,7 @@ fat_read_from_last_entry:
 						u08 i;
 						unsigned char *dptr;
 
-						dptr = &file_name_buffer[0];
+						dptr = &file_name[0];
 						for (i=0;i<8;i++)	*dptr++ = de->deName[i];		// copy name+ext
 						for (i=0;i<3;i++)	*dptr++ = de->deExtension[i];	// copy name+ext
 						*dptr=0;	//ukonceni za nazvem
@@ -330,11 +328,11 @@ fat_read_from_last_entry:
 							//krome nazvu '.          ', a '..         ', tam jen vyhaze mezery
 							unsigned char *sptr;
 							//EXT => .EXT   (posune vcetne 0x00 za koncem extenderu)
-							dptr=(file_name_buffer+12);
+							dptr=(file_name+12);
 							i=4; do { sptr=dptr-1; *dptr=*sptr; dptr=sptr; i--; } while(i>0);
-							if (file_name_buffer[0]!='.') *dptr='.'; //jen pro jine nez '.' a '..'
+							if (file_name[0]!='.') *dptr='.'; //jen pro jine nez '.' a '..'
 							//NAME    .EXT => NAME.EXT
-							sptr=dptr=&file_name_buffer[0];
+							sptr=dptr=&file_name[0];
 							do
 							{
 							 if ((*sptr)!=' ') *dptr++=*sptr;
@@ -360,17 +358,17 @@ fat_next_dir_entry:
 	
 	// we have a file/dir to return
 	// store file/dir starting cluster (start of data)
-	fi->vDisk.start_cluster = (unsigned long) ((unsigned long)de->deHighClust << 16) +  (de->deStartCluster);
+	pDisk->start_cluster = (unsigned long) ((unsigned long)de->deHighClust << 16) +  (de->deStartCluster);
 	// fileindex
-	fi->vDisk.file_index = entry;	//fileindex teto polozky
+	pDisk->file_index = entry;	//fileindex teto polozky
 	// store file/dir size (note: size field for subdirectory entries is always zero)
-	fi->vDisk.size = de->deFileSize;
+	pDisk->size = de->deFileSize;
 	// store file/dir attributes
-	fi->Attr = de->deAttributes;
+	pDisk->fi.Attr = de->deAttributes;
 	// store file/dir last update time
-	fi->Time = (unsigned short) (de->deMTime[0] | de->deMTime[1]<<8);
+	pDisk->fi.Time = (unsigned short) (de->deMTime[0] | de->deMTime[1]<<8);
 	// store file/dir last update date
-	fi->Date = (unsigned short) (de->deMDate[0] | de->deMDate[1]<<8);
+	pDisk->fi.Date = (unsigned short) (de->deMDate[0] | de->deMDate[1]<<8);
 
 	if(gotEntry)
 	{
@@ -381,7 +379,7 @@ fat_next_dir_entry:
 		f->last_dir_sector_count = seccount; //skace se az za inkrementaci seccount, takze tady se 1 neodecita!
 		f->last_dir_valid=gotEntry;
         
-        dprint("DE %s: ec:%d, ind: %d, sec: %d, ac: %d, sc: %d\r\n",file_name_buffer, entrycount, index, f->last_dir_sector, f->last_dir_cluster, f->last_dir_sector_count);
+        //dprint("DE %s: ec:%d, ind: %d, sec: %d, ac: %d, sc: %d\r\n",file_name_buffer, entrycount, index, f->last_dir_sector, f->last_dir_cluster, f->last_dir_sector_count);
 	}
     else
     {
@@ -445,33 +443,30 @@ unsigned long nextCluster(unsigned long cluster)
 }
 
 
-unsigned long getClusterN(unsigned short ncluster)
+unsigned long getClusterN(file_t *pDisk, unsigned short ncluster)
 {
     HWContext* ctx = (HWContext*)__hwcontext;
-    FileInfoStruct* fi = &ctx->file_info;
     FatData* f = &ctx->fat_data;
     
-	if(ncluster<fi->vDisk.ncluster)
+	if(ncluster<pDisk->ncluster)
 	{
-		fi->vDisk.current_cluster=fi->vDisk.start_cluster;
-		fi->vDisk.ncluster=0;
+		pDisk->current_cluster=pDisk->start_cluster;
+		pDisk->ncluster=0;
 	}
 
-	while(fi->vDisk.ncluster!=ncluster)
+	while(pDisk->ncluster!=ncluster)
 	{
-		fi->vDisk.current_cluster=nextCluster(fi->vDisk.current_cluster);
-		fi->vDisk.ncluster++;
+		pDisk->current_cluster=nextCluster(pDisk->current_cluster);
+		pDisk->ncluster++;
 	}
 
-	return (fi->vDisk.current_cluster&(f->fat32_enabled?0xFFFFFFFF:0xFFFF));
+	return (pDisk->current_cluster&(f->fat32_enabled?0xFFFFFFFF:0xFFFF));
 }
 
-unsigned short faccess_offset(char mode, unsigned long offset_start, unsigned short ncount)
+unsigned short faccess_offset(file_t* pDisk, char mode, unsigned long offset_start, unsigned char* buffer, unsigned short ncount)
 {
     HWContext* ctx = (HWContext*)__hwcontext;
-    FileInfoStruct* fi = &ctx->file_info;
     GlobalSystemValues* gsv = &ctx->gsv;
-    unsigned char* atari_sector_buffer = &ctx->atari_sector_buffer[0];
     unsigned char* mmc_sector_buffer = &ctx->mmc_sector_buffer[0];
         
 	unsigned short j;
@@ -480,10 +475,10 @@ unsigned short faccess_offset(char mode, unsigned long offset_start, unsigned sh
 	unsigned long ncluster, nsector, current_sector;
 	unsigned long bytespercluster=((u32)gsv->SectorsPerCluster)*((u32)gsv->BytesPerSector);
 
-	if(offset_start>=fi->vDisk.size)
+	if(offset_start>=pDisk->size)
 		return 0;
 
-	end_of_file = (fi->vDisk.size - offset_start);
+	end_of_file = (pDisk->size - offset_start);
 
 	ncluster = offset/bytespercluster;
 	offset-=ncluster*bytespercluster;
@@ -491,9 +486,9 @@ unsigned short faccess_offset(char mode, unsigned long offset_start, unsigned sh
 	nsector = offset/((u32)gsv->BytesPerSector);
 	offset-=nsector*((u32)gsv->BytesPerSector);
 
-	getClusterN(ncluster);
+	getClusterN(pDisk, ncluster);
 
-	current_sector = fatClustToSect(fi->vDisk.current_cluster) + nsector;
+	current_sector = fatClustToSect(pDisk->current_cluster) + nsector;
 	mmcReadCached(current_sector);
 
 	for(j=0;j<ncount;j++,offset++)
@@ -510,10 +505,10 @@ unsigned short faccess_offset(char mode, unsigned long offset_start, unsigned sh
 				{
 					nsector=0;
 					ncluster++;
-					getClusterN(ncluster);
+					getClusterN(pDisk, ncluster);
 				}
 
-				current_sector = fatClustToSect(fi->vDisk.current_cluster) + nsector;
+				current_sector = fatClustToSect(pDisk->current_cluster) + nsector;
 				mmcReadCached(current_sector);
 			}
 
@@ -521,9 +516,9 @@ unsigned short faccess_offset(char mode, unsigned long offset_start, unsigned sh
 			break; //return (j&0xFFFF);
 
 		if(mode==FILE_ACCESS_WRITE)
-			mmc_sector_buffer[offset]=atari_sector_buffer[j]; //SDsektor<-atarisektor
+			mmc_sector_buffer[offset]=buffer[j]; //SDsektor<-atarisektor
 		else
-			atari_sector_buffer[j]=mmc_sector_buffer[offset]; //atarisektor<-SDsektor
+			buffer[j]=mmc_sector_buffer[offset]; //atarisektor<-SDsektor
 
 		end_of_file--;
 

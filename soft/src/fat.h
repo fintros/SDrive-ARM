@@ -50,6 +50,8 @@
 #ifndef FAT_H
 #define FAT_H
 
+#include "atari.h"
+    
 #define FALSE 0
 #define TRUE -1
 
@@ -388,13 +390,10 @@ struct winentry {
 unsigned char fatInit();
 unsigned long fatClustToSect(unsigned long clust);
 unsigned char fatChangeDirectory(unsigned short entry);
-unsigned char fatGetDirEntry(unsigned short entry, unsigned char use_long_names);
+unsigned char fatGetDirEntry(file_t* file, unsigned char* file_name, unsigned short entry, unsigned char use_long_names);
 unsigned long nextCluster(unsigned long clust);
 
-unsigned long getClusterN(unsigned short ncluster);
-unsigned short faccess_offset(char mode, unsigned long offset_start, unsigned short ncount);
-
-
+unsigned short faccess_offset(file_t* file, char mode, unsigned long offset_start, unsigned char* buffer, unsigned short ncount);
 
 typedef struct _FatData
 {
@@ -406,6 +405,7 @@ typedef struct _FatData
     unsigned long last_dir_cluster;
     unsigned char last_dir_index;
     unsigned char fat32_enabled;
+	unsigned long dir_cluster;    
 } FatData;
 
 #define FILE_ACCESS_READ	0
