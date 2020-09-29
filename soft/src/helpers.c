@@ -65,3 +65,9 @@ void StopWriteOperation()
 {
     LED_RED_OFF;    
 }
+
+unsigned long GetRootDirCluster()
+{
+    HWContext* ctx = (HWContext*)__hwcontext;
+    return ctx->fat_data.dir_cluster;       
+}

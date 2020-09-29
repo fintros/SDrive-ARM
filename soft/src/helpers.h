@@ -19,5 +19,6 @@ void StopReadOperation();
 void StartWriteOperation();
 void StopWriteOperation();
 
+unsigned long GetRootDirCluster();
 
 #endif /* _HELPERS_H */

@@ -47,6 +47,7 @@ typedef enum
    SDRSetD12 = 0xfc,
    SDRDirUp  = 0xfd,
    SDRRootDir = 0xfe,
+   SDRSetBoot = 0xff,
 } EEmuCommand;
 
 int InitBootDrive(unsigned char* pBuffer);

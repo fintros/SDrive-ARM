@@ -140,9 +140,6 @@ unsigned char USART_Get_buffer_and_check_and_send_ACK_or_NACK(unsigned char *buf
 void USART_Send_cmpl_and_buffer_and_check_sum(unsigned char *buff, unsigned short len)
 {
 	unsigned char check_sum;
-    
-    HWContext* ctx = (HWContext*)__hwcontext;
-    unsigned char* atari_sector_buffer = &ctx->atari_sector_buffer[0];
 
 	CyDelayUs(800u);	//t5
 	send_CMPL();

@@ -18,6 +18,7 @@
 #include "helpers.h"
 #include "mmcsd.h"
 
+static file_t _browse;
 
 static int GetNext20FileNames(unsigned char* pBuffer, unsigned short usStartIndex)
 {
@@ -29,13 +30,12 @@ static int GetNext20FileNames(unsigned char* pBuffer, unsigned short usStartInde
 
     memset(pBuffer, 0, ATARI_BUFFER_SIZE);
     
-    file_t* pBase = GetVDiskPtr(0);
     unsigned char* pNext = pBuffer;
     for(int i=0; i < 21; i++)
     {
-        if(fatGetDirEntry(pBase , pNext, usStartIndex++,0))
+        if(fatGetDirEntry(&_browse , pNext, usStartIndex++,0))
         {   
-            pNext[11] = pBase->fi.Attr; // Atribute in +11 byte
+            pNext[11] = _browse.fi.Attr; // Atribute in +11 byte
             pNext += 12;
         }
         else            
@@ -235,16 +235,15 @@ int FileSizeDateTimeToString(unsigned char* pBuffer, file_t* pDisk)
 
 int GetFileDetails(unsigned char* pBuffer, unsigned short item)
 {
-    file_t* pDisk = GetVDiskPtr(shared_parameters.actual_drive_number);    
     int size = 50;
     send_ACK();
-    if((pDisk->flags & FLAGS_DRIVEON) && fatGetDirEntry(pDisk, pBuffer, item, 0))
+    if((_browse.flags & FLAGS_DRIVEON) && fatGetDirEntry(&_browse, pBuffer, item, 0))
     {
-        pBuffer[11] = pDisk->fi.Attr;
-        *(unsigned long*)(pBuffer+12) = pDisk->size;
-        *(unsigned short*)(pBuffer+16) = pDisk->fi.Date;
-        *(unsigned short*)(pBuffer+18) = pDisk->fi.Time;
-        FileSizeDateTimeToString(pBuffer + 20, pDisk);
+        pBuffer[11] = _browse.fi.Attr;
+        *(unsigned long*)(pBuffer+12) = _browse.size;
+        *(unsigned short*)(pBuffer+16) = _browse.fi.Date;
+        *(unsigned short*)(pBuffer+18) = _browse.fi.Time;
+        FileSizeDateTimeToString(pBuffer + 20, &_browse);
     }
     else
         memset(pBuffer, 0, size);   // clean up
@@ -281,8 +280,7 @@ int GetLongFileName(unsigned char* pBuffer, unsigned short item, int size)
     send_ACK();
     
     memset(pBuffer, 0, ATARI_BUFFER_SIZE);
-    file_t* pDisk = GetVDiskPtr(shared_parameters.actual_drive_number);
-    if(! fatGetDirEntry(pDisk, pBuffer, item, 1))
+    if(! fatGetDirEntry(&_browse, pBuffer, item, 1))
     {
 		CyDelayUs(800u);	//t5
         send_ERR();
@@ -296,8 +294,7 @@ int GetFileCount(unsigned char* pBuffer)
 {
     send_ACK();
    	unsigned short i = 0;
-    file_t* pDisk = GetVDiskPtr(shared_parameters.actual_drive_number);
-	while (fatGetDirEntry(pDisk, pBuffer, i, 0)) i++;    
+	while (fatGetDirEntry(&_browse, pBuffer, i, 0)) i++;    
     *(unsigned short*)(pBuffer) = i;
     USART_Send_cmpl_and_buffer_and_check_sum(pBuffer, 2);
     return 0;    
@@ -314,16 +311,15 @@ int GetPath(unsigned char* pBuffer, unsigned char max_no)
     
     memset(pBuffer, 0, ATARI_BUFFER_SIZE);
     
-    unsigned char* pCurrent = pBuffer + count*12;    
-    *pCurrent = 0;
-    pCurrent -= 12;
+    unsigned char* pCurrent = pBuffer + count*12;
  
-    file_t* pDisk = GetVDiskPtr(shared_parameters.actual_drive_number);
-    unsigned long old_cluster = pDisk->dir_cluster;
-    unsigned short old_index = pDisk->file_index;
-    while(fatGetDirEntry(pDisk, pCurrent, 0, 0) &&          // while we found directory
-        (pDisk->fi.Attr & ATTR_DIRECTORY) &&
-        (pCurrent[0] == '.') && (pCurrent[1] == '.'))
+    unsigned long old_cluster = _browse.dir_cluster;
+    unsigned short old_index = _browse.file_index;
+    unsigned char file_name[12];
+    size_t len = 0;
+    while(fatGetDirEntry(&_browse, &file_name[0], 0, 0) &&          // while we found directory
+        (_browse.fi.Attr & ATTR_DIRECTORY) &&
+        (file_name[0] == '.') && (file_name[1] == '.'))
     {
         if(!count)
         {
@@ -331,25 +327,26 @@ int GetPath(unsigned char* pBuffer, unsigned char max_no)
             break;  
         }
         count--;
-        unsigned long cur_cluster = pDisk->dir_cluster;
+        unsigned long cur_cluster = _browse.dir_cluster;
         
-        pDisk->dir_cluster = pDisk->start_cluster;  // switch to up directory
+        _browse.dir_cluster = _browse.start_cluster;  // switch to up directory
        	unsigned short i = 0;
-        for(i=0; fatGetDirEntry(pDisk, pCurrent+1, i,0); i++)
+        for(i=0; fatGetDirEntry(&_browse, &file_name[0], i,0); i++)
         {
-            if(cur_cluster == pDisk->start_cluster) // name found
+            if(cur_cluster == _browse.start_cluster) // name found
             {
-                *pCurrent = '/';
                 pCurrent -= 12;
+                memcpy(pCurrent+1, &file_name[0], 11);
+                *pCurrent = '/';
+                len += 12;
                 break;                
             }            
         }                
     }
     // restore
-    pDisk->dir_cluster = old_cluster;
-    pDisk->file_index = old_index;
-    
-    size_t len = (max_no - count) * 12;
+    _browse.dir_cluster = old_cluster;
+    _browse.file_index = old_index;
+        
     if(len)
         memcpy(pBuffer, pCurrent, len);
     memset(pBuffer + len, 0 , ATARI_BUFFER_SIZE-len);
@@ -364,8 +361,7 @@ unsigned char _pFindPattern[11];
 int FindNext(unsigned char* pBuffer, unsigned short index)
 {
     int size = 14;
-    file_t* pDisk = GetVDiskPtr(shared_parameters.actual_drive_number);
-    while(fatGetDirEntry(pDisk, pBuffer, index, 0))
+    while(fatGetDirEntry(&_browse, pBuffer, index, 0))
     {
         int j;
         for(j = 0; j < 11; j++)
@@ -377,8 +373,8 @@ int FindNext(unsigned char* pBuffer, unsigned short index)
         
         if(j == 11) // found
         {
-            pBuffer[11] = pDisk->fi.Attr;
-            *(unsigned short*)(pBuffer+12) = pDisk->file_index;
+            pBuffer[11] = _browse.fi.Attr;
+            *(unsigned short*)(pBuffer+12) = _browse.file_index;
             USART_Send_cmpl_and_buffer_and_check_sum(pBuffer, size);
             return 0;
         }     
@@ -391,6 +387,7 @@ int FindNext(unsigned char* pBuffer, unsigned short index)
 
 int FindFirst(unsigned char* pBuffer, unsigned char bSkipSearch)
 {
+    send_ACK();
     if (USART_Get_buffer_and_check_and_send_ACK_or_NACK(&_pFindPattern[0],11))
     {
     	CyDelayUs(800u);	//t5
@@ -412,6 +409,7 @@ int ChangeActualDrive(unsigned char drive_no)
     
     // (if drive_no>=DEVICESNUM) Set default (all devices with relevant numbers).
     shared_parameters.actual_drive_number = drive_no < DEVICESNUM?drive_no:settings.emulated_drive_no;
+    set_display(shared_parameters.actual_drive_number);
 
     CyDelayUs(800u);	//t5
     send_CMPL();
@@ -432,24 +430,22 @@ int ChangeDirUp(unsigned char* pBuffer, unsigned char bGetName)
 {
     send_ACK();
 
-    file_t* pDisk = GetVDiskPtr(shared_parameters.actual_drive_number);
-
-    if(fatGetDirEntry(pDisk, pBuffer, 0, 0) &&          // while we found directory
-        (pDisk->fi.Attr & ATTR_DIRECTORY) &&
+    if(fatGetDirEntry(&_browse, pBuffer, 0, 0) &&          // while we found directory
+        (_browse.fi.Attr & ATTR_DIRECTORY) &&
         (pBuffer[0] == '.') && (pBuffer[1] == '.'))
     {
-        unsigned long cur_cluster = pDisk->dir_cluster;
-        pDisk->dir_cluster = pDisk->start_cluster;  // switch to up directory
+        unsigned long cur_cluster = _browse.dir_cluster;
+        _browse.dir_cluster = _browse.start_cluster;  // switch to up directory
         
         if(bGetName)
         {
            	unsigned short i = 0;
-            for(i=0; fatGetDirEntry(pDisk, pBuffer, i,0); i++)
+            for(i=0; fatGetDirEntry(&_browse, pBuffer, i,0); i++)
             {
-                if(cur_cluster == pDisk->start_cluster) // name found
+                if(cur_cluster == _browse.start_cluster) // name found
                 {
-                    pBuffer[11] = pDisk->fi.Attr;
-                    *(unsigned short*)(pBuffer+12) = pDisk->file_index;
+                    pBuffer[11] = _browse.fi.Attr;
+                    *(unsigned short*)(pBuffer+12) = _browse.file_index;
                     USART_Send_cmpl_and_buffer_and_check_sum(pBuffer, 14);  // send name + attr + index
                     return 0;
                 }            
@@ -469,9 +465,9 @@ int ChangeDirRoot(unsigned char* pBuffer)
 {
     send_ACK();
 
-    file_t* pDisk = GetVDiskPtr(shared_parameters.actual_drive_number);
-    pDisk->dir_cluster = MSDOSFSROOT;
-    fatGetDirEntry(pDisk, pBuffer, 0, 0);
+    _browse.dir_cluster = GetRootDirCluster();
+    fatGetDirEntry(&_browse, pBuffer, 0, 0);
+    _browse.flags |= FLAGS_DRIVEON;
 
     CyDelayUs(800u);	//t5
     send_CMPL();
@@ -483,14 +479,17 @@ int ChangeDirRoot(unsigned char* pBuffer)
 int MountDrive(unsigned char* pBuffer, unsigned char drive_no, unsigned short index)
 {
     send_ACK();
+    if(drive_no > DEVICESNUM)
+        drive_no = 0;
     file_t* pDisk = GetVDiskPtr(drive_no);
 
-    if(fatGetDirEntry(pDisk, pBuffer, index, 0))
+    if(fatGetDirEntry(&_browse, pBuffer, index, 0))
     {
-        if(pDisk->flags & ATTR_DIRECTORY)
-            pDisk->dir_cluster = pDisk->start_cluster;
+        if(_browse.fi.Attr & ATTR_DIRECTORY)
+            _browse.dir_cluster = _browse.start_cluster;
         else
         {
+            *pDisk = _browse;
             pDisk->current_cluster = pDisk->start_cluster;
             pDisk->ncluster = 0;
 			if( pBuffer[8]=='A' && pBuffer[9]=='T' && pBuffer[10]=='R' )        // ATR
@@ -587,6 +586,7 @@ int DriveCommand(unsigned char* pCommand, unsigned char* pBuffer)
     case SDRSetD10:
     case SDRSetD11:
     case SDRSetD12:
+    case SDRSetBoot:
         return MountDrive(pBuffer, pCommand[1]-SDRSetD00, *((unsigned short*)(pCommand+2)));
         break;
     case SDRDirUp:
@@ -595,6 +595,7 @@ int DriveCommand(unsigned char* pCommand, unsigned char* pBuffer)
         return ChangeDirRoot(pBuffer);
         break;
     default:
+        dprint("!!!!Unknown command %X\r\n", pCommand[1]);
         CyDelayUs(800u);	//t5
         send_ERR();
         return 1;

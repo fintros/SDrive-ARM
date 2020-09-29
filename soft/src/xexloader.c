@@ -54,7 +54,7 @@ int ReadXEX(file_t* pDisk, unsigned char* buffer, unsigned short sector)
     else if(sector >= 0x171)    // Bob!k & Raster, C.P.U., 2008 XEX Bootloader
     {
         unsigned long real_sector = sector - 0x171;
-		unsigned short proceeded_bytes = faccess_offset(pDisk, FILE_ACCESS_READ,real_sector*XEX_SECTOR_SIZE-3, buffer, XEX_SECTOR_SIZE-3);
+		unsigned short proceeded_bytes = faccess_offset(pDisk, FILE_ACCESS_READ,real_sector*(XEX_SECTOR_SIZE-3), buffer, XEX_SECTOR_SIZE-3);
 
 		if(proceeded_bytes<(XEX_SECTOR_SIZE-3))
 			sector=0; //it was last sector
@@ -68,6 +68,7 @@ int ReadXEX(file_t* pDisk, unsigned char* buffer, unsigned short sector)
     }
     else
     {
+        dprint("Unsble to read XEX sector 0x%x\r\n", sector);
         while(1); // TODO: process correcly - hangs for a while;   
     }
     
