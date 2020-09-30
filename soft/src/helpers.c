@@ -58,12 +58,10 @@ void StopReadOperation()
 
 void StartWriteOperation()
 {
-    LED_RED_ON;    
 }
 
 void StopWriteOperation()
 {
-    LED_RED_OFF;    
 }
 
 unsigned long GetRootDirCluster()
