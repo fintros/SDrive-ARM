@@ -51,6 +51,7 @@
 #define FAT_H
 
 #include "atari.h"
+#include "hwcontext.h"
     
 #define FALSE 0
 #define TRUE -1
@@ -386,27 +387,13 @@ struct winentry {
 #define DD_YEAR_MASK			0xFE00	// year - 1980
 #define DD_YEAR_SHIFT			9
 
+unsigned char fatInit(HWContext* ctx);
+unsigned long fatClustToSect(HWContext* ctx, unsigned long clust);
+unsigned char fatChangeDirectory(HWContext* ctx, unsigned short entry);
+unsigned char fatGetDirEntry(HWContext* ctx, file_t* file, unsigned char* file_name, unsigned short entry, unsigned char use_long_names);
+unsigned long nextCluster(HWContext* ctx, unsigned long clust);
 
-unsigned char fatInit();
-unsigned long fatClustToSect(unsigned long clust);
-unsigned char fatChangeDirectory(unsigned short entry);
-unsigned char fatGetDirEntry(file_t* file, unsigned char* file_name, unsigned short entry, unsigned char use_long_names);
-unsigned long nextCluster(unsigned long clust);
-
-unsigned short faccess_offset(file_t* file, char mode, unsigned long offset_start, unsigned char* buffer, unsigned short ncount);
-
-typedef struct _FatData
-{
-    unsigned long last_dir_start_cluster;
-    unsigned char last_dir_valid;
-    unsigned short last_dir_entry;
-    unsigned long last_dir_sector;
-    unsigned char last_dir_sector_count;
-    unsigned long last_dir_cluster;
-    unsigned char last_dir_index;
-    unsigned char fat32_enabled;
-	unsigned long dir_cluster;    
-} FatData;
+unsigned short faccess_offset(HWContext* ctx, file_t* file, char mode, unsigned long offset_start, unsigned char* buffer, unsigned short ncount);
 
 #define FILE_ACCESS_READ	0
 #define FILE_ACCESS_WRITE	1

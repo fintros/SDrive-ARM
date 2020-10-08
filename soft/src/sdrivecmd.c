@@ -20,7 +20,7 @@
 
 static file_t _browse;
 
-static int GetNext20FileNames(unsigned char* pBuffer, unsigned short usStartIndex)
+static int GetNext20FileNames(HWContext* ctx, unsigned char* pBuffer, unsigned short usStartIndex)
 {
     // Get 20 filenames from xhxl. 8.3 + attribute (11+1)*20+1 [<241] +1st byte of filename 21 (+1)
     
@@ -33,7 +33,7 @@ static int GetNext20FileNames(unsigned char* pBuffer, unsigned short usStartInde
     unsigned char* pNext = pBuffer;
     for(int i=0; i < 21; i++)
     {
-        if(fatGetDirEntry(&_browse , pNext, usStartIndex++,0))
+        if(fatGetDirEntry(ctx, &_browse , pNext, usStartIndex++,0))
         {   
             pNext[11] = _browse.fi.Attr; // Atribute in +11 byte
             pNext += 12;
@@ -80,9 +80,9 @@ static int GetEmuInfo(unsigned char* pBuffer, unsigned char count)
     return 0;
 }
 
-int SetATRFlags(file_t* pDisk, unsigned char* pBuffer)
+int SetATRFlags(HWContext* ctx, file_t* pDisk, unsigned char* pBuffer)
 {
-	if(faccess_offset(pDisk, FILE_ACCESS_READ, 0 , pBuffer, 16)) //ATR header read
+	if(faccess_offset(ctx, pDisk, FILE_ACCESS_READ, 0 , pBuffer, 16)) //ATR header read
     {
         pDisk->flags = FLAGS_DRIVEON;
     	if ( ( pBuffer[4] | pBuffer[5] ) == 0x01 ) {
@@ -98,10 +98,10 @@ int SetATRFlags(file_t* pDisk, unsigned char* pBuffer)
 }
 
 // Mount file in current directory
-int MountFile(file_t* pDisk, const char* pFileName, unsigned char* pBuffer)
+int MountFile(HWContext* ctx, file_t* pDisk, const char* pFileName, unsigned char* pBuffer)
 {
     int i = 0;
-    while(fatGetDirEntry(pDisk, pBuffer, i++, 0))
+    while(fatGetDirEntry(ctx, pDisk, pBuffer, i++, 0))
     {
         if(!strncmp((const char*) pBuffer, pFileName, 11))
         {
@@ -109,7 +109,7 @@ int MountFile(file_t* pDisk, const char* pFileName, unsigned char* pBuffer)
 			pDisk->current_cluster=pDisk->start_cluster;
 			pDisk->ncluster=0;
             if(!strncmp(pFileName+8, "ATR", 3)) // if mount ATR
-                return SetATRFlags(pDisk, pBuffer);
+                return SetATRFlags(ctx, pDisk, pBuffer);
             return 0;                        
         }        
     }
@@ -120,10 +120,10 @@ int MountFile(file_t* pDisk, const char* pFileName, unsigned char* pBuffer)
 
 char DefaultBootFile[]="SDRIVE  ATR";
 
-int InitBootDrive(unsigned char* pBuffer)
+int InitBootDrive(HWContext* ctx, unsigned char* pBuffer)
 {
     LED_OFF;
-	if ( !fatInit() ) 
+	if ( !fatInit(ctx) ) 
 	{
 		LED_GREEN_OFF;
         CyDelayUs(1000u);
@@ -132,20 +132,20 @@ int InitBootDrive(unsigned char* pBuffer)
     
     dprint("FAT FS inititialized\r\n");    
     
-    return MountFile(GetVDiskPtr(0), DefaultBootFile, pBuffer);
+    return MountFile(ctx, GetVDiskPtr(0), DefaultBootFile, pBuffer);
 }
 
-static int InitEmu(unsigned char soft, unsigned char* pBuffer)
+static int InitEmu(HWContext* ctx, unsigned char soft, unsigned char* pBuffer)
 {
     dprint("Init emulator\r\n");
     send_ACK();       
     
-    mmcWriteCachedFlush();
+    mmcWriteCachedFlush(ctx);
 
     CyDelayUs(800u);	//t5
 	send_CMPL();
     
-    if(!soft || InitBootDrive(pBuffer))
+    if(!soft || InitBootDrive(ctx, pBuffer))
         return -1;      // full reinit cycle
 
     return 0;
@@ -233,11 +233,11 @@ int FileSizeDateTimeToString(unsigned char* pBuffer, file_t* pDisk)
     return len;
 }
 
-int GetFileDetails(unsigned char* pBuffer, unsigned short item)
+int GetFileDetails(HWContext* ctx, unsigned char* pBuffer, unsigned short item)
 {
     int size = 50;
     send_ACK();
-    if((_browse.flags & FLAGS_DRIVEON) && fatGetDirEntry(&_browse, pBuffer, item, 0))
+    if((_browse.flags & FLAGS_DRIVEON) && fatGetDirEntry(ctx, &_browse, pBuffer, item, 0))
     {
         pBuffer[11] = _browse.fi.Attr;
         *(unsigned long*)(pBuffer+12) = _browse.size;
@@ -252,7 +252,7 @@ int GetFileDetails(unsigned char* pBuffer, unsigned short item)
     return 0;
 }
 
-int GetCurrentFileName(unsigned char* pBuffer, unsigned char drive_no)
+int GetCurrentFileName(HWContext* ctx, unsigned char* pBuffer, unsigned char drive_no)
 {
     int size = 14;
     send_ACK();
@@ -263,7 +263,7 @@ int GetCurrentFileName(unsigned char* pBuffer, unsigned char drive_no)
         return 1;        
     }
     file_t* pDisk = GetVDiskPtr(drive_no);
-    if((pDisk->flags & FLAGS_DRIVEON) && fatGetDirEntry(pDisk, pBuffer, pDisk->file_index, 0))
+    if((pDisk->flags & FLAGS_DRIVEON) && fatGetDirEntry(ctx, pDisk, pBuffer, pDisk->file_index, 0))
     {
         pBuffer[11] = pDisk->fi.Attr;
         *(unsigned short*)(pBuffer+12) = pDisk->file_index;        
@@ -275,12 +275,12 @@ int GetCurrentFileName(unsigned char* pBuffer, unsigned char drive_no)
     return 0;
 }
 
-int GetLongFileName(unsigned char* pBuffer, unsigned short item, int size)
+int GetLongFileName(HWContext* ctx, unsigned char* pBuffer, unsigned short item, int size)
 {
     send_ACK();
     
     memset(pBuffer, 0, ATARI_BUFFER_SIZE);
-    if(! fatGetDirEntry(&_browse, pBuffer, item, 1))
+    if(! fatGetDirEntry(ctx, &_browse, pBuffer, item, 1))
     {
 		CyDelayUs(800u);	//t5
         send_ERR();
@@ -290,17 +290,17 @@ int GetLongFileName(unsigned char* pBuffer, unsigned short item, int size)
     return 0;
 }
 
-int GetFileCount(unsigned char* pBuffer)
+int GetFileCount(HWContext* ctx, unsigned char* pBuffer)
 {
     send_ACK();
    	unsigned short i = 0;
-	while (fatGetDirEntry(&_browse, pBuffer, i, 0)) i++;    
+	while (fatGetDirEntry(ctx, &_browse, pBuffer, i, 0)) i++;    
     *(unsigned short*)(pBuffer) = i;
     USART_Send_cmpl_and_buffer_and_check_sum(pBuffer, 2);
     return 0;    
 }
 
-int GetPath(unsigned char* pBuffer, unsigned char max_no)
+int GetPath(HWContext* ctx, unsigned char* pBuffer, unsigned char max_no)
 {
     send_ACK();
 
@@ -317,7 +317,7 @@ int GetPath(unsigned char* pBuffer, unsigned char max_no)
     unsigned short old_index = _browse.file_index;
     unsigned char file_name[12];
     size_t len = 0;
-    while(fatGetDirEntry(&_browse, &file_name[0], 0, 0) &&          // while we found directory
+    while(fatGetDirEntry(ctx, &_browse, &file_name[0], 0, 0) &&          // while we found directory
         (_browse.fi.Attr & ATTR_DIRECTORY) &&
         (file_name[0] == '.') && (file_name[1] == '.'))
     {
@@ -331,7 +331,7 @@ int GetPath(unsigned char* pBuffer, unsigned char max_no)
         
         _browse.dir_cluster = _browse.start_cluster;  // switch to up directory
        	unsigned short i = 0;
-        for(i=0; fatGetDirEntry(&_browse, &file_name[0], i,0); i++)
+        for(i=0; fatGetDirEntry(ctx, &_browse, &file_name[0], i,0); i++)
         {
             if(cur_cluster == _browse.start_cluster) // name found
             {
@@ -358,10 +358,10 @@ int GetPath(unsigned char* pBuffer, unsigned char max_no)
 
 unsigned char _pFindPattern[11];
 
-int FindNext(unsigned char* pBuffer, unsigned short index)
+int FindNext(HWContext* ctx, unsigned char* pBuffer, unsigned short index)
 {
     int size = 14;
-    while(fatGetDirEntry(&_browse, pBuffer, index, 0))
+    while(fatGetDirEntry(ctx, &_browse, pBuffer, index, 0))
     {
         int j;
         for(j = 0; j < 11; j++)
@@ -385,7 +385,7 @@ int FindNext(unsigned char* pBuffer, unsigned short index)
     return 0;    
 }
 
-int FindFirst(unsigned char* pBuffer, unsigned char bSkipSearch)
+int FindFirst(HWContext* ctx, unsigned char* pBuffer, unsigned char bSkipSearch)
 {
     send_ACK();
     if (USART_Get_buffer_and_check_and_send_ACK_or_NACK(&_pFindPattern[0],11))
@@ -395,7 +395,7 @@ int FindFirst(unsigned char* pBuffer, unsigned char bSkipSearch)
         return 1;        
     }
     if(!bSkipSearch)
-        return FindNext(pBuffer, 0);        // to check different behaviour on exit with findnext
+        return FindNext(ctx, pBuffer, 0);        // to check different behaviour on exit with findnext
     
 	CyDelayUs(800u);	//t5
     send_CMPL();
@@ -426,11 +426,11 @@ int GetSharedParams(unsigned char size, unsigned char offset)
 }
 
 
-int ChangeDirUp(unsigned char* pBuffer, unsigned char bGetName)
+int ChangeDirUp(HWContext* ctx, unsigned char* pBuffer, unsigned char bGetName)
 {
     send_ACK();
 
-    if(fatGetDirEntry(&_browse, pBuffer, 0, 0) &&          // while we found directory
+    if(fatGetDirEntry(ctx, &_browse, pBuffer, 0, 0) &&          // while we found directory
         (_browse.fi.Attr & ATTR_DIRECTORY) &&
         (pBuffer[0] == '.') && (pBuffer[1] == '.'))
     {
@@ -440,7 +440,7 @@ int ChangeDirUp(unsigned char* pBuffer, unsigned char bGetName)
         if(bGetName)
         {
            	unsigned short i = 0;
-            for(i=0; fatGetDirEntry(&_browse, pBuffer, i,0); i++)
+            for(i=0; fatGetDirEntry(ctx, &_browse, pBuffer, i,0); i++)
             {
                 if(cur_cluster == _browse.start_cluster) // name found
                 {
@@ -461,12 +461,12 @@ int ChangeDirUp(unsigned char* pBuffer, unsigned char bGetName)
     return 0;
  }
 
-int ChangeDirRoot(unsigned char* pBuffer)
+int ChangeDirRoot(HWContext* ctx, unsigned char* pBuffer)
 {
     send_ACK();
 
     _browse.dir_cluster = GetRootDirCluster();
-    fatGetDirEntry(&_browse, pBuffer, 0, 0);
+    fatGetDirEntry(ctx, &_browse, pBuffer, 0, 0);
     _browse.flags |= FLAGS_DRIVEON;
 
     CyDelayUs(800u);	//t5
@@ -476,14 +476,14 @@ int ChangeDirRoot(unsigned char* pBuffer)
 }
 
 
-int MountDrive(unsigned char* pBuffer, unsigned char drive_no, unsigned short index)
+int MountDrive(HWContext* ctx, unsigned char* pBuffer, unsigned char drive_no, unsigned short index)
 {
     send_ACK();
     if(drive_no > DEVICESNUM)
         drive_no = 0;
     file_t* pDisk = GetVDiskPtr(drive_no);
 
-    if(fatGetDirEntry(&_browse, pBuffer, index, 0))
+    if(fatGetDirEntry(ctx, &_browse, pBuffer, index, 0))
     {
         if(_browse.fi.Attr & ATTR_DIRECTORY)
             _browse.dir_cluster = _browse.start_cluster;
@@ -493,7 +493,7 @@ int MountDrive(unsigned char* pBuffer, unsigned char drive_no, unsigned short in
             pDisk->current_cluster = pDisk->start_cluster;
             pDisk->ncluster = 0;
 			if( pBuffer[8]=='A' && pBuffer[9]=='T' && pBuffer[10]=='R' )        // ATR
-                  SetATRFlags(pDisk, pBuffer); 
+                  SetATRFlags(ctx, pDisk, pBuffer); 
             else if( pBuffer[8]=='X' && pBuffer[9]=='F' && pBuffer[10]=='D' )   // XFD
             {				
 				pDisk->flags=(FLAGS_DRIVEON|FLAGS_XFDTYPE);
@@ -522,21 +522,21 @@ int MountDrive(unsigned char* pBuffer, unsigned char drive_no, unsigned short in
     return 1;            
 }
 
-int DriveCommand(unsigned char* pCommand, unsigned char* pBuffer)
+int DriveCommand(HWContext* ctx, unsigned char* pCommand, unsigned char* pBuffer)
 {   
     switch(pCommand[1])
     {
     case CmdWrite:
         // simulate write for boot disk
-        return Write(GetVDiskPtr(0), pBuffer, *((unsigned short*)(pCommand+2)));        
+        return Write(ctx, GetVDiskPtr(0), pBuffer, *((unsigned short*)(pCommand+2)));        
     case CmdRead:
         // simulate read for boot disk
-        return Read(GetVDiskPtr(0), pBuffer, *((unsigned short*)(pCommand+2)));
+        return Read(ctx, GetVDiskPtr(0), pBuffer, *((unsigned short*)(pCommand+2)));
     case CmdStatus:
         // simulate status command for boot disk        
         return GetStatus(GetVDiskPtr(0));
     case SDRGet20FileNames:
-        return GetNext20FileNames(pBuffer, *((unsigned short*)(pCommand+2)));
+        return GetNext20FileNames(ctx, pBuffer, *((unsigned short*)(pCommand+2)));
     case SDRSetGastIO:
         return SetFastIO(pCommand[2]);
     case SDRSetBLReloc:        
@@ -545,30 +545,30 @@ int DriveCommand(unsigned char* pCommand, unsigned char* pBuffer)
         return GetEmuInfo(pBuffer, pCommand[2]);
         break;
     case SDRInitDrive:
-        return InitEmu(pCommand[2], pBuffer);
+        return InitEmu(ctx, pCommand[2], pBuffer);
     case SDRDeactivateDrive:
         return DeactivateDrive(pCommand[2]);
     case SDRSetDir:
-        return GetCurrentFileName(pBuffer, pCommand[2]);
+        return GetCurrentFileName(ctx, pBuffer, pCommand[2]);
     case SDRGetFileDetails:
-        return GetFileDetails(pBuffer, *((unsigned short*)(pCommand+2)));
+        return GetFileDetails(ctx, pBuffer, *((unsigned short*)(pCommand+2)));
     case SDRGetLongFileName256:
-        return GetLongFileName(pBuffer, *((unsigned short*)(pCommand+2)), 256);
+        return GetLongFileName(ctx, pBuffer, *((unsigned short*)(pCommand+2)), 256);
     case SDRGetLongFileName128:
-        return GetLongFileName(pBuffer, *((unsigned short*)(pCommand+2)), 128);
+        return GetLongFileName(ctx, pBuffer, *((unsigned short*)(pCommand+2)), 128);
     case SDRGetLongFileName64:
-        return GetLongFileName(pBuffer, *((unsigned short*)(pCommand+2)), 64);
+        return GetLongFileName(ctx, pBuffer, *((unsigned short*)(pCommand+2)), 64);
     case SDRGetLongFileName32:
-        return GetLongFileName(pBuffer, *((unsigned short*)(pCommand+2)), 32);
+        return GetLongFileName(ctx, pBuffer, *((unsigned short*)(pCommand+2)), 32);
     case SDRGetFilesCount:
-        return GetFileCount(pBuffer);
+        return GetFileCount(ctx, pBuffer);
     case SDRGetPath:
-        return GetPath(pBuffer, pCommand[2]);
+        return GetPath(ctx, pBuffer, pCommand[2]);
     case SDRFindFirst:
-        return FindFirst(pBuffer, pCommand[3]);
+        return FindFirst(ctx, pBuffer, pCommand[3]);
     case SDRFindNext:
         send_ACK();
-        return FindNext(pBuffer, *((unsigned short*)(pCommand+2)));
+        return FindNext(ctx, pBuffer, *((unsigned short*)(pCommand+2)));
     case SDRChangeActualDrive:
         return ChangeActualDrive(pCommand[2]);
     case SDRGetSharedParams:
@@ -587,12 +587,12 @@ int DriveCommand(unsigned char* pCommand, unsigned char* pBuffer)
     case SDRSetD11:
     case SDRSetD12:
     case SDRSetBoot:
-        return MountDrive(pBuffer, pCommand[1]-SDRSetD00, *((unsigned short*)(pCommand+2)));
+        return MountDrive(ctx, pBuffer, pCommand[1]-SDRSetD00, *((unsigned short*)(pCommand+2)));
         break;
     case SDRDirUp:
-        return ChangeDirUp(pBuffer, pCommand[2]);
+        return ChangeDirUp(ctx, pBuffer, pCommand[2]);
     case SDRRootDir:
-        return ChangeDirRoot(pBuffer);
+        return ChangeDirRoot(ctx, pBuffer);
         break;
     default:
         dprint("!!!!Unknown command %X\r\n", pCommand[1]);

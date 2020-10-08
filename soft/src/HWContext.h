@@ -13,7 +13,6 @@
 
 #include <cytypes.h>
 #include "atari.h"
-#include "fat.h"
 
 #ifdef __cplusplus
 extern "C" {    
@@ -28,6 +27,19 @@ typedef struct _GlobalSystemValues			//4+4+2+2+1=13 bytes
 	unsigned short BytesPerSector;
 	unsigned char SectorsPerCluster;
 } GlobalSystemValues;
+
+typedef struct _FatData
+{
+    unsigned long last_dir_start_cluster;
+    unsigned char last_dir_valid;
+    unsigned short last_dir_entry;
+    unsigned long last_dir_sector;
+    unsigned char last_dir_sector_count;
+    unsigned long last_dir_cluster;
+    unsigned char last_dir_index;
+    unsigned char fat32_enabled;
+	unsigned long dir_cluster;    
+} FatData;
 
 #define ATARI_BUFFER_SIZE 256
 #define MMC_BUFFER_SIZE 512
@@ -44,8 +56,9 @@ typedef struct _HWContext
     void  (*SPIM_WriteTxData)(uint32 txData);
     uint32 (*SPIM_GetRxBufferSize)(void);
     uint32 (*SPIM_ReadRxData)(void);
+    void (*SPIM_SS)(uint8 val); 
     
-    // data processing 
+    // data processing  
     unsigned long n_actual_mmc_sector;
     unsigned char atari_sector_buffer[ATARI_BUFFER_SIZE] __attribute__ ((aligned (4)));
     unsigned char mmc_sector_buffer[MMC_BUFFER_SIZE] __attribute__ ((aligned (4)));

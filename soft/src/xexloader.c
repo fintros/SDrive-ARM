@@ -13,6 +13,7 @@
 #include "sio.h"
 #include "gpio.h"
 #include "dprint.h"
+#include "fat.h"
 
 //
 // XEX Bootloader
@@ -35,7 +36,7 @@ unsigned char boot_xex_loader[179] = {
 //  (Should be exactly 20 0x07 bytes)
 
 
-int ReadXEX(file_t* pDisk, unsigned char* buffer, unsigned short sector)
+int ReadXEX(HWContext* ctx, file_t* pDisk, unsigned char* buffer, unsigned short sector)
 {
     // cleanup buffer
     memset(buffer, 0, XEX_SECTOR_SIZE);
@@ -54,7 +55,7 @@ int ReadXEX(file_t* pDisk, unsigned char* buffer, unsigned short sector)
     else if(sector >= 0x171)    // Bob!k & Raster, C.P.U., 2008 XEX Bootloader
     {
         unsigned long real_sector = sector - 0x171;
-		unsigned short proceeded_bytes = faccess_offset(pDisk, FILE_ACCESS_READ,real_sector*(XEX_SECTOR_SIZE-3), buffer, XEX_SECTOR_SIZE-3);
+		unsigned short proceeded_bytes = faccess_offset(ctx, pDisk, FILE_ACCESS_READ,real_sector*(XEX_SECTOR_SIZE-3), buffer, XEX_SECTOR_SIZE-3);
 
 		if(proceeded_bytes<(XEX_SECTOR_SIZE-3))
 			sector=0; //it was last sector

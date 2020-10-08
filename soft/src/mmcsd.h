@@ -10,11 +10,10 @@
 
 #ifndef MMCSD_H
 #define MMCSD_H
+    
+#include "hwcontext.h"    
 
-typedef unsigned char u08;
-typedef unsigned short u16;
-typedef unsigned int u32;
-// functions
+// functions    
     
 #ifdef __cplusplus
 extern "C" {    
@@ -22,26 +21,26 @@ extern "C" {
 
 //! Initialize ARM<->MMC hardware interface.
 /// Prepares hardware for MMC access.
-void mmcInit(void);
+void mmcInit(HWContext* ctx);
 
 //! Initialize the card and prepare it for use.
 /// Returns zero if successful.
-u08 mmcReset(void);
+int mmcReset(HWContext* ctx);
 
 //! Read 512-byte sector from card to buffer
 /// Returns zero if successful.
-u08 mmcRead(u32 sector);
+int mmcRead(HWContext* ctx, unsigned long sector);
 
 //! Write 512-byte sector from buffer to card
 /// Returns zero if successful.
-u08 mmcWrite(u32 sector);
+int mmcWrite(HWContext* ctx, unsigned long sector);
 
 
-u08 mmcWriteCached(unsigned char force);
+int mmcWriteCached(HWContext* ctx, unsigned char force);
 
-void mmcWriteCachedFlush();
+void mmcWriteCachedFlush(HWContext* ctx);
 
-void mmcReadCached(u32 sector);
+void mmcReadCached(HWContext* ctx, unsigned long sector);
 
 #ifdef __cplusplus
 }

@@ -15,8 +15,9 @@
 #include "dprint.h"
 #include "xexloader.h"
 #include "helpers.h"
+#include "fat.h"
 
-static void FormatInternal(file_t* pDisk, int size, unsigned char* buffer)
+static void FormatInternal(HWContext* ctx, file_t* pDisk, int size, unsigned char* buffer)
 {   
     int formaterror = 0;
 	pDisk->fi.percomstate=0; // after the format, percom loses its value
@@ -39,7 +40,7 @@ static void FormatInternal(file_t* pDisk, int size, unsigned char* buffer)
     {
         if (psize>ATARI_BUFFER_SIZE) 
             psize=ATARI_BUFFER_SIZE;
-        if (!faccess_offset(pDisk, FILE_ACCESS_WRITE, offset, buffer, psize))
+        if (!faccess_offset(ctx, pDisk, FILE_ACCESS_WRITE, offset, buffer, psize))
         {
             formaterror=1;
             break;
@@ -64,7 +65,7 @@ static void FormatInternal(file_t* pDisk, int size, unsigned char* buffer)
 // format single + PERCOM
 // 	Single for 810 and stock 1050 or as defined by CMD $4F for upgraded drives (Speedy, Happy, HDI, Black Box, XF 551).
 // Returns 128 bytes (SD) or 256 bytes (DD) after format. Format ok requires that the first two bytes are $FF. It is said to return bad sector list (never seen one).
-static int Format(file_t* pDisk, unsigned char* buffer)
+static int Format(HWContext* ctx, file_t* pDisk, unsigned char* buffer)
 {
     unsigned long singleSize = 92160;
     
@@ -79,13 +80,13 @@ static int Format(file_t* pDisk, unsigned char* buffer)
         send_NACK();
     }
     else
-        FormatInternal(pDisk, pDisk->fi.percomstate==2 ? 256 : 128, buffer); 
+        FormatInternal(ctx, pDisk, pDisk->fi.percomstate==2 ? 256 : 128, buffer); 
         
     return 0;
 }
 
 // 	Formats medium density on an Atari 1050. Format medium density cannot be achieved via PERCOM block settings!
-static int FormatMedium(file_t* pDisk, unsigned char* buffer)
+static int FormatMedium(HWContext* ctx, file_t* pDisk, unsigned char* buffer)
 {
     // error in case of non medium or readonly disk
     if ((pDisk->flags & (FLAGS_ATRMEDIUMSIZE | FLAGS_READONLY) ) != FLAGS_ATRMEDIUMSIZE )
@@ -94,7 +95,7 @@ static int FormatMedium(file_t* pDisk, unsigned char* buffer)
         send_NACK();
     }
     else
-        FormatInternal(pDisk, 128, buffer);
+        FormatInternal(ctx, pDisk, 128, buffer);
 
     return 0;
 }
@@ -392,11 +393,11 @@ static unsigned int GetATROffset(file_t* pDisk, unsigned short sector, unsigned 
     return offset;         
 }
 
-static int ReadATR(file_t* pDisk, unsigned char* buffer, unsigned short sector)
+static int ReadATR(HWContext* ctx, file_t* pDisk, unsigned char* buffer, unsigned short sector)
 {
     unsigned int sector_size;
     unsigned int offset = GetATROffset(pDisk, sector, &sector_size);    
-    unsigned int proceeded_bytes = faccess_offset(pDisk, FILE_ACCESS_READ, offset, buffer, sector_size);
+    unsigned int proceeded_bytes = faccess_offset(ctx, pDisk, FILE_ACCESS_READ, offset, buffer, sector_size);
     dprint("Read result %d, offset=%d, secsize=%d\r\n", proceeded_bytes,offset, sector_size);
     
 #if 0
@@ -434,21 +435,21 @@ static int ReadATR(file_t* pDisk, unsigned char* buffer, unsigned short sector)
 }
 
 
-int Read(file_t* pDisk, unsigned char* buffer, unsigned short sector)
+int Read(HWContext* ctx, file_t* pDisk, unsigned char* buffer, unsigned short sector)
 {
     StartReadOperation();
     dprint("Read sector\r\n");
     send_ACK();       
     
     if(pDisk->flags & FLAGS_XEXLOADER)
-        return ReadXEX(pDisk, buffer, sector);
+        return ReadXEX(ctx, pDisk, buffer, sector);
     else
-        return ReadATR(pDisk, buffer, sector);
+        return ReadATR(ctx, pDisk, buffer, sector);
  
     return 0;
 }
 
-static int WriteATR(file_t* pDisk, unsigned char* buffer, unsigned short sector)
+static int WriteATR(HWContext* ctx, file_t* pDisk, unsigned char* buffer, unsigned short sector)
 {
     unsigned int sector_size;
     unsigned int offset = GetATROffset(pDisk, sector, &sector_size);
@@ -459,7 +460,7 @@ static int WriteATR(file_t* pDisk, unsigned char* buffer, unsigned short sector)
         CyDelayUs(800u);	//t5
     	if ( get_readonly() || 
              (pDisk->flags & FLAGS_READONLY) || 
-             faccess_offset(pDisk, FILE_ACCESS_WRITE, offset, buffer, sector_size) == 0)
+             faccess_offset(ctx, pDisk, FILE_ACCESS_WRITE, offset, buffer, sector_size) == 0)
         {
             send_ERR();
         }
@@ -472,7 +473,7 @@ static int WriteATR(file_t* pDisk, unsigned char* buffer, unsigned short sector)
 }
 
 
-int Write(file_t* pDisk, unsigned char* buffer, unsigned short sector)
+int Write(HWContext* ctx, file_t* pDisk, unsigned char* buffer, unsigned short sector)
 {
     StartWriteOperation();
     dprint("Write sector\r\n");
@@ -488,7 +489,7 @@ int Write(file_t* pDisk, unsigned char* buffer, unsigned short sector)
         }                
     }
     else
-        return WriteATR(pDisk, buffer, sector);
+        return WriteATR(ctx, pDisk, buffer, sector);
  
     return 0;
 }
@@ -512,7 +513,7 @@ void ResetDrives()
         virtual_disk[i].dir_cluster = f->dir_cluster;
 }
 
-int SimulateDiskDrive(unsigned char* pCommand, unsigned char* buffer)
+int SimulateDiskDrive(HWContext* ctx, unsigned char* pCommand, unsigned char* buffer)
 {    
   	unsigned int virtual_drive_number;
     
@@ -542,9 +543,9 @@ int SimulateDiskDrive(unsigned char* pCommand, unsigned char* buffer)
     switch(pCommand[1])
     {
     case CmdFormat:
-        return Format(pDisk, buffer);
+        return Format(ctx, pDisk, buffer);
     case CmdFormatMedium:
-        return FormatMedium(pDisk, buffer);
+        return FormatMedium(ctx, pDisk, buffer);
     case CmdGetHighSpeedIndex:
         return GetHighSpeedIndex();
     case CmdReadPercom:
@@ -552,10 +553,10 @@ int SimulateDiskDrive(unsigned char* pCommand, unsigned char* buffer)
     case CmdWritePercom:
         return WritePercom(pDisk, buffer);
     case CmdRead:
-        return Read(pDisk, buffer, *((unsigned short*)(pCommand+2)));
+        return Read(ctx, pDisk, buffer, *((unsigned short*)(pCommand+2)));
     case CmdWrite:
     case CmdWriteVerify:
-        return Write(pDisk, buffer, *((unsigned short*)(pCommand+2)));
+        return Write(ctx, pDisk, buffer, *((unsigned short*)(pCommand+2)));
     case CmdStatus:
         return GetStatus(pDisk);
     default:

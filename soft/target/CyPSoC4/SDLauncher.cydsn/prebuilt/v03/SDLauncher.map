@@ -1,0 +1,1238 @@
+Archive member included to satisfy reference by file (symbol)
+
+.\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL.o)
+                              .\CortexM0\ARM_GCC_541\Release\hwcontext.o (SPIM_BL_Start)
+.\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI_UART.o)
+                              .\CortexM0\ARM_GCC_541\Release\hwcontext.o (SPIM_BL_SpiUartReadRxData)
+.\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI.o)
+                              .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL.o) (SPIM_BL_SpiPostEnable)
+.\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPI_CLK_BL.o)
+                              .\CortexM0\ARM_GCC_541\Release\hwcontext.o (SPI_CLK_BL_SetFractionalDividerRegister)
+.\CortexM0\ARM_GCC_541\Release\SDLauncher.a(LEDREG_BL.o)
+                              .\CortexM0\ARM_GCC_541\Release\hwcontext.o (LEDREG_BL_Write)
+.\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CardPresent.o)
+                              .\CortexM0\ARM_GCC_541\Release\main.o (CardPresent_Read)
+.\CortexM0\ARM_GCC_541\Release\SDLauncher.a(ReadOnly_BL.o)
+                              .\CortexM0\ARM_GCC_541\Release\hwcontext.o (ReadOnly_BL_Read)
+.\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_sclk_m.o)
+                              .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI.o) (SPIM_BL_sclk_m_Write)
+.\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyFlash.o)
+                              .\CortexM0\ARM_GCC_541\Release\main.o (CySysFlashWriteRow)
+.\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+                              .\CortexM0\ARM_GCC_541\Release\cyfitter_cfg.o (CyIntSetVector)
+.\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+                              .\CortexM0\ARM_GCC_541\Release\cyfitter_cfg.o (CySysWdtIsr)
+.\CortexM0\ARM_GCC_541\Release\SDLauncher.a(MMC_SSEL.o)
+                              .\CortexM0\ARM_GCC_541\Release\hwcontext.o (MMC_SSEL_Write)
+.\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyBootAsmGnu.o)
+                              .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o) (CyDelayCycles)
+c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m\libgcc.a(_udivsi3.o)
+                              .\CortexM0\ARM_GCC_541\Release\sdaccess.o (__aeabi_uidiv)
+c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m\libgcc.a(_dvmd_tls.o)
+                              c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m\libgcc.a(_udivsi3.o) (__aeabi_idiv0)
+c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-errno.o)
+                              .\CortexM0\ARM_GCC_541\Release\Cm0Start.o (__errno)
+c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-exit.o)
+                              c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m/crt0.o (exit)
+c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-impure.o)
+                              c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-exit.o) (_global_impure_ptr)
+c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-init.o)
+                              c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m/crt0.o (__libc_init_array)
+c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-memcpy-stub.o)
+                              .\CortexM0\ARM_GCC_541\Release\fat.o (memcpy)
+c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-memset.o)
+                              c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m/crt0.o (memset)
+c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-strncmp.o)
+                              .\CortexM0\ARM_GCC_541\Release\main.o (strncmp)
+
+Discarded input sections
+
+ .text          0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crti.o
+ .data          0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crti.o
+ .bss           0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crti.o
+ .data          0x00000000        0x4 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crtbegin.o
+ .text          0x00000000       0x78 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m/crt0.o
+ .data          0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m/crt0.o
+ .bss           0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m/crt0.o
+ .ARM.extab     0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m/crt0.o
+ .ARM.exidx     0x00000000        0x8 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m/crt0.o
+ .text          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\main.o
+ .data          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\main.o
+ .bss           0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\main.o
+ .text          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\mmcsd.o
+ .data          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\mmcsd.o
+ .bss           0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\mmcsd.o
+ .text          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+ .data          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+ .bss           0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+ .text._ZN8SDAccess11disk_statusEv
+                0x00000000        0x8 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+ .text._ZN8SDAccess9disk_syncEv
+                0x00000000        0x4 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+ .text._ZN8SDAccess12disk_sectorsEv
+                0x00000000        0x4 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+ .text          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\fat.o
+ .data          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\fat.o
+ .bss           0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\fat.o
+ .text          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\dprint.o
+ .data          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\dprint.o
+ .bss           0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\dprint.o
+ .text          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\hwcontext.o
+ .data          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\hwcontext.o
+ .text          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\cyfitter_cfg.o
+ .data          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\cyfitter_cfg.o
+ .bss           0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\cyfitter_cfg.o
+ .text          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\cymetadata.o
+ .data          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\cymetadata.o
+ .bss           0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\cymetadata.o
+ .text          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\Cm0Start.o
+ .data          0x00000000        0x4 .\CortexM0\ARM_GCC_541\Release\Cm0Start.o
+ .bss           0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\Cm0Start.o
+ .text._exit    0x00000000        0xa .\CortexM0\ARM_GCC_541\Release\Cm0Start.o
+ .text._sbrk    0x00000000       0x2c .\CortexM0\ARM_GCC_541\Release\Cm0Start.o
+ .text          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL.o)
+ .data          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL.o)
+ .text.SPIM_BL_Init
+                0x00000000        0x8 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL.o)
+ .text.SPIM_BL_Stop
+                0x00000000       0x20 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL.o)
+ .text.SPIM_BL_SetRxFifoLevel
+                0x00000000       0x14 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL.o)
+ .text.SPIM_BL_SetTxFifoLevel
+                0x00000000       0x14 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL.o)
+ .text.SPIM_BL_I2CSlaveNackGeneration
+                0x00000000       0x3c .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL.o)
+ .text          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI_UART.o)
+ .data          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI_UART.o)
+ .bss           0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI_UART.o)
+ .text.SPIM_BL_SpiUartClearRxBuffer
+                0x00000000       0x20 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI_UART.o)
+ .text.SPIM_BL_SpiUartPutArray
+                0x00000000       0x16 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI_UART.o)
+ .text.SPIM_BL_SpiUartGetTxBufferSize
+                0x00000000       0x10 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI_UART.o)
+ .text.SPIM_BL_SpiUartClearTxBuffer
+                0x00000000       0x20 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI_UART.o)
+ .text.SPIM_BL_SpiUartDisableIntRx
+                0x00000000       0x10 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI_UART.o)
+ .text.SPIM_BL_SpiUartDisableIntTx
+                0x00000000       0x10 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI_UART.o)
+ .text          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI.o)
+ .data          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI.o)
+ .bss           0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI.o)
+ .text.SPIM_BL_SpiStop
+                0x00000000       0x3c .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI.o)
+ .text          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPI_CLK_BL.o)
+ .data          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPI_CLK_BL.o)
+ .bss           0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPI_CLK_BL.o)
+ .text.SPI_CLK_BL_Start
+                0x00000000       0x14 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPI_CLK_BL.o)
+ .text.SPI_CLK_BL_Stop
+                0x00000000       0x10 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPI_CLK_BL.o)
+ .text.SPI_CLK_BL_GetDividerRegister
+                0x00000000        0xc .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPI_CLK_BL.o)
+ .text.SPI_CLK_BL_GetFractionalDividerRegister
+                0x00000000        0x4 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPI_CLK_BL.o)
+ .text          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(LEDREG_BL.o)
+ .data          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(LEDREG_BL.o)
+ .bss           0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(LEDREG_BL.o)
+ .text          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CardPresent.o)
+ .data          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CardPresent.o)
+ .bss           0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CardPresent.o)
+ .text.CardPresent_SetDriveMode
+                0x00000000       0x14 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CardPresent.o)
+ .text.CardPresent_Write
+                0x00000000       0x18 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CardPresent.o)
+ .text.CardPresent_ReadDataReg
+                0x00000000       0x10 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CardPresent.o)
+ .text.CardPresent_SetInterruptMode
+                0x00000000       0x14 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CardPresent.o)
+ .text.CardPresent_ClearInterrupt
+                0x00000000       0x10 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CardPresent.o)
+ .text          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(ReadOnly_BL.o)
+ .data          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(ReadOnly_BL.o)
+ .bss           0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(ReadOnly_BL.o)
+ .text.ReadOnly_BL_SetDriveMode
+                0x00000000       0x18 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(ReadOnly_BL.o)
+ .text.ReadOnly_BL_Write
+                0x00000000       0x18 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(ReadOnly_BL.o)
+ .text.ReadOnly_BL_ReadDataReg
+                0x00000000       0x10 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(ReadOnly_BL.o)
+ .text.ReadOnly_BL_SetInterruptMode
+                0x00000000       0x14 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(ReadOnly_BL.o)
+ .text.ReadOnly_BL_ClearInterrupt
+                0x00000000       0x14 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(ReadOnly_BL.o)
+ .text          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_sclk_m.o)
+ .data          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_sclk_m.o)
+ .bss           0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_sclk_m.o)
+ .text.SPIM_BL_sclk_m_SetDriveMode
+                0x00000000       0x18 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_sclk_m.o)
+ .text.SPIM_BL_sclk_m_Write
+                0x00000000       0x18 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_sclk_m.o)
+ .text.SPIM_BL_sclk_m_Read
+                0x00000000       0x10 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_sclk_m.o)
+ .text.SPIM_BL_sclk_m_ReadDataReg
+                0x00000000       0x10 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_sclk_m.o)
+ .text.SPIM_BL_sclk_m_SetInterruptMode
+                0x00000000       0x14 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_sclk_m.o)
+ .text.SPIM_BL_sclk_m_ClearInterrupt
+                0x00000000       0x14 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_sclk_m.o)
+ .text          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyFlash.o)
+ .data          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyFlash.o)
+ .text.CySysFlashSetWaitCycles
+                0x00000000       0x30 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyFlash.o)
+ .text          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .bss           0x00000000       0x18 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CySysClkImoStart
+                0x00000000       0x14 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CySysClkImoStop
+                0x00000000       0x10 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CySysClkWriteHfclkDirect
+                0x00000000       0x20 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CySysEnablePumpClock
+                0x00000000       0x34 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CySysClkGetSysclkSource
+                0x00000000       0x18 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CySysClkWriteSysclkDiv
+                0x00000000       0x2c .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CySysLvdDisable
+                0x00000000       0x20 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CySysLvdGetInterruptSource
+                0x00000000       0x10 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CySysLvdClearInterrupt
+                0x00000000        0xc .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CySysGetResetReason
+                0x00000000       0x14 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CyDisableInts
+                0x00000000       0x10 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CyEnableInts
+                0x00000000        0xc .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CyIntSetSysVector
+                0x00000000        0xe .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CyIntGetSysVector
+                0x00000000        0xc .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CyIntGetVector
+                0x00000000       0x10 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CyIntSetPriority
+                0x00000000       0x34 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CyIntGetPriority
+                0x00000000       0x20 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CyIntGetState
+                0x00000000       0x18 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CyIntDisable
+                0x00000000       0x14 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CyIntSetPending
+                0x00000000       0x14 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CyIntClearPending
+                0x00000000       0x14 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CyHalt   0x00000000        0x4 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CySysLvdEnable
+                0x00000000       0x44 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CyDelayFreq
+                0x00000000       0x48 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CySysTickInit
+                0x00000000       0x44 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CySysTickStop
+                0x00000000       0x10 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CySysTickEnableInterrupt
+                0x00000000       0x10 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CySysTickEnable
+                0x00000000       0x18 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CySysTickStart
+                0x00000000       0x1c .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CySysTickDisableInterrupt
+                0x00000000       0x10 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CySysTickSetReload
+                0x00000000       0x10 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CySysTickGetReload
+                0x00000000       0x10 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CySysTickGetValue
+                0x00000000       0x10 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CySysTickGetCountFlag
+                0x00000000       0x10 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CySysTickServiceCallbacks
+                0x00000000       0x24 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CySysTickClear
+                0x00000000        0xc .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CySysTickSetCallback
+                0x00000000       0x10 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CySysTickGetCallback
+                0x00000000        0xc .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text.CyGetUniqueId
+                0x00000000       0x74 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .text          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysClkIloStart
+                0x00000000       0x14 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysClkIloStartMeasurement
+                0x00000000       0x34 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysClkIloStopMeasurement
+                0x00000000       0x14 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysClkIloCompensate
+                0x00000000       0xe8 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysWdtGetEnabledStatus
+                0x00000000       0x18 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysWdtSetMode
+                0x00000000       0x2c .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysWdtGetMode
+                0x00000000       0x14 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysWdtSetClearOnMatch
+                0x00000000       0x2c .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysWdtGetClearOnMatch
+                0x00000000       0x18 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysWdtEnable
+                0x00000000       0x40 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysWdtDisable
+                0x00000000       0x48 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysWdtSetCascade
+                0x00000000       0x34 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysWdtGetCascade
+                0x00000000       0x14 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysWdtSetMatch
+                0x00000000       0x30 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysWdtSetToggleBit
+                0x00000000       0x2c .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysWdtGetToggleBit
+                0x00000000       0x10 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysWdtGetMatch
+                0x00000000       0x14 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysWdtGetCount
+                0x00000000       0x30 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysClkIloStop
+                0x00000000       0xb8 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysWdtGetInterruptSource
+                0x00000000       0x14 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysWdtResetCounters
+                0x00000000       0x1c .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysWdtSetInterruptCallback
+                0x00000000       0x18 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysWdtGetInterruptCallback
+                0x00000000       0x18 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysWdtEnableCounterIsr
+                0x00000000       0x28 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysWdtDisableCounterIsr
+                0x00000000       0x1c .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysWatchdogFeed
+                0x00000000       0x4e .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysTimerDelayUntilMatch
+                0x00000000       0x64 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text.CySysTimerDelay
+                0x00000000       0x34 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .rodata        0x00000000        0xc .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .text          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(MMC_SSEL.o)
+ .data          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(MMC_SSEL.o)
+ .bss           0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(MMC_SSEL.o)
+ .text.MMC_SSEL_Read
+                0x00000000        0xc .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(MMC_SSEL.o)
+ .data          0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyBootAsmGnu.o)
+ .bss           0x00000000        0x0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyBootAsmGnu.o)
+ .data          0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m\libgcc.a(_udivsi3.o)
+ .bss           0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m\libgcc.a(_udivsi3.o)
+ .data          0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m\libgcc.a(_dvmd_tls.o)
+ .bss           0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m\libgcc.a(_dvmd_tls.o)
+ .text          0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-errno.o)
+ .data          0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-errno.o)
+ .bss           0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-errno.o)
+ .text          0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-exit.o)
+ .data          0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-exit.o)
+ .bss           0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-exit.o)
+ .text.exit     0x00000000       0x2c c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-exit.o)
+ .text          0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-impure.o)
+ .data          0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-impure.o)
+ .bss           0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-impure.o)
+ .rodata._global_impure_ptr
+                0x00000000        0x4 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-impure.o)
+ .text          0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-init.o)
+ .data          0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-init.o)
+ .bss           0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-init.o)
+ .text          0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-memcpy-stub.o)
+ .data          0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-memcpy-stub.o)
+ .bss           0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-memcpy-stub.o)
+ .text          0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-memset.o)
+ .data          0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-memset.o)
+ .bss           0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-memset.o)
+ .text          0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-strncmp.o)
+ .data          0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-strncmp.o)
+ .bss           0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-strncmp.o)
+ .text          0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crtend.o
+ .data          0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crtend.o
+ .bss           0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crtend.o
+ .text          0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crtn.o
+ .data          0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crtn.o
+ .bss           0x00000000        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crtn.o
+
+Memory Configuration
+
+Name             Origin             Length             Attributes
+rom              0x00000000         0x00008000         xr
+ram              0x20000000         0x00001000         xrw
+*default*        0x00000000         0xffffffff
+
+Linker script and memory map
+
+LOAD c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crti.o
+LOAD c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crtbegin.o
+LOAD c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m/crt0.o
+START GROUP
+LOAD .\CortexM0\ARM_GCC_541\Release\main.o
+LOAD .\CortexM0\ARM_GCC_541\Release\mmcsd.o
+LOAD .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+LOAD .\CortexM0\ARM_GCC_541\Release\fat.o
+LOAD .\CortexM0\ARM_GCC_541\Release\dprint.o
+LOAD .\CortexM0\ARM_GCC_541\Release\hwcontext.o
+LOAD .\CortexM0\ARM_GCC_541\Release\cyfitter_cfg.o
+LOAD .\CortexM0\ARM_GCC_541\Release\cymetadata.o
+LOAD .\CortexM0\ARM_GCC_541\Release\Cm0Start.o
+LOAD .\CortexM0\ARM_GCC_541\Release\SDLauncher.a
+END GROUP
+START GROUP
+LOAD c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m\libgcc.a
+LOAD c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a
+LOAD c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libc_nano.a
+END GROUP
+START GROUP
+LOAD c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m\libgcc.a
+LOAD c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libc_nano.a
+END GROUP
+LOAD c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crtend.o
+LOAD c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crtn.o
+START GROUP
+LOAD c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m\libgcc.a
+LOAD c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libc.a
+LOAD c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libnosys.a
+END GROUP
+                0x00000000                CY_APPL_ORIGIN = 0x0
+                0x00000080                CY_FLASH_ROW_SIZE = 0x80
+                0x00000001                CY_APPL_NUM = 0x1
+                0x00000001                CY_APPL_MAX = 0x1
+                0x00000040                CY_METADATA_SIZE = 0x40
+                0x00000000                CY_APPL_LOADABLE = 0x0
+                0x00000000                CY_CHECKSUM_EXCLUDE_SIZE = ALIGN (0x0, CY_FLASH_ROW_SIZE)
+                0x00000000                CY_APP_FOR_STACK_AND_COPIER = 0x0
+                [!provide]                PROVIDE (__cy_heap_start, _end)
+                0x00000001                PROVIDE (__cy_region_num, ((__cy_regions_end - __cy_regions) / 0x10))
+                0x20000ffc                PROVIDE (__cy_stack, ((ORIGIN (ram) + LENGTH (ram)) - 0x4))
+                0x20000ffc                PROVIDE (__hwcontext, __cy_stack)
+                [!provide]                PROVIDE (__cy_heap_end, (__cy_stack - 0x400))
+
+.cybootloader   0x00000000        0x0
+ *(.cybootloader)
+                0x00000000                appl1_start = CY_APPL_ORIGIN?CY_APPL_ORIGIN:ALIGN (CY_FLASH_ROW_SIZE)
+                0x00003f80                appl2_start = (appl1_start + ALIGN ((((LENGTH (rom) - appl1_start) - (0x2 * CY_FLASH_ROW_SIZE)) / 0x2), CY_FLASH_ROW_SIZE))
+                0x00000000                appl_start = (CY_APPL_NUM == 0x1)?appl1_start:appl2_start
+                0x00000001                cy_project_type_bootloader = (appl_start == 0x0)?0x1:0x0
+                0x00000000                cy_project_type_app_for_stack_and_copier = (CY_APP_FOR_STACK_AND_COPIER == 0x1)?0x1:0x0
+
+.text           0x00000000     0x1bf2
+ CREATE_OBJECT_SYMBOLS
+                0x00000000                PROVIDE (__cy_interrupt_vector, RomVectors)
+ *(.romvectors)
+ .romvectors    0x00000000       0x10 .\CortexM0\ARM_GCC_541\Release\Cm0Start.o
+                0x00000000                RomVectors
+                0x00000001                ASSERT ((. != __cy_interrupt_vector), No interrupt vector)
+                0x00000001                ASSERT (CY_APPL_ORIGIN?(SIZEOF (.cybootloader) <= CY_APPL_ORIGIN):0x1, Wrong image location)
+                0x00000010                PROVIDE (__cy_reset, Reset)
+ *(.text.Reset)
+ .text.Reset    0x00000010        0x6 .\CortexM0\ARM_GCC_541\Release\Cm0Start.o
+                0x00000010                Reset
+                0x00000001                ASSERT ((. != __cy_reset), No reset code)
+ *(.psocinit)
+ *fill*         0x00000016        0x2 
+ .psocinit      0x00000018      0x1f8 .\CortexM0\ARM_GCC_541\Release\cyfitter_cfg.o
+                0x00000018                cyfitter_cfg
+                0x00000210                . = MAX (., 0x100)
+ *(.text .text.* .gnu.linkonce.t.*)
+ .text          0x00000210       0x60 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crtbegin.o
+ .text.Launch   0x00000270        0x2 .\CortexM0\ARM_GCC_541\Release\main.o
+ .text.GetUint32Value
+                0x00000272       0x18 .\CortexM0\ARM_GCC_541\Release\main.o
+                0x00000272                GetUint32Value
+ .text.GetUint16Value
+                0x0000028a        0xa .\CortexM0\ARM_GCC_541\Release\main.o
+                0x0000028a                GetUint16Value
+ .text.CheckLaunch
+                0x00000294       0x30 .\CortexM0\ARM_GCC_541\Release\main.o
+                0x00000294                CheckLaunch
+ .text.ProceedUpdate
+                0x000002c4      0x1d0 .\CortexM0\ARM_GCC_541\Release\main.o
+                0x000002c4                ProceedUpdate
+ .text.startup.main
+                0x00000494      0x100 .\CortexM0\ARM_GCC_541\Release\main.o
+                0x00000494                main
+ .text.mmcInit  0x00000594       0x10 .\CortexM0\ARM_GCC_541\Release\mmcsd.o
+                0x00000594                mmcInit
+ .text.mmcReset
+                0x000005a4        0xe .\CortexM0\ARM_GCC_541\Release\mmcsd.o
+                0x000005a4                mmcReset
+ .text.mmcRead  0x000005b2       0x18 .\CortexM0\ARM_GCC_541\Release\mmcsd.o
+                0x000005b2                mmcRead
+ .text.mmcWrite
+                0x000005ca       0x18 .\CortexM0\ARM_GCC_541\Release\mmcsd.o
+                0x000005ca                mmcWrite
+ .text.mmcWriteCached
+                0x000005e2       0x6c .\CortexM0\ARM_GCC_541\Release\mmcsd.o
+                0x000005e2                mmcWriteCached
+ .text.mmcWriteCachedFlush
+                0x0000064e       0x1c .\CortexM0\ARM_GCC_541\Release\mmcsd.o
+                0x0000064e                mmcWriteCachedFlush
+ .text.mmcReadCached
+                0x0000066a       0x2e .\CortexM0\ARM_GCC_541\Release\mmcsd.o
+                0x0000066a                mmcReadCached
+ .text._ZL15spiTransferByteh
+                0x00000698       0x20 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+ .text._ZL8ext_bitsPhii
+                0x000006b8       0x32 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+ .text._ZN8SDAccessC2Ev
+                0x000006ea        0x6 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+                0x000006ea                SDAccess::SDAccess()
+                0x000006ea                SDAccess::SDAccess()
+ .text._ZN8SDAccess4_cmdEii
+                0x000006f0       0x70 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+                0x000006f0                SDAccess::_cmd(int, int)
+ .text._ZN8SDAccess18initialise_card_v1Ev
+                0x00000760       0x38 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+                0x00000760                SDAccess::initialise_card_v1()
+ .text._ZN8SDAccess5_cmdxEii
+                0x00000798       0x64 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+                0x00000798                SDAccess::_cmdx(int, int)
+ .text._ZN8SDAccess6_cmd58Ev
+                0x000007fc       0x84 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+                0x000007fc                SDAccess::_cmd58()
+ .text._ZN8SDAccess18initialise_card_v2Ev
+                0x00000880       0x50 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+                0x00000880                SDAccess::initialise_card_v2()
+ .text._ZN8SDAccess5_cmd8Ev
+                0x000008d0       0x78 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+                0x000008d0                SDAccess::_cmd8()
+ .text._ZN8SDAccess15initialise_cardEv
+                0x00000948       0x70 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+                0x00000948                SDAccess::initialise_card()
+ .text._ZN8SDAccess5_readEPhm
+                0x000009b8       0x40 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+                0x000009b8                SDAccess::_read(unsigned char*, unsigned long)
+ .text._ZN8SDAccess9disk_readEPhmm
+                0x000009f8       0x68 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+                0x000009f8                SDAccess::disk_read(unsigned char*, unsigned long, unsigned long)
+ .text._ZN8SDAccess6_writeEPKhm
+                0x00000a60       0x62 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+                0x00000a60                SDAccess::_write(unsigned char const*, unsigned long)
+ *fill*         0x00000ac2        0x2 
+ .text._ZN8SDAccess10disk_writeEPKhmm
+                0x00000ac4       0x68 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+                0x00000ac4                SDAccess::disk_write(unsigned char const*, unsigned long, unsigned long)
+ .text._ZN8SDAccess11_sd_sectorsEv
+                0x00000b2c       0x84 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+                0x00000b2c                SDAccess::_sd_sectors()
+ .text._ZN8SDAccess15disk_initializeEv
+                0x00000bb0       0x5c .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+                0x00000bb0                SDAccess::disk_initialize()
+ .text.fatClustToSect
+                0x00000c0c       0x1e .\CortexM0\ARM_GCC_541\Release\fat.o
+                0x00000c0c                fatClustToSect
+ *fill*         0x00000c2a        0x2 
+ .text.fatInit  0x00000c2c      0x164 .\CortexM0\ARM_GCC_541\Release\fat.o
+                0x00000c2c                fatInit
+ .text.nextCluster
+                0x00000d90       0x74 .\CortexM0\ARM_GCC_541\Release\fat.o
+                0x00000d90                nextCluster
+ .text.fatGetDirEntry
+                0x00000e04      0x2a4 .\CortexM0\ARM_GCC_541\Release\fat.o
+                0x00000e04                fatGetDirEntry
+ .text.getClusterN
+                0x000010a8       0xb0 .\CortexM0\ARM_GCC_541\Release\fat.o
+                0x000010a8                getClusterN
+ .text.faccess_offset
+                0x00001158      0x158 .\CortexM0\ARM_GCC_541\Release\fat.o
+                0x00001158                faccess_offset
+ .text.InitLoaderCTX
+                0x000012b0       0xa0 .\CortexM0\ARM_GCC_541\Release\hwcontext.o
+                0x000012b0                InitLoaderCTX
+ .text.startup._GLOBAL__sub_I_InitLoaderCTX
+                0x00001350       0x14 .\CortexM0\ARM_GCC_541\Release\hwcontext.o
+ .text.IntDefaultHandler
+                0x00001364       0x10 .\CortexM0\ARM_GCC_541\Release\Cm0Start.o
+                0x00001364                IntDefaultHandler
+ .text.Start_c  0x00001374       0x4c .\CortexM0\ARM_GCC_541\Release\Cm0Start.o
+                0x00001374                Start_c
+ .text.startup.initialize_psoc
+                0x000013c0       0x3c .\CortexM0\ARM_GCC_541\Release\Cm0Start.o
+                0x000013c0                initialize_psoc
+ .text.SPIM_BL_Enable
+                0x000013fc       0x18 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL.o)
+                0x000013fc                SPIM_BL_Enable
+ .text.SPIM_BL_Start
+                0x00001414       0x1c .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL.o)
+                0x00001414                SPIM_BL_Start
+ .text.SPIM_BL_SpiUartReadRxData
+                0x00001430        0xc .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI_UART.o)
+                0x00001430                SPIM_BL_SpiUartReadRxData
+ .text.SPIM_BL_SpiUartGetRxBufferSize
+                0x0000143c       0x10 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI_UART.o)
+                0x0000143c                SPIM_BL_SpiUartGetRxBufferSize
+ .text.SPIM_BL_SpiUartWriteTxData
+                0x0000144c       0x1c .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI_UART.o)
+                0x0000144c                SPIM_BL_SpiUartWriteTxData
+ .text.SPIM_BL_SpiPostEnable
+                0x00001468       0x24 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI.o)
+                0x00001468                SPIM_BL_SpiPostEnable
+ .text.SPIM_BL_SpiSetActiveSlaveSelect
+                0x0000148c       0x20 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI.o)
+                0x0000148c                SPIM_BL_SpiSetActiveSlaveSelect
+ .text.SPIM_BL_SpiInit
+                0x000014ac       0x88 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI.o)
+                0x000014ac                SPIM_BL_SpiInit
+ .text.SPI_CLK_BL_SetFractionalDividerRegister
+                0x00001534       0x14 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPI_CLK_BL.o)
+                0x00001534                SPI_CLK_BL_SetFractionalDividerRegister
+ .text.LEDREG_BL_Write
+                0x00001548        0xc .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(LEDREG_BL.o)
+                0x00001548                LEDREG_BL_Write
+ .text.LEDREG_BL_Read
+                0x00001554        0xc .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(LEDREG_BL.o)
+                0x00001554                LEDREG_BL_Read
+ .text.CardPresent_Read
+                0x00001560       0x10 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CardPresent.o)
+                0x00001560                CardPresent_Read
+ .text.ReadOnly_BL_Read
+                0x00001570       0x10 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(ReadOnly_BL.o)
+                0x00001570                ReadOnly_BL_Read
+ .text.CySysFlashWriteRow
+                0x00001580      0x1ac .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyFlash.o)
+                0x00001580                CySysFlashWriteRow
+ .text.CyIntSetVector
+                0x0000172c       0x10 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+                0x0000172c                CyIntSetVector
+ .text.CyIntEnable
+                0x0000173c       0x14 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+                0x0000173c                CyIntEnable
+ .text.CySoftwareReset
+                0x00001750       0x18 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+                0x00001750                CySoftwareReset
+ .text.CyDelay  0x00001768       0x2c .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+                0x00001768                CyDelay
+ .text.CyDelayUs
+                0x00001794       0x14 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+                0x00001794                CyDelayUs
+ .text.CySysClkWriteImoFreq
+                0x000017a8      0x124 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+                0x000017a8                CySysClkWriteImoFreq
+ .text.CySysWdtLock
+                0x000018cc       0x1c .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+                0x000018cc                CySysWdtLock
+ .text.CySysWdtUnlock
+                0x000018e8       0x30 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+                0x000018e8                CySysWdtUnlock
+ .text.CySysWdtClearInterrupt
+                0x00001918       0x54 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+                0x00001918                CySysWdtClearInterrupt
+ .text.CySysWdtIsr
+                0x0000196c       0xa0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+                0x0000196c                CySysWdtIsr
+ .text.MMC_SSEL_Write
+                0x00001a0c        0xc .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(MMC_SSEL.o)
+                0x00001a0c                MMC_SSEL_Write
+ .text          0x00001a18       0x24 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyBootAsmGnu.o)
+                0x00001a18                CyDelayCycles
+                0x00001a2c                CyEnterCriticalSection
+                0x00001a34                CyExitCriticalSection
+ .text          0x00001a3c      0x114 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m\libgcc.a(_udivsi3.o)
+                0x00001a3c                __aeabi_uidiv
+                0x00001a3c                __udivsi3
+                0x00001b48                __aeabi_uidivmod
+ .text          0x00001b50        0x4 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m\libgcc.a(_dvmd_tls.o)
+                0x00001b50                __aeabi_idiv0
+                0x00001b50                __aeabi_ldiv0
+ .text.__errno  0x00001b54        0xc c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-errno.o)
+                0x00001b54                __errno
+ .text.__libc_init_array
+                0x00001b60       0x4c c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-init.o)
+                0x00001b60                __libc_init_array
+ .text.memcpy   0x00001bac       0x12 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-memcpy-stub.o)
+                0x00001bac                memcpy
+ .text.memset   0x00001bbe       0x10 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-memset.o)
+                0x00001bbe                memset
+ .text.strncmp  0x00001bce       0x24 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-strncmp.o)
+                0x00001bce                strncmp
+ *(.plt)
+ *(.gnu.warning)
+ *(.glue_7t)
+ .glue_7t       0x00001bf2        0x0 linker stubs
+ *(.glue_7)
+ .glue_7        0x00001bf2        0x0 linker stubs
+ *(.vfp11_veneer)
+ .vfp11_veneer  0x00001bf2        0x0 linker stubs
+ *(.keep)
+ *(.bootloader)
+ *(.ARM.extab* .gnu.linkonce.armextab.*)
+ *(.gcc_except_table)
+
+.v4_bx          0x00001bf4        0x0
+ .v4_bx         0x00001bf4        0x0 linker stubs
+
+.iplt           0x00001bf4        0x0
+ .iplt          0x00001bf4        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crtbegin.o
+
+.eh_frame_hdr
+ *(.eh_frame_hdr)
+
+.eh_frame       0x00001bf4        0x4
+ *(.eh_frame)
+ .eh_frame      0x00001bf4        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crtbegin.o
+ .eh_frame      0x00001bf4        0x4 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crtend.o
+                [!provide]                PROVIDE (__exidx_start, .)
+
+.ARM.exidx
+ *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+                0x00001bf8                __exidx_end = .
+
+.rodata         0x00001bf8       0xd8
+ *(.rodata .rodata.* .gnu.linkonce.r.*)
+ .rodata.str1.1
+                0x00001bf8        0xb .\CortexM0\ARM_GCC_541\Release\main.o
+ *fill*         0x00001c03        0x1 
+ .rodata        0x00001c04       0x62 .\CortexM0\ARM_GCC_541\Release\cyfitter_cfg.o
+ .rodata        0x00001c66       0x2e .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+                0x00001c66                cyImoFreqMhz2Reg
+ .rodata.str1.1
+                0x00001c94        0x2 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-impure.o)
+                0x00001c98                . = ALIGN (0x4)
+ *fill*         0x00001c96        0x2 
+ *(.init)
+ .init          0x00001c98        0x4 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crti.o
+                0x00001c98                _init
+ .init          0x00001c9c        0x8 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crtn.o
+                0x00001ca4                . = ALIGN (0x4)
+                0x00001ca4                __preinit_array_start = .
+ *(.preinit_array)
+                0x00001ca4                __preinit_array_end = .
+                0x00001ca4                . = ALIGN (0x4)
+                0x00001ca4                __init_array_start = .
+ *(SORT(.init_array.*))
+ *(.init_array)
+ .init_array    0x00001ca4        0x4 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crtbegin.o
+ .init_array    0x00001ca8        0x4 .\CortexM0\ARM_GCC_541\Release\hwcontext.o
+ .init_array    0x00001cac        0x4 .\CortexM0\ARM_GCC_541\Release\Cm0Start.o
+                0x00001cb0                __init_array_end = .
+                0x00001cb0                . = ALIGN (0x4)
+ *(.fini)
+ .fini          0x00001cb0        0x4 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crti.o
+                0x00001cb0                _fini
+ .fini          0x00001cb4        0x8 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crtn.o
+                0x00001cbc                . = ALIGN (0x4)
+                0x00001cbc                __fini_array_start = .
+ *(.fini_array)
+ .fini_array    0x00001cbc        0x4 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crtbegin.o
+ *(SORT(.fini_array.*))
+                0x00001cc0                __fini_array_end = .
+                0x00001cc0                . = ALIGN (0x4)
+ *crtbegin.o(.ctors)
+ *(EXCLUDE_FILE(*crtend.o) .ctors)
+ *(SORT(.ctors.*))
+ *crtend.o(.ctors)
+                0x00001cc0                . = ALIGN (0x4)
+ *crtbegin.o(.dtors)
+ *(EXCLUDE_FILE(*crtend.o) .dtors)
+ *(SORT(.dtors.*))
+ *crtend.o(.dtors)
+                0x00001cc0                . = ALIGN (0x4)
+                0x00001cc0                __cy_regions = .
+                0x00001cc0        0x4 LONG 0x1cd0 __cy_region_init_ram
+                0x00001cc4        0x4 LONG 0x200000c8 __cy_region_start_data
+                0x00001cc8        0x4 LONG 0x80 __cy_region_init_size_ram
+                0x00001ccc        0x4 LONG 0x3d0 __cy_region_zero_size_ram
+                0x00001cd0                __cy_regions_end = .
+                0x00001cd0                . = ALIGN (0x8)
+                0x00001cd0                _etext = .
+
+.cy_checksum_exclude
+                0x00001cd0        0x0
+ *(.cy_checksum_exclude)
+
+.ramvectors     0x20000000       0xc0
+                0x20000000                __cy_region_start_ram = .
+ *(.ramvectors)
+ .ramvectors    0x20000000       0xc0 .\CortexM0\ARM_GCC_541\Release\Cm0Start.o
+                0x20000000                CyRamVectors
+
+.btldr_run      0x200000c0        0x4
+ *(.bootloaderruntype)
+ .bootloaderruntype
+                0x200000c0        0x4 .\CortexM0\ARM_GCC_541\Release\main.o
+                0x200000c0                cyBtldrRunType
+
+.noinit
+ *(.noinit)
+
+.data           0x200000c8       0x80 load address 0x00001cd0
+                0x200000c8                __cy_region_start_data = .
+ *(.jcr)
+ .jcr           0x200000c8        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crtbegin.o
+ .jcr           0x200000c8        0x4 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crtend.o
+ *(.got.plt)
+ *(.got)
+ *(.shdata)
+ *(.data .data.* .gnu.linkonce.d.*)
+ .data          0x200000cc       0x14 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+                0x200000cc                CySysClkPumpConfig
+                0x200000d0                cydelay32kMs
+                0x200000d4                cydelayFreqKhz
+                0x200000d8                cydelayFreqMhz
+                0x200000dc                cydelayFreqHz
+ .data          0x200000e0        0x4 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .data.impure_data
+                0x200000e4       0x60 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-impure.o)
+ .data._impure_ptr
+                0x20000144        0x4 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-impure.o)
+                0x20000144                _impure_ptr
+                0x20000148                . = ALIGN (0x8)
+ *(.ram)
+                0x20000148                _edata = .
+
+.igot.plt       0x20000148        0x0 load address 0x00001d50
+ .igot.plt      0x20000148        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crtbegin.o
+
+.bss            0x20000148      0x3d0 load address 0x00001d50
+                0x20000148                PROVIDE (__bss_start__, .)
+ *(.shbss)
+ *(.bss .bss.* .gnu.linkonce.b.*)
+ .bss           0x20000148       0x1c c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crtbegin.o
+ .bss           0x20000164      0x388 .\CortexM0\ARM_GCC_541\Release\hwcontext.o
+ .bss           0x200004ec        0x4 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL.o)
+                0x200004ec                SPIM_BL_initVar
+                0x200004ee                SPIM_BL_IntrTxMask
+ .bss           0x200004f0        0x4 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyFlash.o)
+ .bss           0x200004f4       0x20 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ *(COMMON)
+                0x20000518                . = ALIGN (0x8)
+ *fill*         0x20000514        0x4 
+ *(.ram.b)
+                0x20000518                _end = .
+                0x20000518                __end = .
+                0x20000518                PROVIDE (end, .)
+                0x20000518                PROVIDE (__bss_end__, .)
+                0x00001cd0                __cy_region_init_ram = LOADADDR (.data)
+                0x00000080                __cy_region_init_size_ram = (_edata - ADDR (.data))
+                0x000003d0                __cy_region_zero_size_ram = (_end - _edata)
+
+.heap           0x20000518       0x80 load address 0x00001d50
+                0x20000518                . = _end
+                0x20000598                . = (. + 0x80)
+ *fill*         0x20000518       0x80 
+                0x20000598                __cy_heap_limit = .
+
+.stack          0x20000bfc      0x400
+                0x20000bfc                __cy_stack_limit = .
+                0x20000ffc                . = (. + 0x400)
+ *fill*         0x20000bfc      0x400 
+                0x00000001                ASSERT ((__cy_stack_limit >= __cy_heap_limit), region RAM overflowed with stack)
+                0x00000000                cy_checksum_exclude_size = (CY_APPL_LOADABLE == 0x1)?SIZEOF (.cy_checksum_exclude):0x0
+                0x00000001                ASSERT ((cy_checksum_exclude_size <= CY_CHECKSUM_EXCLUDE_SIZE), CY_BOOT: Section .cy_checksum_exclude size exceedes specified limit.)
+                0x00007fc0                cyloadermeta_start = (cy_project_type_bootloader || cy_project_type_app_for_stack_and_copier)?(LENGTH (rom) - CY_METADATA_SIZE):0xf0000000
+
+.cyloadermeta
+ *(.cyloadermeta)
+                0x00007fc0                cyloadablemeta_start = cy_project_type_app_for_stack_and_copier?((LENGTH (rom) - CY_FLASH_ROW_SIZE) - CY_METADATA_SIZE):((LENGTH (rom) - (CY_FLASH_ROW_SIZE * (CY_APPL_NUM - 0x1))) - CY_METADATA_SIZE)
+
+.cyloadablemeta
+ *(.cyloadablemeta)
+
+.cyflashprotect
+                0x90400000       0x20
+ *(.cyflashprotect)
+ .cyflashprotect
+                0x90400000       0x20 .\CortexM0\ARM_GCC_541\Release\cymetadata.o
+                0x90400000                cy_meta_flashprotect
+
+.cymeta         0x90500000        0xc
+ *(.cymeta)
+ .cymeta        0x90500000        0xc .\CortexM0\ARM_GCC_541\Release\cymetadata.o
+                0x90500000                cy_metadata
+
+.cychipprotect  0x90600000        0x1
+ *(.cychipprotect)
+ .cychipprotect
+                0x90600000        0x1 .\CortexM0\ARM_GCC_541\Release\cymetadata.o
+                0x90600000                cy_meta_chipprotect
+
+.rel.dyn        0x00001d50        0x0 load address 0x90600004
+ .rel.iplt      0x00001d50        0x0 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crtbegin.o
+
+.stab
+ *(.stab)
+
+.stabstr
+ *(.stabstr)
+
+.debug
+ *(.debug)
+
+.line
+ *(.line)
+
+.debug_srcinfo
+ *(.debug_srcinfo)
+
+.debug_sfnames
+ *(.debug_sfnames)
+
+.debug_aranges  0x00000000      0x780
+ *(.debug_aranges)
+ .debug_aranges
+                0x00000000       0x48 .\CortexM0\ARM_GCC_541\Release\main.o
+ .debug_aranges
+                0x00000048       0x50 .\CortexM0\ARM_GCC_541\Release\mmcsd.o
+ .debug_aranges
+                0x00000098       0xb0 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+ .debug_aranges
+                0x00000148       0x48 .\CortexM0\ARM_GCC_541\Release\fat.o
+ .debug_aranges
+                0x00000190       0x18 .\CortexM0\ARM_GCC_541\Release\dprint.o
+ .debug_aranges
+                0x000001a8       0x28 .\CortexM0\ARM_GCC_541\Release\hwcontext.o
+ .debug_aranges
+                0x000001d0       0x20 .\CortexM0\ARM_GCC_541\Release\cyfitter_cfg.o
+ .debug_aranges
+                0x000001f0       0x18 .\CortexM0\ARM_GCC_541\Release\cymetadata.o
+ .debug_aranges
+                0x00000208       0x48 .\CortexM0\ARM_GCC_541\Release\Cm0Start.o
+ .debug_aranges
+                0x00000250       0x50 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL.o)
+ .debug_aranges
+                0x000002a0       0x60 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI_UART.o)
+ .debug_aranges
+                0x00000300       0x38 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI.o)
+ .debug_aranges
+                0x00000338       0x40 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPI_CLK_BL.o)
+ .debug_aranges
+                0x00000378       0x28 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(LEDREG_BL.o)
+ .debug_aranges
+                0x000003a0       0x48 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CardPresent.o)
+ .debug_aranges
+                0x000003e8       0x48 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(ReadOnly_BL.o)
+ .debug_aranges
+                0x00000430       0x48 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_sclk_m.o)
+ .debug_aranges
+                0x00000478       0x28 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyFlash.o)
+ .debug_aranges
+                0x000004a0      0x180 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .debug_aranges
+                0x00000620      0x118 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .debug_aranges
+                0x00000738       0x28 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(MMC_SSEL.o)
+ .debug_aranges
+                0x00000760       0x20 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyBootAsmGnu.o)
+
+.debug_pubnames
+ *(.debug_pubnames)
+
+.debug_info     0x00000000     0x72c4
+ *(.debug_info .gnu.linkonce.wi.*)
+ .debug_info    0x00000000      0xac6 .\CortexM0\ARM_GCC_541\Release\main.o
+ .debug_info    0x00000ac6      0x8bc .\CortexM0\ARM_GCC_541\Release\mmcsd.o
+ .debug_info    0x00001382     0x15d6 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+ .debug_info    0x00002958      0xf2a .\CortexM0\ARM_GCC_541\Release\fat.o
+ .debug_info    0x00003882       0x87 .\CortexM0\ARM_GCC_541\Release\dprint.o
+ .debug_info    0x00003909      0x753 .\CortexM0\ARM_GCC_541\Release\hwcontext.o
+ .debug_info    0x0000405c      0x3c0 .\CortexM0\ARM_GCC_541\Release\cyfitter_cfg.o
+ .debug_info    0x0000441c       0xf8 .\CortexM0\ARM_GCC_541\Release\cymetadata.o
+ .debug_info    0x00004514      0x39e .\CortexM0\ARM_GCC_541\Release\Cm0Start.o
+ .debug_info    0x000048b2      0x261 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL.o)
+ .debug_info    0x00004b13      0x224 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI_UART.o)
+ .debug_info    0x00004d37      0x15b .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI.o)
+ .debug_info    0x00004e92      0x14e .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPI_CLK_BL.o)
+ .debug_info    0x00004fe0       0xd6 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(LEDREG_BL.o)
+ .debug_info    0x000050b6      0x1a0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CardPresent.o)
+ .debug_info    0x00005256      0x19b .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(ReadOnly_BL.o)
+ .debug_info    0x000053f1      0x19b .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_sclk_m.o)
+ .debug_info    0x0000558c      0x364 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyFlash.o)
+ .debug_info    0x000058f0      0xaef .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .debug_info    0x000063df      0xd7b .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .debug_info    0x0000715a       0xd6 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(MMC_SSEL.o)
+ .debug_info    0x00007230       0x94 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyBootAsmGnu.o)
+
+.debug_abbrev   0x00000000     0x2154
+ *(.debug_abbrev)
+ .debug_abbrev  0x00000000      0x26a .\CortexM0\ARM_GCC_541\Release\main.o
+ .debug_abbrev  0x0000026a      0x2c1 .\CortexM0\ARM_GCC_541\Release\mmcsd.o
+ .debug_abbrev  0x0000052b      0x36a .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+ .debug_abbrev  0x00000895      0x2e5 .\CortexM0\ARM_GCC_541\Release\fat.o
+ .debug_abbrev  0x00000b7a       0x26 .\CortexM0\ARM_GCC_541\Release\dprint.o
+ .debug_abbrev  0x00000ba0      0x22f .\CortexM0\ARM_GCC_541\Release\hwcontext.o
+ .debug_abbrev  0x00000dcf      0x1d5 .\CortexM0\ARM_GCC_541\Release\cyfitter_cfg.o
+ .debug_abbrev  0x00000fa4       0x5d .\CortexM0\ARM_GCC_541\Release\cymetadata.o
+ .debug_abbrev  0x00001001      0x1d5 .\CortexM0\ARM_GCC_541\Release\Cm0Start.o
+ .debug_abbrev  0x000011d6      0x127 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL.o)
+ .debug_abbrev  0x000012fd      0x14f .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI_UART.o)
+ .debug_abbrev  0x0000144c       0xec .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI.o)
+ .debug_abbrev  0x00001538       0xb7 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPI_CLK_BL.o)
+ .debug_abbrev  0x000015ef       0x81 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(LEDREG_BL.o)
+ .debug_abbrev  0x00001670       0xc8 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CardPresent.o)
+ .debug_abbrev  0x00001738       0xc6 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(ReadOnly_BL.o)
+ .debug_abbrev  0x000017fe       0xc6 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_sclk_m.o)
+ .debug_abbrev  0x000018c4      0x1ce .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyFlash.o)
+ .debug_abbrev  0x00001a92      0x2e6 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .debug_abbrev  0x00001d78      0x347 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .debug_abbrev  0x000020bf       0x81 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(MMC_SSEL.o)
+ .debug_abbrev  0x00002140       0x14 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyBootAsmGnu.o)
+
+.debug_line     0x00000000     0x2478
+ *(.debug_line)
+ .debug_line    0x00000000      0x223 .\CortexM0\ARM_GCC_541\Release\main.o
+ .debug_line    0x00000223      0x208 .\CortexM0\ARM_GCC_541\Release\mmcsd.o
+ .debug_line    0x0000042b      0x468 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+ .debug_line    0x00000893      0x281 .\CortexM0\ARM_GCC_541\Release\fat.o
+ .debug_line    0x00000b14       0x1d .\CortexM0\ARM_GCC_541\Release\dprint.o
+ .debug_line    0x00000b31      0x1bf .\CortexM0\ARM_GCC_541\Release\hwcontext.o
+ .debug_line    0x00000cf0      0x178 .\CortexM0\ARM_GCC_541\Release\cyfitter_cfg.o
+ .debug_line    0x00000e68      0x133 .\CortexM0\ARM_GCC_541\Release\cymetadata.o
+ .debug_line    0x00000f9b      0x221 .\CortexM0\ARM_GCC_541\Release\Cm0Start.o
+ .debug_line    0x000011bc      0x12f .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL.o)
+ .debug_line    0x000012eb      0x12c .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI_UART.o)
+ .debug_line    0x00001417       0xff .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI.o)
+ .debug_line    0x00001516       0xba .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPI_CLK_BL.o)
+ .debug_line    0x000015d0       0x76 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(LEDREG_BL.o)
+ .debug_line    0x00001646       0xcd .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CardPresent.o)
+ .debug_line    0x00001713       0xce .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(ReadOnly_BL.o)
+ .debug_line    0x000017e1       0xd1 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_sclk_m.o)
+ .debug_line    0x000018b2      0x173 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyFlash.o)
+ .debug_line    0x00001a25      0x4b5 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .debug_line    0x00001eda      0x4c0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .debug_line    0x0000239a       0x75 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(MMC_SSEL.o)
+ .debug_line    0x0000240f       0x69 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyBootAsmGnu.o)
+
+.debug_frame    0x00000000     0x120c
+ *(.debug_frame)
+ .debug_frame   0x00000000       0xb8 .\CortexM0\ARM_GCC_541\Release\main.o
+ .debug_frame   0x000000b8       0xd0 .\CortexM0\ARM_GCC_541\Release\mmcsd.o
+ .debug_frame   0x00000188      0x274 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+ .debug_frame   0x000003fc       0xec .\CortexM0\ARM_GCC_541\Release\fat.o
+ .debug_frame   0x000004e8       0x48 .\CortexM0\ARM_GCC_541\Release\hwcontext.o
+ .debug_frame   0x00000530       0x3c .\CortexM0\ARM_GCC_541\Release\cyfitter_cfg.o
+ .debug_frame   0x0000056c       0xc8 .\CortexM0\ARM_GCC_541\Release\Cm0Start.o
+ .debug_frame   0x00000634       0xb0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL.o)
+ .debug_frame   0x000006e4       0xb0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI_UART.o)
+ .debug_frame   0x00000794       0x68 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI.o)
+ .debug_frame   0x000007fc       0x60 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPI_CLK_BL.o)
+ .debug_frame   0x0000085c       0x30 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(LEDREG_BL.o)
+ .debug_frame   0x0000088c       0x70 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CardPresent.o)
+ .debug_frame   0x000008fc       0x70 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(ReadOnly_BL.o)
+ .debug_frame   0x0000096c       0x70 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_sclk_m.o)
+ .debug_frame   0x000009dc       0x54 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyFlash.o)
+ .debug_frame   0x00000a30      0x3b0 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .debug_frame   0x00000de0      0x2f4 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .debug_frame   0x000010d4       0x30 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(MMC_SSEL.o)
+ .debug_frame   0x00001104       0x20 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m\libgcc.a(_udivsi3.o)
+ .debug_frame   0x00001124       0x20 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-errno.o)
+ .debug_frame   0x00001144       0x28 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-exit.o)
+ .debug_frame   0x0000116c       0x2c c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-init.o)
+ .debug_frame   0x00001198       0x28 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-memcpy-stub.o)
+ .debug_frame   0x000011c0       0x20 c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-memset.o)
+ .debug_frame   0x000011e0       0x2c c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-strncmp.o)
+
+.debug_str      0x00000000     0x2330
+ *(.debug_str)
+ .debug_str     0x00000000      0x5c5 .\CortexM0\ARM_GCC_541\Release\main.o
+                                0x67c (size before relaxing)
+ .debug_str     0x000005c5      0x399 .\CortexM0\ARM_GCC_541\Release\mmcsd.o
+                                0x75f (size before relaxing)
+ .debug_str     0x0000095e       0xcc .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+                                0x7e2 (size before relaxing)
+ .debug_str     0x00000a2a      0x437 .\CortexM0\ARM_GCC_541\Release\fat.o
+                                0x95d (size before relaxing)
+ .debug_str     0x00000e61       0x16 .\CortexM0\ARM_GCC_541\Release\dprint.o
+                                0x1a5 (size before relaxing)
+ .debug_str     0x00000e77       0x9b .\CortexM0\ARM_GCC_541\Release\hwcontext.o
+                                0x7a3 (size before relaxing)
+ .debug_str     0x00000f12       0xff .\CortexM0\ARM_GCC_541\Release\cyfitter_cfg.o
+                                0x2ea (size before relaxing)
+ .debug_str     0x00001011       0x59 .\CortexM0\ARM_GCC_541\Release\cymetadata.o
+                                0x1dc (size before relaxing)
+ .debug_str     0x0000106a      0x13a .\CortexM0\ARM_GCC_541\Release\Cm0Start.o
+                                0x315 (size before relaxing)
+ .debug_str     0x000011a4      0x15e .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL.o)
+                                0x307 (size before relaxing)
+ .debug_str     0x00001302      0x153 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI_UART.o)
+                                0x300 (size before relaxing)
+ .debug_str     0x00001455       0x6e .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI.o)
+                                0x25a (size before relaxing)
+ .debug_str     0x000014c3       0xdb .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPI_CLK_BL.o)
+                                0x26f (size before relaxing)
+ .debug_str     0x0000159e       0x4a .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(LEDREG_BL.o)
+                                0x1cf (size before relaxing)
+ .debug_str     0x000015e8       0xbb .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CardPresent.o)
+                                0x274 (size before relaxing)
+ .debug_str     0x000016a3       0xb1 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(ReadOnly_BL.o)
+                                0x274 (size before relaxing)
+ .debug_str     0x00001754       0xb1 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_sclk_m.o)
+                                0x289 (size before relaxing)
+ .debug_str     0x00001805      0x16e .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyFlash.o)
+                                0x342 (size before relaxing)
+ .debug_str     0x00001973      0x461 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+                                0x6ca (size before relaxing)
+ .debug_str     0x00001dd4      0x51d .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+                                0x74a (size before relaxing)
+ .debug_str     0x000022f1       0x3f .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(MMC_SSEL.o)
+                                0x1cc (size before relaxing)
+
+.debug_loc      0x00000000     0x3955
+ *(.debug_loc)
+ .debug_loc     0x00000000      0x395 .\CortexM0\ARM_GCC_541\Release\main.o
+ .debug_loc     0x00000395      0x230 .\CortexM0\ARM_GCC_541\Release\mmcsd.o
+ .debug_loc     0x000005c5      0xd2e .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+ .debug_loc     0x000012f3      0xe98 .\CortexM0\ARM_GCC_541\Release\fat.o
+ .debug_loc     0x0000218b       0x2a .\CortexM0\ARM_GCC_541\Release\hwcontext.o
+ .debug_loc     0x000021b5      0x11e .\CortexM0\ARM_GCC_541\Release\cyfitter_cfg.o
+ .debug_loc     0x000022d3      0x1de .\CortexM0\ARM_GCC_541\Release\Cm0Start.o
+ .debug_loc     0x000024b1       0x7e .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL.o)
+ .debug_loc     0x0000252f       0xee .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI_UART.o)
+ .debug_loc     0x0000261d       0x4a .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI.o)
+ .debug_loc     0x00002667       0x1a .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPI_CLK_BL.o)
+ .debug_loc     0x00002681       0x5f .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CardPresent.o)
+ .debug_loc     0x000026e0       0xa1 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(ReadOnly_BL.o)
+ .debug_loc     0x00002781       0xa1 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_sclk_m.o)
+ .debug_loc     0x00002822      0x258 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyFlash.o)
+ .debug_loc     0x00002a7a      0x545 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .debug_loc     0x00002fbf      0x996 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+
+.debug_macinfo
+ *(.debug_macinfo)
+
+.debug_ranges   0x00000000      0x918
+ *(.debug_ranges)
+ .debug_ranges  0x00000000       0x50 .\CortexM0\ARM_GCC_541\Release\main.o
+ .debug_ranges  0x00000050       0x40 .\CortexM0\ARM_GCC_541\Release\mmcsd.o
+ .debug_ranges  0x00000090      0x1e0 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+ .debug_ranges  0x00000270       0x50 .\CortexM0\ARM_GCC_541\Release\fat.o
+ .debug_ranges  0x000002c0       0x30 .\CortexM0\ARM_GCC_541\Release\hwcontext.o
+ .debug_ranges  0x000002f0       0xa8 .\CortexM0\ARM_GCC_541\Release\cyfitter_cfg.o
+ .debug_ranges  0x00000398       0x50 .\CortexM0\ARM_GCC_541\Release\Cm0Start.o
+ .debug_ranges  0x000003e8       0x40 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL.o)
+ .debug_ranges  0x00000428       0x50 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI_UART.o)
+ .debug_ranges  0x00000478       0x28 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI.o)
+ .debug_ranges  0x000004a0       0x30 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPI_CLK_BL.o)
+ .debug_ranges  0x000004d0       0x18 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(LEDREG_BL.o)
+ .debug_ranges  0x000004e8       0x38 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CardPresent.o)
+ .debug_ranges  0x00000520       0x38 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(ReadOnly_BL.o)
+ .debug_ranges  0x00000558       0x38 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_sclk_m.o)
+ .debug_ranges  0x00000590       0x30 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyFlash.o)
+ .debug_ranges  0x000005c0      0x1a8 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .debug_ranges  0x00000768      0x198 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .debug_ranges  0x00000900       0x18 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(MMC_SSEL.o)
+
+.comment        0x00000000       0x6e
+ .comment       0x00000000       0x6e .\CortexM0\ARM_GCC_541\Release\main.o
+                                 0x6f (size before relaxing)
+ .comment       0x0000006e       0x6f .\CortexM0\ARM_GCC_541\Release\mmcsd.o
+ .comment       0x0000006e       0x6f .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+ .comment       0x0000006e       0x6f .\CortexM0\ARM_GCC_541\Release\fat.o
+ .comment       0x0000006e       0x6f .\CortexM0\ARM_GCC_541\Release\dprint.o
+ .comment       0x0000006e       0x6f .\CortexM0\ARM_GCC_541\Release\hwcontext.o
+ .comment       0x0000006e       0x6f .\CortexM0\ARM_GCC_541\Release\cyfitter_cfg.o
+ .comment       0x0000006e       0x6f .\CortexM0\ARM_GCC_541\Release\cymetadata.o
+ .comment       0x0000006e       0x6f .\CortexM0\ARM_GCC_541\Release\Cm0Start.o
+ .comment       0x0000006e       0x6f .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL.o)
+ .comment       0x0000006e       0x6f .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI_UART.o)
+ .comment       0x0000006e       0x6f .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI.o)
+ .comment       0x0000006e       0x6f .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPI_CLK_BL.o)
+ .comment       0x0000006e       0x6f .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(LEDREG_BL.o)
+ .comment       0x0000006e       0x6f .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CardPresent.o)
+ .comment       0x0000006e       0x6f .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(ReadOnly_BL.o)
+ .comment       0x0000006e       0x6f .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_sclk_m.o)
+ .comment       0x0000006e       0x6f .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyFlash.o)
+ .comment       0x0000006e       0x6f .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .comment       0x0000006e       0x6f .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .comment       0x0000006e       0x6f .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(MMC_SSEL.o)
+
+.debug_weaknames
+ *(.debug_weaknames)
+
+.debug_funcnames
+ *(.debug_funcnames)
+
+.debug_typenames
+ *(.debug_typenames)
+
+.debug_varnames
+ *(.debug_varnames)
+
+.note.gnu.arm.ident
+ *(.note.gnu.arm.ident)
+
+.ARM.attributes
+                0x00000000       0x28
+ *(.ARM.attributes)
+ .ARM.attributes
+                0x00000000       0x1e c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crti.o
+ .ARM.attributes
+                0x0000001e       0x2c c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crtbegin.o
+ .ARM.attributes
+                0x0000004a       0x1b c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m/crt0.o
+ .ARM.attributes
+                0x00000065       0x31 .\CortexM0\ARM_GCC_541\Release\main.o
+ .ARM.attributes
+                0x00000096       0x31 .\CortexM0\ARM_GCC_541\Release\mmcsd.o
+ .ARM.attributes
+                0x000000c7       0x31 .\CortexM0\ARM_GCC_541\Release\sdaccess.o
+ .ARM.attributes
+                0x000000f8       0x31 .\CortexM0\ARM_GCC_541\Release\fat.o
+ .ARM.attributes
+                0x00000129       0x31 .\CortexM0\ARM_GCC_541\Release\dprint.o
+ .ARM.attributes
+                0x0000015a       0x31 .\CortexM0\ARM_GCC_541\Release\hwcontext.o
+ .ARM.attributes
+                0x0000018b       0x31 .\CortexM0\ARM_GCC_541\Release\cyfitter_cfg.o
+ .ARM.attributes
+                0x000001bc       0x31 .\CortexM0\ARM_GCC_541\Release\cymetadata.o
+ .ARM.attributes
+                0x000001ed       0x31 .\CortexM0\ARM_GCC_541\Release\Cm0Start.o
+ .ARM.attributes
+                0x0000021e       0x31 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL.o)
+ .ARM.attributes
+                0x0000024f       0x31 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI_UART.o)
+ .ARM.attributes
+                0x00000280       0x31 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_SPI.o)
+ .ARM.attributes
+                0x000002b1       0x31 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPI_CLK_BL.o)
+ .ARM.attributes
+                0x000002e2       0x31 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(LEDREG_BL.o)
+ .ARM.attributes
+                0x00000313       0x31 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CardPresent.o)
+ .ARM.attributes
+                0x00000344       0x31 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(ReadOnly_BL.o)
+ .ARM.attributes
+                0x00000375       0x31 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(SPIM_BL_sclk_m.o)
+ .ARM.attributes
+                0x000003a6       0x31 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyFlash.o)
+ .ARM.attributes
+                0x000003d7       0x31 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLib.o)
+ .ARM.attributes
+                0x00000408       0x31 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyLFClk.o)
+ .ARM.attributes
+                0x00000439       0x31 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(MMC_SSEL.o)
+ .ARM.attributes
+                0x0000046a       0x21 .\CortexM0\ARM_GCC_541\Release\SDLauncher.a(CyBootAsmGnu.o)
+ .ARM.attributes
+                0x0000048b       0x1e c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m\libgcc.a(_udivsi3.o)
+ .ARM.attributes
+                0x000004a9       0x1e c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m\libgcc.a(_dvmd_tls.o)
+ .ARM.attributes
+                0x000004c7       0x2c c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-errno.o)
+ .ARM.attributes
+                0x000004f3       0x2c c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-exit.o)
+ .ARM.attributes
+                0x0000051f       0x2c c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-impure.o)
+ .ARM.attributes
+                0x0000054b       0x2c c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-init.o)
+ .ARM.attributes
+                0x00000577       0x2c c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-memcpy-stub.o)
+ .ARM.attributes
+                0x000005a3       0x2c c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-memset.o)
+ .ARM.attributes
+                0x000005cf       0x2c c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/../../../../arm-none-eabi/lib/armv6-m\libg_nano.a(lib_a-strncmp.o)
+ .ARM.attributes
+                0x000005fb       0x2c c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crtend.o
+ .ARM.attributes
+                0x00000627       0x1e c:/storage/soft/cypress/psoc creator/4.3/psoc creator/import/gnu/arm/5.4.1/bin/../lib/gcc/arm-none-eabi/5.4.1/armv6-m/crtn.o
+
+/DISCARD/
+ *(.note.GNU-stack)
+OUTPUT(C:\Storage\Work\Atari\SDrive-ARM\soft\target\CyPSoC4\SDLauncher.cydsn\CortexM0\ARM_GCC_541\Release\SDLauncher.elf elf32-littlearm)

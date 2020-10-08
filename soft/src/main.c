@@ -18,8 +18,8 @@ int main(void)
     
     //CyDelay(5000);
     CyGlobalIntEnable; /* Enable global interrupts. */
-    UART_1_Start();    
-
+    UART_1_Start(); 
+    SlowUARTCounter_Init();
     InitLoadableCTX();
     sdrive();
     return 0;

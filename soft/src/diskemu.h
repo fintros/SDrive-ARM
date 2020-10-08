@@ -32,9 +32,9 @@ typedef enum
 
 file_t* GetVDiskPtr(int no);
 
-int SimulateDiskDrive(unsigned char* pCommand, unsigned char* buffer);
-int Read(file_t* pDisk, unsigned char* buffer, unsigned short sector);
-int Write(file_t* pDisk, unsigned char* buffer, unsigned short sector);
+int SimulateDiskDrive(HWContext* ctx, unsigned char* pCommand, unsigned char* buffer);
+int Read(HWContext* ctx, file_t* pDisk, unsigned char* buffer, unsigned short sector);
+int Write(HWContext* ctx, file_t* pDisk, unsigned char* buffer, unsigned short sector);
 int GetStatus(file_t* pDisk);
 
 void ResetDrives();
