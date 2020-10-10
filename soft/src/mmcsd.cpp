@@ -9,95 +9,78 @@
  */
  
 #include "mmcsd.h"
-#include "SDAccess.h"
-#include "HWContext.h"
+#include "sdaccess.h"
 
-#define LED_RED_ON		((HWContext*)__hwcontext)->LEDREG_Write(((HWContext*)__hwcontext)->LEDREG_Read() & ~0x2)
-#define LED_RED_OFF		((HWContext*)__hwcontext)->LEDREG_Write(((HWContext*)__hwcontext)->LEDREG_Read() | 0x2)
-
+#define LED_RED_ON		(ctx->LEDREG_Write(ctx->LEDREG_Read() & ~0x2))
+#define LED_RED_OFF		(ctx->LEDREG_Write(ctx->LEDREG_Read() | 0x2))
 
 extern "C" {    
 
-void mmcInit(void)
+void mmcInit(HWContext* ctx)
 {
-    HWContext* ctx = (HWContext*)__hwcontext;
   	ctx->n_actual_mmc_sector=0xFFFFFFFF;
 	ctx->n_actual_mmc_sector_needswrite=0;
-
-    // initialize SPI interface
 }
 
-u08 mmcReset(void)
-{
-    HWContext* ctx = (HWContext*)__hwcontext;
-  
+int mmcReset(HWContext* ctx)
+{  
     return ((SDAccess*)(ctx->sdAccess))->disk_initialize();
 }
 
-u08 mmcRead(u32 sector)
+int mmcRead(HWContext* ctx, unsigned long sector)
 {
-    HWContext* ctx = (HWContext*)__hwcontext;
 	return ((SDAccess*)(ctx->sdAccess))->disk_read(&ctx->mmc_sector_buffer[0], sector, 1);
 }
 
-u08 mmcWrite(u32 sector)
+int mmcWrite(HWContext* ctx, unsigned long sector)
 {
-    HWContext* ctx = (HWContext*)__hwcontext;
 	return ((SDAccess*)(ctx->sdAccess))->disk_write(&ctx->mmc_sector_buffer[0], sector, 1);
 }
 
-void mmcReadCached(u32 sector)
+void mmcReadCached(HWContext* ctx, unsigned long sector)
 {
-    HWContext* ctx = (HWContext*)__hwcontext;
 	if(sector==ctx->n_actual_mmc_sector) return;
 
-	u08 ret,retry;
-	//predtim nez nacte jiny, musi ulozit soucasny
-	mmcWriteCachedFlush();
-	//az ted nacte novy
-	retry=0; //zkusi to maximalne 256x
+	unsigned char ret, retry;
+	mmcWriteCachedFlush(ctx);
+	retry=0;
 	do
 	{
-		ret = mmcRead(sector);	//vraci 0 kdyz ok
+		ret = mmcRead(ctx, sector);
 		retry--;
 	} while (ret && retry);
-	while(ret); //a pokud se vubec nepovedlo, tady zustane zablokovany cely SDrive!
+	while(ret);
 	ctx->n_actual_mmc_sector=sector;
 }
 
-u08 mmcWriteCached(unsigned char force)
+int mmcWriteCached(HWContext* ctx, unsigned char force)
 {
-    HWContext* ctx = (HWContext*)__hwcontext;
 	if ( ctx->ReadOnly_Read() == 0  ) return 0xff; //zakazany zapis
 	LED_RED_ON;
 	if (force)
 	{
-		u08 ret,retry;
-		retry=16; //zkusi to maximalne 16x
+		unsigned char ret,retry;
+		retry=16;
 		do
 		{
-			ret = mmcWrite(ctx->n_actual_mmc_sector); //vraci 0 kdyz ok
+			ret = mmcWrite(ctx, ctx->n_actual_mmc_sector);
 			retry--;
 		} while (ret && retry);
-		while(ret); //a pokud se vubec nepovedlo, tady zustane zablokovany cely SDrive!
-		ctx->n_actual_mmc_sector_needswrite = 0;
+		while(ret);
+        ctx->n_actual_mmc_sector_needswrite = 0;
 		LED_RED_OFF;
 	}
 	else
 	{
 		ctx->n_actual_mmc_sector_needswrite=1;
 	}
-	return 0; //vraci 0 kdyz ok
+	return 0;
 }
 
-void mmcWriteCachedFlush()
+void mmcWriteCachedFlush(HWContext* ctx)
 {
-    HWContext* ctx = (HWContext*)__hwcontext;
 	if (ctx->n_actual_mmc_sector_needswrite)
-	{
-	 while (mmcWriteCached(1)); //pokud je zakazany zapis, tady zustane zablokovany cely SDrive!
-	 							//do okamziku, nez ten zapis nebude povolen (visi mu neco v cache)
-	}
+	 while (mmcWriteCached(ctx, 1));
 }
 
 }    

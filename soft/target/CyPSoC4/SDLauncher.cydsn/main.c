@@ -77,7 +77,7 @@ int ProceedUpdate(file_t* pFile, int isForced)
     pFile->current_cluster = pFile->start_cluster;
 	pFile->ncluster=0;
 
-	faccess_offset(pFile, FILE_ACCESS_READ,0x7FC0, &((HWContext*)__hwcontext)->atari_sector_buffer[0], 0x40); // read metadata
+	faccess_offset(ctx, pFile, FILE_ACCESS_READ, 0x7FC0, &((HWContext*)__hwcontext)->atari_sector_buffer[0], 0x40); // read metadata
     
     uint16 currVersion = GetUint16Value(Launcher_MD_BTLDB_APP_VERSION_OFFSET(0));
     uint16 currAppID = GetUint16Value(Launcher_MD_BTLDB_APP_ID_OFFSET(0));
@@ -123,7 +123,7 @@ int ProceedUpdate(file_t* pFile, int isForced)
             {
               	pFile->current_cluster=pFile->start_cluster;
                 pFile->ncluster=0;
-                if(faccess_offset(pFile, FILE_ACCESS_READ, currentOffset, &((HWContext*)__hwcontext)->atari_sector_buffer[0], CY_FLASH_SIZEOF_ROW))
+                if(faccess_offset(ctx, pFile, FILE_ACCESS_READ, currentOffset, &((HWContext*)__hwcontext)->atari_sector_buffer[0], CY_FLASH_SIZEOF_ROW))
                 {
                     ledState = 1 - ledState;
                     if(ledState)
@@ -195,14 +195,14 @@ int main(void)
     
     do
 	{
-		mmcInit();
+		mmcInit(ctx);
 	}
-	while(mmcReset());
+	while(mmcReset(ctx));
 
     dprint("MMC inited\r\n"); 
 
     
-   	while ( !fatInit() ) //Inicializace FATky
+   	while ( !fatInit(ctx) ) //Inicializace FATky
 	{
        CyDelay(100u);
     }
@@ -220,7 +220,7 @@ int main(void)
     // search for update first.
 	i=0;
     int updateType = 0; // no update by default
-	while( fatGetDirEntry(&file, &ctx->atari_sector_buffer[0], i, 0) )
+	while( fatGetDirEntry(ctx, &file, &ctx->atari_sector_buffer[0], i, 0) )
 	{
         const char* fileName = (char*)&ctx->atari_sector_buffer[0];
         if(!strncmp("UPD", &fileName[8],3))

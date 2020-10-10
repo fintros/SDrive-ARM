@@ -32,11 +32,10 @@
 SharedParameters shared_parameters;
 Settings settings;
 
-int wait_for_command()
+int wait_for_command(HWContext* ctx)
 {
     static unsigned long autowritecounter = 0;
     static unsigned char last_key = 0;
-    HWContext* ctx = (HWContext*)__hwcontext;
 
     while( get_cmd_H() )	//dokud je Atari signal command na H
     {           
@@ -49,7 +48,7 @@ int wait_for_command()
             switch(actual_key)
         	{
         		case 6: ///BOOT KEY
-        			if(InitBootDrive(&ctx->atari_sector_buffer[0]))
+        			if(InitBootDrive(ctx, &ctx->atari_sector_buffer[0]))
                         return -1;
                     shared_parameters.actual_drive_number = 0;
         			break;;
@@ -73,7 +72,7 @@ int wait_for_command()
 
         if (autowritecounter>1700000)
         {
-         	mmcWriteCachedFlush();
+         	mmcWriteCachedFlush(ctx);
         	autowritecounter=0;
         }
         else
@@ -82,24 +81,127 @@ int wait_for_command()
     return 0;
 }
 
+#define UART_SAMPLES 40
+unsigned char vals[UART_SAMPLES];
+unsigned int no;
+
+CY_ISR(SlowUartISR)
+{
+    if(no < UART_SAMPLES)
+    {        
+        unsigned int count = SlowUARTCounter_COUNTER_REG & SlowUARTCounter_16BIT_MASK;
+        SlowUARTCounter_COUNTER_REG = 0;
+        vals[no++] = count | (SWBUT_Read()&1);  // timer already shift value by one bit right
+    }
+}
+
+enum
+{
+    EStateWaitForStartBit = 0,
+    EStateDataRecv,
+    EStateWaitForStopBit,
+    EStateError
+};
+
+
+int DecodeSlowUART(unsigned char* command, int max_len)
+{
+    int state = EStateWaitForStartBit;
+    int byte_no = 0;
+    int bit_in_byte = 0;
+    unsigned char current_byte = 0;
+    
+    for(unsigned int i = 0; i < no; i++)
+    {
+        unsigned int bit = 1 - (vals[i] & 1);
+        unsigned int count = vals[i] >> 1;
+
+        while(count--)
+        {
+            switch(state)
+            {
+                case EStateWaitForStartBit:
+                    if(bit)    // wait for '0'
+                        break;
+                    state = EStateDataRecv;
+                    current_byte = 0;
+                    bit_in_byte = 0;
+                    break;
+                case EStateDataRecv:
+                   current_byte |= bit << bit_in_byte++;
+                   if(bit_in_byte == 8)
+                       state = EStateWaitForStopBit;
+                   break;
+                case EStateWaitForStopBit:
+                    if(bit) // wait for '1'
+                    {
+                        if(byte_no < max_len)
+                            command[byte_no++] = current_byte;
+                        state = EStateWaitForStartBit;                   
+                    }
+                    break;
+                case EStateError:
+                    break;
+            }   
+        }
+    }
+    // fill out remaining bits in case '1' ended sequence
+    if(bit_in_byte < 8)
+    {        
+        for(;bit_in_byte < 8; bit_in_byte++)
+           current_byte |= 1 << bit_in_byte;
+    
+        if(byte_no < max_len)
+            command[byte_no++] = current_byte;
+    }
+
+    #ifdef DEBUG
+        dprint("Decoded CMD %d: [%02X %02X %02X %02X %02X]\r\n", byte_no, command[0], command[1], command[2], command[3], command[4]);        
+    #endif
+    
+    if( command[4] != get_checksum(command, 4) )
+        return 1;
+
+    return 0;
+}
 
 int get_command(unsigned char* command)
 {
     LED_OFF;
     memset(command, 0, 4);
-	u08 err = USART_Get_Buffer_And_Check(command,4,CMD_STATE_L);
-
-#ifdef DEBUG
-    if(err)
-        dprint("Command error: [%02X]\r\n", err);
-    else
-        dprint("Command: [%02X %02X %02X %02X]\r\n", command[0], command[1], command[2], command[3]);
-#endif
+    
+    // try to catch on ordinary speed
+    no = 0;
+    SlowUARTCounter_WriteCounter(0);
+    SlowUARTCounter_Start();
+    SlowUartISR_StartEx(SlowUartISR);
+        
+	// end get as ususal
+    unsigned char err = USART_Get_Buffer_And_Check(command,4,CMD_STATE_L);
 
 	CyDelayUs(800u);	//t1 (650-950us) (Bez tehle pauzy to cele nefunguje!!!)
 	wait_cmd_LH();	//ceka az se zvedne signal command na H
 	CyDelayUs(100u);	//T2=100   (po zvednuti command a pred ACKem)
+    
+#ifdef DEBUG
+    if(err)
+        dprint("Command error: [%02X]\r\n", err);
+    else
+        dprint("Command: [%02X %02X %02X %02X], CS: [%02X]\r\n", command[0], command[1], command[2], command[3], command[4]);
+#endif  
 
+    SlowUartISR_Stop();
+    SlowUARTCounter_Stop();
+    
+#ifdef DEBUG
+    dprint("Catched: ");
+    for(int i = 0; i < no; i++)
+        dprint("[%d]%d,", 1 - (vals[i] & 1),  vals[i]>>1);
+    dprint("\r\n");
+#endif  
+    if(err)
+        err = DecodeSlowUART(command,5);
+    
     LED_GREEN_ON;
     LED_ON;
     
@@ -120,7 +222,6 @@ int get_command(unsigned char* command)
 
     return 0;
 }
-
 
 //----- Begin Code ------------------------------------------------------------
 int sdrive(void)
@@ -172,9 +273,9 @@ int sdrive(void)
     	do
     	{
             dprint("Retry\r\n");
-    		mmcInit();
+    		mmcInit(ctx);
     	}
-    	while(mmcReset());	//Wait for SD card ready
+    	while(mmcReset(ctx));	//Wait for SD card ready
 
         LED_GREEN_OFF;
         dprint("SD card inititialized\r\n");
@@ -183,7 +284,7 @@ int sdrive(void)
 
         // set boot drive to active D1:
         shared_parameters.actual_drive_number = 0;
-    	if(InitBootDrive(&ctx->atari_sector_buffer[0]))
+    	if(InitBootDrive(ctx, &ctx->atari_sector_buffer[0]))
             continue;
         
     	set_display(shared_parameters.actual_drive_number);
@@ -193,22 +294,22 @@ int sdrive(void)
             int res;
             
     		LED_GREEN_OFF;
-            if((res = wait_for_command()) > 0)
+            if((res = wait_for_command(ctx)) > 0)
                 continue;
-            
+                        
             if((res = get_command(command)) > 0)
                 continue;
-
+                       
     		LED_GREEN_OFF;
 
     		if( command[0]>=0x31 && command[0]<(0x30+DEVICESNUM) ) //D1: to DX: X is DEVICESNUM
     		{
-                if((res = SimulateDiskDrive(command, &atari_sector_buffer[0])) > 0)
+                if((res = SimulateDiskDrive(ctx, command, &atari_sector_buffer[0])) > 0)
                     continue;
     		} 
     		else if( command[0] == (unsigned char)0x70 + settings.emulated_drive_no)
     		{
-                if((res = DriveCommand(command, &atari_sector_buffer[0])) > 0)
+                if((res = DriveCommand(ctx, command, &atari_sector_buffer[0])) > 0)
                     continue;
             }
             dprint("res: %d\r\n", res);

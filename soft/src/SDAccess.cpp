@@ -154,27 +154,37 @@ int SDAccess::initialise_card() {
 
     ctx->SPI_CLK_SetFractionalDividerRegister(48000000/ctx->sd_init_freq, 0);
 	ctx->SPIM_Start();
+    int ret = 0;
 
     for (int i = 0; i < 16; i++) {
         spiTransferByte(0xFF);
     }
 
+    ctx->SPIM_SS(0); // 0 to SS
+
     // send CMD0, should return with all zeros except IDLE STATE set (bit 0)
     if (_cmd(0, 0) != R1_IDLE_STATE) {
         dprint("No disk, or could not put SD card in to SPI idle state\r\n");
-        return SDCARD_FAIL;
+        ret = SDCARD_FAIL;
     }
 
-    // send CMD8 to determine whther it is ver 2.x
-    int r = _cmd8();
-    if (r == R1_IDLE_STATE) {
-        return initialise_card_v2();
-    } else if (r == (R1_IDLE_STATE | R1_ILLEGAL_COMMAND)) {
-        return initialise_card_v1();
-    } else {
-        dprint("Not in idle state after sending CMD8 (not an SD card?)\r\n");
-        return SDCARD_FAIL;
+    if(!ret)
+    {
+        // send CMD8 to determine whther it is ver 2.x
+        int r = _cmd8();
+        if (r == R1_IDLE_STATE) {
+            ret = initialise_card_v2();
+        } else if (r == (R1_IDLE_STATE | R1_ILLEGAL_COMMAND)) {
+            ret = initialise_card_v1();
+        } else {
+            dprint("Not in idle state after sending CMD8 (not an SD card?)\r\n");
+            ret = SDCARD_FAIL;
+        }
     }
+
+    ctx->SPIM_SS(1); // 1 to SS
+
+    return ret;    
 }
 
 int SDAccess::initialise_card_v1() {
@@ -182,7 +192,7 @@ int SDAccess::initialise_card_v1() {
         _cmd(55, 0);
         if (_cmd(41, 0) == 0) {
             cdv = 512;
-            dprint( "\r\n\rInit: SEDCARD_V1\r\n\r");
+            dprint( "\r\n\rInit: SDCARD_V1\r\n\r");
             return SDCARD_V1;
         }
     }
@@ -219,6 +229,8 @@ int SDAccess::disk_initialize() {
         return 1;
     }
     dprint("init card = %d\r\n", _is_initialized);
+    ctx->SPIM_SS(0); // 0 to SS
+    
     _sectors = _sd_sectors();
 
     // Set block length to 512 (CMD16)
@@ -226,6 +238,8 @@ int SDAccess::disk_initialize() {
         dprint("Set 512-byte block timed out\r\n");
         return 1;
     }
+    ctx->SPIM_SS(1); // 1 to SS
+    
 
     // Set SCK for data transfer
     ctx->SPI_CLK_SetFractionalDividerRegister(48000000/ctx->sd_work_freq, 0);
@@ -236,11 +250,17 @@ int SDAccess::disk_write(const uint8_t* buffer, uint32_t block_number, uint32_t 
     if (!_is_initialized) {
         return -1;
     }
-    
+
+    int res = 0;
+    HWContext* ctx = (HWContext*)__hwcontext;
+
+    ctx->SPIM_SS(0); // 0 to SS
+
     for (uint32_t b = block_number; b < block_number + count; b++) {
         // set write address for single block (CMD24)
         if (_cmd(24, b * cdv) != 0) {
-            return 1;
+            res = 1;
+            break;
         }
         
         // send the data block
@@ -248,7 +268,9 @@ int SDAccess::disk_write(const uint8_t* buffer, uint32_t block_number, uint32_t 
         buffer += 512;
     }
     
-    return 0;
+    ctx->SPIM_SS(1); // 1 to SS
+    
+    return res;
 }
 
 int SDAccess::disk_read(uint8_t* buffer, uint32_t block_number, uint32_t count) {
@@ -256,10 +278,16 @@ int SDAccess::disk_read(uint8_t* buffer, uint32_t block_number, uint32_t count) 
         return -1;
     }
     
+    int res = 0;
+    HWContext* ctx = (HWContext*)__hwcontext;
+    
+    ctx->SPIM_SS(0); // 0 to SS
+    
     for (uint32_t b = block_number; b < block_number + count; b++) {
         // set read address for single block (CMD17)
         if (_cmd(17, b * cdv) != 0) {
-            return 1;
+            res = 1;
+            break;
         }
         
         // receive the data
@@ -267,7 +295,9 @@ int SDAccess::disk_read(uint8_t* buffer, uint32_t block_number, uint32_t count) 
         buffer += 512;
     }
 
-    return 0;
+    ctx->SPIM_SS(1); // 1 to SS
+    
+    return res;
 }
 
 int SDAccess::disk_status() {

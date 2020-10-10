@@ -2,7 +2,7 @@
 <DesignWideResources xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://cypress.com/xsd/cydwr">
   <Group key="Component">
     <Group key="v1">
-      <Data key="cy_boot" value="cy_boot_v5_90" />
+      <Data key="cy_boot" value="cy_boot_v6_0" />
       <Data key="cy_lfclk" value="cy_lfclk_v1_20" />
       <Data key="Em_EEPROM_Dynamic" value="Em_EEPROM_Dynamic_v2_20" />
       <Data key="LIN_Dynamic" value="LIN_Dynamic_v5_0" />
@@ -18,10 +18,11 @@
       <Data key="8c8734ef-3644-4eed-bc55-360072b94fff/9613317f-9767-4872-a15a-e07325d93413" value="SPIM_BL_ss0_m" />
       <Data key="8c8734ef-3644-4eed-bc55-360072b94fff/ed092b9b-d398-4703-be89-cebf998501f6" value="SPIM_BL_mosi_m" />
       <Data key="8d318d8b-cf7b-4b6b-b02c-ab1c5c49d0ba" value="CardPresent" />
+      <Data key="12fccbb5-30c8-492a-bb13-bc8c1aa8789a" value="SPI_CS" />
       <Data key="4408e0e9-13fe-40cd-ad90-5e028f894609" value="LED_Y0" />
       <Data key="96563f98-22c6-4465-bcb4-f0883090de9e" value="LED_Y1" />
       <Data key="2240036b-4dc4-4c1a-a38e-2a6edee0eef3" value="LED_R" />
-      <Data key="b6d08914-020e-44ca-9a72-364aef5cc2d3" value="ReadOnly" />
+      <Data key="b6d08914-020e-44ca-9a72-364aef5cc2d3" value="ReadOnly_BL" />
       <Data key="beecb5d7-90d4-41ed-b65a-b6094d957729/23b8206d-1c77-4e61-be4a-b4037d5de5fc" value="Debug_BL_tx" />
       <Data key="beecb5d7-90d4-41ed-b65a-b6094d957729/78e33e5d-45ea-4b75-88d5-73274e8a7ce4" value="Debug_BL_rx" />
       <Data key="e851a3b9-efb8-48be-bbb8-b303b216c393" value="LED_G" />
@@ -1267,6 +1268,11 @@
     <Group key="8d318d8b-cf7b-4b6b-b02c-ab1c5c49d0ba">
       <Group key="0">
         <Data key="Port Format" value="0,0" />
+      </Group>
+    </Group>
+    <Group key="12fccbb5-30c8-492a-bb13-bc8c1aa8789a">
+      <Group key="0">
+        <Data key="Port Format" value="0,7" />
       </Group>
     </Group>
     <Group key="4408e0e9-13fe-40cd-ad90-5e028f894609">

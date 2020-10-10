@@ -47,6 +47,7 @@ void InitLoadableCTX(void)
     _staticVars._context.SPIM_WriteTxData = SPIM_BL_SpiUartWriteTxData;
     _staticVars._context.SPIM_GetRxBufferSize = SPIM_BL_SpiUartGetRxBufferSize;
     _staticVars._context.SPIM_ReadRxData = SPIM_BL_SpiUartReadRxData;
+    _staticVars._context.SPIM_SS = MMC_SSEL_Write;
     
 #ifdef DEBUG
     Debug_BL_Start();
@@ -65,6 +66,7 @@ void InitLoadableCTX(void)
     _staticVars._context.SPIM_WriteTxData = SPIM_B_SpiUartWriteTxData;
     _staticVars._context.SPIM_GetRxBufferSize = SPIM_B_SpiUartGetRxBufferSize;
     _staticVars._context.SPIM_ReadRxData = SPIM_B_SpiUartReadRxData;
+    _staticVars._context.SPIM_SS = MMC_SSEL_Write;
     
 #ifdef DEBUG
     Debug_B_Start();

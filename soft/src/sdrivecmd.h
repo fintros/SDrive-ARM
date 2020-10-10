@@ -11,6 +11,7 @@
 #ifndef _SDRIVEOPS_H
 #define _SDRIVEOPS_H
 
+#include "hwcontext.h"
 
 typedef enum
 {
@@ -50,9 +51,9 @@ typedef enum
    SDRSetBoot = 0xff,
 } EEmuCommand;
 
-int InitBootDrive(unsigned char* pBuffer);
+int InitBootDrive(HWContext* ctx, unsigned char* pBuffer);
 
-int DriveCommand(unsigned char* command, unsigned char* buffer);
+int DriveCommand(HWContext* ctx, unsigned char* command, unsigned char* buffer);
 
 
 #endif /* _SDRIVEOPS_H */

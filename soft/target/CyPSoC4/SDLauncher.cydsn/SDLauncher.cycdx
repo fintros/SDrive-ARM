@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <blockRegMap version="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://cypress.com/xsd/cyblockregmap cyblockregmap.xsd" xmlns="http://cypress.com/xsd/cyblockregmap">
-  <block name="CardPresent" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="LED_Y3" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="LED_Y2" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="ReadOnly_BL" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="Em_EEPROM_Dynamic" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="SPI_SSEL" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="LED_Y3" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="CardPresent" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="cy_lfclk" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="Em_EEPROM_Dynamic" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="MMC_SSEL" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
+    <register name="MMC_SSEL_CONTROL_REG" address="0x400F0073" bitWidth="8" desc="" hidden="false" />
+  </block>
   <block name="cy_boot" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="LED_Y1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="LED_Y2" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="Debug_BL" BASE="0x0" SIZE="0x0" desc="Serial Communication Block" visible="true" hidden="false">
     <block name="clock_VM" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="sclk_s_VM" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
@@ -347,23 +350,22 @@
       <field name="BREAK_DETECT" from="11" to="11" access="RW" resetVal="" desc="Logical and of corresponding request and mask bits" hidden="false" />
     </register>
   </block>
-  <block name="SPI_CLK_BL" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="LED_G" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="SPIM_BL" BASE="0x0" SIZE="0x0" desc="Serial Communication Block" visible="true" hidden="false">
-    <block name="mosi_s_VM" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="sclk_s_VM" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-    <block name="ZeroTerminal_7" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="mosi_s_VM" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="miso_m_VM" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-    <block name="rx_VM" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-    <block name="select_s_VM" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="clock_VM" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="select_s_VM" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="rx_VM" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="rx_wake_VM" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="ZeroTerminal_7" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="cts_VM" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-    <block name="ss0_m" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-    <block name="Device_VM4" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="SCB" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-    <block name="sclk_m" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-    <block name="or_sclk" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="Device_VM4" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="mosi_m" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="or_sclk" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="sclk_m" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="miso_m" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <register name="_CTRL" address="0x40070000" bitWidth="32" desc="Generic control register" hidden="false">
       <field name="OVS" from="3" to="0" access="RW" resetVal="" desc="Serial interface bit period oversampling factor expressed in lP clock cycles. Used for SPI and UART functionality. OVS + 1 IP clock cycles constitute a single serial interface clock/bit cycle." hidden="false" />
@@ -688,10 +690,11 @@
       <field name="BREAK_DETECT" from="11" to="11" access="RW" resetVal="" desc="Logical and of corresponding request and mask bits" hidden="false" />
     </register>
   </block>
-  <block name="LED_G" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="SPI_CLK_BL" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="LED_Y0" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="LED_R" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="LED_Y1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="LEDREG_BL" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
     <register name="LEDREG_BL_CONTROL_REG" address="0x400F0072" bitWidth="8" desc="" hidden="false" />
   </block>
+  <block name="LED_R" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
 </blockRegMap>

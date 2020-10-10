@@ -40,25 +40,23 @@
 
 #include "fat.h"
 #include "atari.h"
-#include "hwcontext.h"
 #include "mmcsd.h"
 #include "dprint.h"
 
-unsigned long fatClustToSect(unsigned long clust)
+unsigned long fatClustToSect(HWContext* ctx, unsigned long clust)
 {
-    GlobalSystemValues* gsv = &((HWContext*)__hwcontext)->gsv;
+    GlobalSystemValues* gsv = &ctx->gsv;
 	if(clust==MSDOSFSROOT)
 		return gsv->FirstDataSector - gsv->RootDirSectors;
 
 	return ((clust-2) * gsv->SectorsPerCluster) + gsv->FirstDataSector;
 }
 
-unsigned char fatInit()
+unsigned char fatInit(HWContext* ctx)
 {
-    GlobalSystemValues* gsv = &((HWContext*)__hwcontext)->gsv;
-    FatData* f = &((HWContext*)__hwcontext)->fat_data;
-    unsigned char* mmc_sector_buffer = &((HWContext*)__hwcontext)->mmc_sector_buffer[0];
-    //FileInfoStruct* fi = &((HWContext*)__hwcontext)->file_info;
+    GlobalSystemValues* gsv = &ctx->gsv;
+    FatData* f = &ctx->fat_data;
+    unsigned char* mmc_sector_buffer = &ctx->mmc_sector_buffer[0];
     
 	partrecord PartInfo;
     partrecord *pPartInfo;
@@ -66,7 +64,7 @@ unsigned char fatInit()
 
 	// read partition table
 	// TODO.... error checking
-	mmcReadCached(0);
+	mmcReadCached(ctx, 0);
 	// map first partition record	
 	// save partition information to global PartInfo
     pPartInfo = (partrecord *) (((partsector *) mmc_sector_buffer)->psPart);
@@ -80,7 +78,7 @@ unsigned char fatInit()
 	
 	// Read the Partition BootSector
 	// **first sector of partition in PartInfo.prStartLBA
-	mmcReadCached(PartInfo.prStartLBA);
+	mmcReadCached(ctx, PartInfo.prStartLBA);
 	bpb = (struct bpb710 *) ((struct bootsector710 *) (char*)mmc_sector_buffer)->bsBPB;
 
 	// setup global disk constants
@@ -141,9 +139,8 @@ unsigned char fatInit()
 
 //////////////////////////////////////////////////////////////
 
-unsigned char fatGetDirEntry(file_t* pDisk, unsigned char* file_name, unsigned short entry, unsigned char use_long_names)
+unsigned char fatGetDirEntry(HWContext* ctx, file_t* pDisk, unsigned char* file_name, unsigned short entry, unsigned char use_long_names)
 {
-    HWContext* ctx = (HWContext*)__hwcontext;
     GlobalSystemValues* gsv = &ctx->gsv;
     FatData* f = &ctx->fat_data;
     unsigned char* mmc_sector_buffer = &ctx->mmc_sector_buffer[0];
@@ -154,7 +151,7 @@ unsigned char fatGetDirEntry(file_t* pDisk, unsigned char* file_name, unsigned s
 	unsigned char haveLongNameEntry;
 	unsigned char gotEntry;
 	unsigned short b;
-	u08 index;
+	unsigned char index;
 	unsigned short entrycount = 0;
 	unsigned long actual_cluster = pDisk->dir_cluster;
 	unsigned char seccount=0;
@@ -175,7 +172,7 @@ unsigned char fatGetDirEntry(file_t* pDisk, unsigned char* file_name, unsigned s
 	   )
 	{
 		//musi zacit od zacatku
-		sector = fatClustToSect(pDisk->dir_cluster);
+		sector = fatClustToSect(ctx, pDisk->dir_cluster);
 		//index = 0;
         dprint("Read from begin\r\n");
 		goto fat_read_from_begin;
@@ -206,15 +203,15 @@ unsigned char fatGetDirEntry(file_t* pDisk, unsigned char* file_name, unsigned s
 			{
 				//next cluster
 				//pri prechodu pres pocet sektoru v clusteru
-				actual_cluster = nextCluster(actual_cluster);
-				sector=fatClustToSect(actual_cluster);
+				actual_cluster = nextCluster(ctx, actual_cluster);
+				sector=fatClustToSect(ctx, actual_cluster);
 				seccount=0;
 			}
 fat_read_from_begin:
 			index = 0;
 			seccount++;		//ted bude nacitat dalsi sektor (musi ho zapocitat)
 fat_read_from_last_entry:
-			mmcReadCached( sector++ ); 	//prave ho nacetl
+			mmcReadCached( ctx, sector++ ); 	//prave ho nacetl
 			de = (struct direntry *) (char*)mmc_sector_buffer;
 			de+=index;
 		}
@@ -239,13 +236,9 @@ fat_read_from_last_entry:
 			{
 				// we have a long name entry
 				// cast this directory entry as a "windows" (LFN: LongFileName) entry
-				u08 i;
+				unsigned char i;
 				unsigned char *fnbPtr;
 
-				//pokud nechceme longname, NESMI je vubec kompletovat
-				//a preskoci na dalsi polozku
-				//( takze ani haveLongNameEntry nikdy nebude nastaveno na 1)
-				//Jinak by totiz preplacaval dalsi kusy atari_sector_bufferu 12-255 ! BACHA!!!
 				if (!use_long_names) goto fat_next_dir_entry;
 
 				we = (struct winentry *) de;
@@ -257,19 +250,6 @@ fat_read_from_last_entry:
 				for (i=0;i<6;i++)	*fnbPtr++ = we->wePart2[i*2];	// second part
 				for (i=0;i<2;i++)	*fnbPtr++ = we->wePart3[i*2];	// and third part
 
-				/*
-				{
-				//unsigned char * sptr;
-				//sptr=we->wePart1;
-				//do { *fnbPtr++ = *sptr++; sptr++; } while (sptr<(we->wePart1+10)); // copy first part
-				//^-- pouziti jen tohoto prvniho a druhe dva pres normalni for(..) uspori 10 bajtu,
-				//pri pouziti i dalsich dvou timto stylem uz se to ale zase prodlouzi - nechaaaaaapu!
-				//sptr=we->wePart2;
-				//do { *fnbPtr++ = *sptr++; sptr++; } while (sptr<(we->wePart2+12)); // second part
-				//sptr=we->wePart3;
-				//do { *fnbPtr++ = *sptr++; sptr++; } while (sptr<(we->wePart3+4));  // and third part
-				}
-				*/
 
 				if (we->weCnt & WIN_LAST) *fnbPtr = 0;				// in case dirnamelength is multiple of 13, add termination
 				if ((we->weCnt & 0x0f) == 1) haveLongNameEntry = 1;	// flag that we have a complete long name entry set
@@ -298,49 +278,30 @@ fat_read_from_last_entry:
 					// entry is a short name (8.3 format) without a
 					// corresponding multi-part long name entry
 
-					//Zcela vynecha adresar "." a disk label
 					if( (de->deName[0]=='.' && de->deName[1]==' ' && (de->deAttributes & ATTR_DIRECTORY) ) //je to "." adresar
 						|| (de->deAttributes & ATTR_VOLUME) ) goto fat_next_dir_entry;
 
-					if(entrycount == entry)
-					{
-						/*
-						fnbPtr = &FileNameBuffer[string_offset];
-						for (i=0;i<8;i++)	*fnbPtr++ = de->deName[i];		// copy name
-						for (i=0;i<3;i++)	*fnbPtr++ = de->deExtension[i];	// copy extension
-						*fnbPtr = 0;										// null-terminate
-						*/
-						u08 i;
-						unsigned char *dptr;
 
-						dptr = &file_name[0];
-						for (i=0;i<8;i++)	*dptr++ = de->deName[i];		// copy name+ext
-						for (i=0;i<3;i++)	*dptr++ = de->deExtension[i];	// copy name+ext
-						*dptr=0;	//ukonceni za nazvem
+                    if(entrycount == entry)
+					{                      
+                    	// use 'NAME    EXT' or 'NAME.EXT' depend on long names flag
+                        memcpy(&file_name[0], &de->deName[0], 8);
+                        int ext_pos = 8;
+                        if (use_long_names)
+                        {
+                            int i =0;
+                            for(;i<8;i++)
+                                if(file_name[i] == ' ')
+                                    break;
+                            if(file_name[0] != '.') // . and .. are exceptions
+                                file_name[i] = '.';
+                            else
+                                file_name[i] = 0;
+                            ext_pos = i+1;
+                        }
+                        memcpy(&file_name[ext_pos], &de->deExtension[0], 3);
+                        file_name[ext_pos+3] = 0;
 
-						// desired entry has been found, break out
-						//pokud chtel longname, tak to neni a proto upravi 8+3 jmeno na nazev.ext
-						//aby to melo formatovani jako longname
-						if (use_long_names)
-						{
-							//upravi 'NAME    EXT' na 'NAME.EXT'
-							//(vyhazi mezery a prida tecku)
-							//krome nazvu '.          ', a '..         ', tam jen vyhaze mezery
-							unsigned char *sptr;
-							//EXT => .EXT   (posune vcetne 0x00 za koncem extenderu)
-							dptr=(file_name+12);
-							i=4; do { sptr=dptr-1; *dptr=*sptr; dptr=sptr; i--; } while(i>0);
-							if (file_name[0]!='.') *dptr='.'; //jen pro jine nez '.' a '..'
-							//NAME    .EXT => NAME.EXT
-							sptr=dptr=&file_name[0];
-							do
-							{
-							 if ((*sptr)!=' ') *dptr++=*sptr;
-							 sptr++;
-							} while (*sptr);
-							*dptr=0; //ukonceni
-						}
-						//
 						gotEntry = 1;
 						break;
 					}
@@ -390,9 +351,8 @@ fat_next_dir_entry:
 }
 
 
-unsigned long nextCluster(unsigned long cluster)
+unsigned long nextCluster(HWContext* ctx, unsigned long cluster)
 {
-    HWContext* ctx = (HWContext*)__hwcontext;
     GlobalSystemValues* gsv = &ctx->gsv;
     FatData* f = &ctx->fat_data;
     unsigned char* mmc_sector_buffer = &ctx->mmc_sector_buffer[0];
@@ -423,13 +383,13 @@ unsigned long nextCluster(unsigned long cluster)
     	}
 
 	  // calculate the FAT sector that we're interested in
-	  sector = gsv->FirstFATSector + (fatOffset / ((u32)gsv->BytesPerSector));
+	  sector = gsv->FirstFATSector + (fatOffset / ((unsigned long)gsv->BytesPerSector));
 	  // calculate offset of the our entry within that FAT sector
-	  offset = fatOffset % ((u32)gsv->BytesPerSector);
+	  offset = fatOffset % ((unsigned long)gsv->BytesPerSector);
 
 	  // if we don't already have this FAT chunk loaded, go get it
 	  // read sector of FAT table
-  	  mmcReadCached( sector );
+  	  mmcReadCached( ctx, sector );
 
       memcpy(&tmp, &((char*)mmc_sector_buffer)[offset], sizeof(tmp));
 	  // read the nextCluster value
@@ -443,9 +403,8 @@ unsigned long nextCluster(unsigned long cluster)
 }
 
 
-unsigned long getClusterN(file_t *pDisk, unsigned short ncluster)
+unsigned long getClusterN(HWContext* ctx, file_t *pDisk, unsigned short ncluster)
 {
-    HWContext* ctx = (HWContext*)__hwcontext;
     FatData* f = &ctx->fat_data;
     
 	if(ncluster<pDisk->ncluster)
@@ -456,16 +415,15 @@ unsigned long getClusterN(file_t *pDisk, unsigned short ncluster)
 
 	while(pDisk->ncluster!=ncluster)
 	{
-		pDisk->current_cluster=nextCluster(pDisk->current_cluster);
+		pDisk->current_cluster=nextCluster(ctx, pDisk->current_cluster);
 		pDisk->ncluster++;
 	}
 
 	return (pDisk->current_cluster&(f->fat32_enabled?0xFFFFFFFF:0xFFFF));
 }
 
-unsigned short faccess_offset(file_t* pDisk, char mode, unsigned long offset_start, unsigned char* buffer, unsigned short ncount)
+unsigned short faccess_offset(HWContext* ctx, file_t* pDisk, char mode, unsigned long offset_start, unsigned char* buffer, unsigned short ncount)
 {
-    HWContext* ctx = (HWContext*)__hwcontext;
     GlobalSystemValues* gsv = &ctx->gsv;
     unsigned char* mmc_sector_buffer = &ctx->mmc_sector_buffer[0];
         
@@ -473,7 +431,7 @@ unsigned short faccess_offset(file_t* pDisk, char mode, unsigned long offset_sta
 	unsigned long offset=offset_start;
 	unsigned long end_of_file;
 	unsigned long ncluster, nsector, current_sector;
-	unsigned long bytespercluster=((u32)gsv->SectorsPerCluster)*((u32)gsv->BytesPerSector);
+	unsigned long bytespercluster=((unsigned long)gsv->SectorsPerCluster)*((unsigned long)gsv->BytesPerSector);
 
 	if(offset_start>=pDisk->size)
 		return 0;
@@ -483,33 +441,33 @@ unsigned short faccess_offset(file_t* pDisk, char mode, unsigned long offset_sta
 	ncluster = offset/bytespercluster;
 	offset-=ncluster*bytespercluster;
 
-	nsector = offset/((u32)gsv->BytesPerSector);
-	offset-=nsector*((u32)gsv->BytesPerSector);
+	nsector = offset/((unsigned long)gsv->BytesPerSector);
+	offset-=nsector*((unsigned long)gsv->BytesPerSector);
 
-	getClusterN(pDisk, ncluster);
+	getClusterN(ctx, pDisk, ncluster);
 
-	current_sector = fatClustToSect(pDisk->current_cluster) + nsector;
-	mmcReadCached(current_sector);
+	current_sector = fatClustToSect(ctx, pDisk->current_cluster) + nsector;
+	mmcReadCached(ctx, current_sector);
 
 	for(j=0;j<ncount;j++,offset++)
 	{
-			if(offset>=((u32)gsv->BytesPerSector) )
+			if(offset>=((unsigned long)gsv->BytesPerSector) )
 			{
-				if(mode==FILE_ACCESS_WRITE && mmcWriteCached(0))
+				if(mode==FILE_ACCESS_WRITE && mmcWriteCached(ctx, 0))
 					return 0;
 
 				offset=0;
 				nsector++;
 
-				if(nsector>=((u32)gsv->SectorsPerCluster) )
+				if(nsector>=((unsigned long)gsv->SectorsPerCluster) )
 				{
 					nsector=0;
 					ncluster++;
-					getClusterN(pDisk, ncluster);
+					getClusterN(ctx, pDisk, ncluster);
 				}
 
-				current_sector = fatClustToSect(pDisk->current_cluster) + nsector;
-				mmcReadCached(current_sector);
+				current_sector = fatClustToSect(ctx, pDisk->current_cluster) + nsector;
+				mmcReadCached(ctx, current_sector);
 			}
 
 		if(!end_of_file)
@@ -525,7 +483,7 @@ unsigned short faccess_offset(file_t* pDisk, char mode, unsigned long offset_sta
 	}
 	
 
-	if(mode==FILE_ACCESS_WRITE && mmcWriteCached(0))
+	if(mode==FILE_ACCESS_WRITE && mmcWriteCached(ctx, 0))
 		return 0;
 
 	return (j&0xFFFF);
