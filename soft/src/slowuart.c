@@ -18,6 +18,9 @@
 static unsigned char _captured_vals[UART_SAMPLES];
 unsigned int _captured_no;
 
+
+// RX edge changing handler
+// Timer conts 4x speed to solve racing issues
 CY_ISR(SlowUartISR)
 {
     if(_captured_no < UART_SAMPLES)
@@ -48,9 +51,11 @@ void StopSlowUART()
 {
     SlowUartISR_Stop();
     SlowUARTCounter_Stop();
-    
 }
 
+
+// array of captued values decoded to bytes sequence. Each value of _captured_vals is 
+// length of input level in timer ticks shifted by 1 to the left and last bit - level itself 0 or 1
 int DecodeSlowUART(unsigned char* command, int max_len)
 {
     int state = EStateWaitForStartBit;
@@ -66,7 +71,6 @@ int DecodeSlowUART(unsigned char* command, int max_len)
         dprint("[%d]%d,", 1 - (_captured_vals[i] & 1),  _captured_vals[i]>>1);
     dprint("\r\n");    
 #endif
-    
     
     for(unsigned int i = 0; i < _captured_no; i++)
     {
