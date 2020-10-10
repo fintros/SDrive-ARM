@@ -28,6 +28,7 @@
 #include "sdrive.h"
 #include "diskemu.h"
 #include "sdrivecmd.h"
+#include "slowuart.h"
 
 SharedParameters shared_parameters;
 Settings settings;
@@ -81,100 +82,21 @@ int wait_for_command(HWContext* ctx)
     return 0;
 }
 
-#define UART_SAMPLES 40
-unsigned char vals[UART_SAMPLES];
-unsigned int no;
-
-CY_ISR(SlowUartISR)
-{
-    if(no < UART_SAMPLES)
-    {        
-        unsigned int count = SlowUARTCounter_COUNTER_REG & SlowUARTCounter_16BIT_MASK;
-        SlowUARTCounter_COUNTER_REG = 0;
-        vals[no++] = count | (SWBUT_Read()&1);  // timer already shift value by one bit right
-    }
-}
-
-enum
-{
-    EStateWaitForStartBit = 0,
-    EStateDataRecv,
-    EStateWaitForStopBit,
-    EStateError
-};
-
-
-int DecodeSlowUART(unsigned char* command, int max_len)
-{
-    int state = EStateWaitForStartBit;
-    int byte_no = 0;
-    int bit_in_byte = 0;
-    unsigned char current_byte = 0;
-    
-    for(unsigned int i = 0; i < no; i++)
-    {
-        unsigned int bit = 1 - (vals[i] & 1);
-        unsigned int count = vals[i] >> 1;
-
-        while(count--)
-        {
-            switch(state)
-            {
-                case EStateWaitForStartBit:
-                    if(bit)    // wait for '0'
-                        break;
-                    state = EStateDataRecv;
-                    current_byte = 0;
-                    bit_in_byte = 0;
-                    break;
-                case EStateDataRecv:
-                   current_byte |= bit << bit_in_byte++;
-                   if(bit_in_byte == 8)
-                       state = EStateWaitForStopBit;
-                   break;
-                case EStateWaitForStopBit:
-                    if(bit) // wait for '1'
-                    {
-                        if(byte_no < max_len)
-                            command[byte_no++] = current_byte;
-                        state = EStateWaitForStartBit;                   
-                    }
-                    break;
-                case EStateError:
-                    break;
-            }   
-        }
-    }
-    // fill out remaining bits in case '1' ended sequence
-    if(bit_in_byte < 8)
-    {        
-        for(;bit_in_byte < 8; bit_in_byte++)
-           current_byte |= 1 << bit_in_byte;
-    
-        if(byte_no < max_len)
-            command[byte_no++] = current_byte;
-    }
-
-    #ifdef DEBUG
-        dprint("Decoded CMD %d: [%02X %02X %02X %02X %02X]\r\n", byte_no, command[0], command[1], command[2], command[3], command[4]);        
-    #endif
-    
-    if( command[4] != get_checksum(command, 4) )
-        return 1;
-
-    return 0;
-}
 
 int get_command(unsigned char* command)
 {
     LED_OFF;
     memset(command, 0, 4);
     
+    
+    if(!shared_parameters.fastsio_active)
+    {
+        USART_Init(6 + shared_parameters.fastsio_pokeydiv); // by default init UART for FastIO
+        shared_parameters.fastsio_active = 1;        
+    }
+    
     // try to catch on ordinary speed
-    no = 0;
-    SlowUARTCounter_WriteCounter(0);
-    SlowUARTCounter_Start();
-    SlowUartISR_StartEx(SlowUartISR);
+    ResetSlowUART();
         
 	// end get as ususal
     unsigned char err = USART_Get_Buffer_And_Check(command,4,CMD_STATE_L);
@@ -187,39 +109,27 @@ int get_command(unsigned char* command)
     if(err)
         dprint("Command error: [%02X]\r\n", err);
     else
-        dprint("Command: [%02X %02X %02X %02X], CS: [%02X]\r\n", command[0], command[1], command[2], command[3], command[4]);
+        dprint("Command: [%02X %02X %02X %02X]\r\n", command[0], command[1], command[2], command[3]);
 #endif  
 
     SlowUartISR_Stop();
     SlowUARTCounter_Stop();
     
-#ifdef DEBUG
-    dprint("Catched: ");
-    for(int i = 0; i < no; i++)
-        dprint("[%d]%d,", 1 - (vals[i] & 1),  vals[i]>>1);
-    dprint("\r\n");
-#endif  
     if(err)
+    {        
         err = DecodeSlowUART(command,5);
+        
+        // setect command on standard speed - switch speed
+        if(!err)
+        {
+            USART_Init(6 + US_POKEY_DIV_STANDARD);
+            shared_parameters.fastsio_active = 0;
+        }
+    }
     
     LED_GREEN_ON;
     LED_ON;
     
-	if(err)
-	{
-        // if key was pressed
-		if (err&0x02) 
-            return 1;
-
-        // if not standard rate - change fastsio flag
-		if (shared_parameters.fastsio_pokeydiv!=US_POKEY_DIV_STANDARD)
-			shared_parameters.fastsio_active = !shared_parameters.fastsio_active;
-        
-        USART_Init(6 + (shared_parameters.fastsio_active?shared_parameters.fastsio_pokeydiv:US_POKEY_DIV_STANDARD));
-        
-        return 1;
-	}
-
     return 0;
 }
 

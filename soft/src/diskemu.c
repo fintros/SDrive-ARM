@@ -400,7 +400,7 @@ static int ReadATR(HWContext* ctx, file_t* pDisk, unsigned char* buffer, unsigne
     unsigned int proceeded_bytes = faccess_offset(ctx, pDisk, FILE_ACCESS_READ, offset, buffer, sector_size);
     dprint("Read result %d, offset=%d, secsize=%d\r\n", proceeded_bytes,offset, sector_size);
     
-#if 0
+#if 1
     for(unsigned int i = 0; i < proceeded_bytes;i+=16)
     {
         dprint("%02X %02X %02X %02X  %02X %02X %02X %02X  %02X %02X %02X %02X  %02X %02X %02X %02X\r\n",

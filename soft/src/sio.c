@@ -85,6 +85,7 @@ void USART_Send_Buffer(unsigned char *buff, unsigned short len)
     while(bufIndex < len)
     {
         UART_1_PutChar(buff[bufIndex]);
+        while(UART_1_GetTxBufferSize());
         bufIndex++;
     }
     while(UART_1_GetTxBufferSize());
