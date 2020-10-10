@@ -112,8 +112,7 @@ int get_command(unsigned char* command)
         dprint("Command: [%02X %02X %02X %02X]\r\n", command[0], command[1], command[2], command[3]);
 #endif  
 
-    SlowUartISR_Stop();
-    SlowUARTCounter_Stop();
+    StopSlowUART();
     
     if(err)
     {        

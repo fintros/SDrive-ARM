@@ -44,6 +44,13 @@ void ResetSlowUART()
     SlowUartISR_StartEx(SlowUartISR);    
 }
 
+void StopSlowUART()
+{
+    SlowUartISR_Stop();
+    SlowUARTCounter_Stop();
+    
+}
+
 int DecodeSlowUART(unsigned char* command, int max_len)
 {
     int state = EStateWaitForStartBit;

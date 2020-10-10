@@ -24,5 +24,11 @@ void ResetSlowUART();
   * @return 0 if success and 1 otherwise
   */
 int DecodeSlowUART(unsigned char* command, int max_len);
+
+/**
+  * @brief Stop SlowUART serving
+  */
+void StopSlowUART();
+
     
 #endif /* _SLOWUART_H */
