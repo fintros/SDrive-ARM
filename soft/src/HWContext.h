@@ -18,6 +18,10 @@
 extern "C" {    
 #endif
 
+typedef unsigned char u08;
+typedef unsigned short u16;
+typedef unsigned long u32;
+
     
 typedef struct _GlobalSystemValues			//4+4+2+2+1=13 bytes
 {

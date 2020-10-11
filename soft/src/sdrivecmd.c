@@ -17,6 +17,7 @@
 #include "fat.h"
 #include "helpers.h"
 #include "mmcsd.h"
+#include "atx.h"
 
 static file_t _browse;
 
@@ -108,6 +109,7 @@ int MountFile(HWContext* ctx, file_t* pDisk, const char* pFileName, unsigned cha
             dprint("%s found\r\n", pFileName);
 			pDisk->current_cluster=pDisk->start_cluster;
 			pDisk->ncluster=0;
+			pDisk->status=0xff;
             if(!strncmp(pFileName+8, "ATR", 3)) // if mount ATR
                 return SetATRFlags(ctx, pDisk, pBuffer);
             return 0;                        
@@ -482,6 +484,8 @@ int MountDrive(HWContext* ctx, unsigned char* pBuffer, unsigned char drive_no, u
     if(drive_no > DEVICESNUM)
         drive_no = 0;
     file_t* pDisk = GetVDiskPtr(drive_no);
+    
+    pDisk->status = 0xff;   // reset status
 
     if(fatGetDirEntry(ctx, &_browse, pBuffer, index, 0))
     {
@@ -504,6 +508,11 @@ int MountDrive(HWContext* ctx, unsigned char* pBuffer, unsigned char drive_no, u
 					else
 						pDisk->flags |= FLAGS_ATRDOUBLESECTORS;
 				}                
+            }
+			else if( pBuffer[8]=='A' && pBuffer[9]=='T' && pBuffer[10]=='X' )        // ATX
+            {
+                loadAtxFile(ctx, pDisk, pBuffer);
+                pDisk->flags |= FLAGS_DRIVEON|FLAGS_ATXTYPE;
             }
             else
                 pDisk->flags = FLAGS_DRIVEON|FLAGS_XEXLOADER|FLAGS_ATRMEDIUMSIZE;  // XEX            

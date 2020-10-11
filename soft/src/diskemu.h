@@ -32,6 +32,10 @@ typedef enum
 
 file_t* GetVDiskPtr(int no);
 
+// don't attach motor state to disk no for a while
+void StartMotor();
+void StopMotor();
+
 int SimulateDiskDrive(HWContext* ctx, unsigned char* pCommand, unsigned char* buffer);
 int Read(HWContext* ctx, file_t* pDisk, unsigned char* buffer, unsigned short sector);
 int Write(HWContext* ctx, file_t* pDisk, unsigned char* buffer, unsigned short sector);

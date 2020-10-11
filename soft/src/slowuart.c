@@ -10,6 +10,9 @@
 
 #include "project.h"
 #include <CyLib.h>
+
+#undef DEBUG
+
 #include "dprint.h"
 #include "helpers.h"
 

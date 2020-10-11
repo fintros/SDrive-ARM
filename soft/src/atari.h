@@ -7,6 +7,7 @@
 #define FLAGS_XFDTYPE			0x10
 #define FLAGS_READONLY			0x08
 #define FLAGS_WRITEERROR		0x04
+#define FLAGS_ATXTYPE		    0x02
 #define FLAGS_DRIVEON			0x01
 
 // Stuctures
@@ -29,6 +30,7 @@ typedef struct						//4+4+4+2+2+4+1=21
 	unsigned long size;					//< file size
 	unsigned char flags;				//< file flags
     fileinfo_t fi;                     //< additional file information
+    unsigned char status;               //< last status
 } __attribute__((packed)) file_t ;
 
    

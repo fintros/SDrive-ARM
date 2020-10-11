@@ -105,7 +105,7 @@ int get_command(unsigned char* command)
 	wait_cmd_LH();	//ceka az se zvedne signal command na H
 	CyDelayUs(100u);	//T2=100   (po zvednuti command a pred ACKem)
     
-#ifdef DEBUG
+#if 0
     if(err)
         dprint("Command error: [%02X]\r\n", err);
     else
@@ -125,6 +125,10 @@ int get_command(unsigned char* command)
             shared_parameters.fastsio_active = 0;
         }
     }
+
+#ifdef DEBUG
+    dprint("Command: [%02X %02X %02X %02X]\r\n", command[0], command[1], command[2], command[3]);
+#endif  
     
     LED_GREEN_ON;
     LED_ON;
@@ -143,6 +147,7 @@ int sdrive(void)
     // todo setting read from settings file
     settings.emulated_drive_no = 1; // Emulate D1 for a while
     settings.default_pokey_div = US_POKEY_DIV_DEFAULT; 
+    settings.is_1050 = 0;
 
 	unsigned char command[5];
 
@@ -221,7 +226,7 @@ int sdrive(void)
                 if((res = DriveCommand(ctx, command, &atari_sector_buffer[0])) > 0)
                     continue;
             }
-            dprint("res: %d\r\n", res);
+            //dprint("res: %d\r\n", res);
             // to do process cassete and printer
             if(res < 0)
                 break;

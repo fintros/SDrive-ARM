@@ -16,6 +16,7 @@
 #include "xexloader.h"
 #include "helpers.h"
 #include "fat.h"
+#include "atx.h"
 
 static void FormatInternal(HWContext* ctx, file_t* pDisk, int size, unsigned char* buffer)
 {   
@@ -335,6 +336,8 @@ static int WritePercom(file_t* pDisk, unsigned char* buffer)
     return 0;
 }
 
+static unsigned char motor_state = 0;
+
 int GetStatus(file_t* pDisk)
 {
     unsigned char buffer[4];
@@ -342,7 +345,7 @@ int GetStatus(file_t* pDisk)
     dprint("Ask for status\r\n");
     send_ACK();      
     
-    buffer[0] = 0x10;	                                        //0x00 motor off	0x10 motor on
+    buffer[0] = motor_state>0?0x10:0;	 //0x00 motor off	0x10 motor on
     if (pDisk->flags & FLAGS_ATRMEDIUMSIZE) buffer[0]|=0x80;	// medium/single
     if (pDisk->flags & FLAGS_ATRDOUBLESECTORS) buffer[0]|=0x20;	// double/normal sector size
     if (pDisk->flags & FLAGS_WRITEERROR)
@@ -353,7 +356,7 @@ int GetStatus(file_t* pDisk)
     }
     if (get_readonly() || (pDisk->flags & FLAGS_READONLY)) buffer[0]|=0x08;	//write protected bit
 
-    buffer[1] = 0xff;
+    buffer[1] = pDisk->status;
     buffer[2] = 0xe0; 		//(244s) timeout
     buffer[3] = 0x00;		// 
 
@@ -393,15 +396,9 @@ static unsigned int GetATROffset(file_t* pDisk, unsigned short sector, unsigned 
     return offset;         
 }
 
-static int ReadATR(HWContext* ctx, file_t* pDisk, unsigned char* buffer, unsigned short sector)
+static void DumpBuffer(unsigned char* buffer, unsigned int len)
 {
-    unsigned int sector_size;
-    unsigned int offset = GetATROffset(pDisk, sector, &sector_size);    
-    unsigned int proceeded_bytes = faccess_offset(ctx, pDisk, FILE_ACCESS_READ, offset, buffer, sector_size);
-    dprint("Read result %d, offset=%d, secsize=%d\r\n", proceeded_bytes,offset, sector_size);
-    
-#if 1
-    for(unsigned int i = 0; i < proceeded_bytes;i+=16)
+    for(unsigned int i = 0; i < len; i+=16)
     {
         dprint("%02X %02X %02X %02X  %02X %02X %02X %02X  %02X %02X %02X %02X  %02X %02X %02X %02X\r\n",
             buffer[i],
@@ -421,9 +418,16 @@ static int ReadATR(HWContext* ctx, file_t* pDisk, unsigned char* buffer, unsigne
             buffer[i+14],
             buffer[i+15]                        
         );
-    }    
-#endif
-    
+    }            
+}
+
+static int ReadATR(HWContext* ctx, file_t* pDisk, unsigned char* buffer, unsigned short sector)
+{
+    unsigned int sector_size;
+    unsigned int offset = GetATROffset(pDisk, sector, &sector_size);    
+    unsigned int proceeded_bytes = faccess_offset(ctx, pDisk, FILE_ACCESS_READ, offset, buffer, sector_size);
+    dprint("Read result %d, offset=%d, secsize=%d\r\n", proceeded_bytes,offset, sector_size);
+       
     if(proceeded_bytes)
         USART_Send_cmpl_and_buffer_and_check_sum(buffer, sector_size);
     else
@@ -431,18 +435,47 @@ static int ReadATR(HWContext* ctx, file_t* pDisk, unsigned char* buffer, unsigne
         CyDelayUs(800u);	//t5
         send_ERR();
     }        
+
+#if 1
+    DumpBuffer(buffer, proceeded_bytes);
+#endif
+    
     return 0;
 }
 
+static int ReadATX(HWContext* ctx, file_t* pDisk, unsigned char* buffer, unsigned short sector)
+{
+    unsigned short sector_size;
+    unsigned int proceeded_bytes = loadAtxSector(ctx, pDisk, buffer, sector, &sector_size);
+
+   
+    if(proceeded_bytes)
+        USART_Send_cmpl_and_buffer_and_check_sum(buffer, sector_size);
+    else
+    {
+        CyDelayUs(800u);	//t5
+        USART_Send_err_and_buffer_and_check_sum(buffer, sector_size);
+    }        
+
+#if 1
+    DumpBuffer(buffer, proceeded_bytes);
+#endif
+    
+    return 0;    
+}
 
 int Read(HWContext* ctx, file_t* pDisk, unsigned char* buffer, unsigned short sector)
 {
     StartReadOperation();
-    dprint("Read sector\r\n");
+    StartMotor();
     send_ACK();       
+    dprint("Read sector\r\n");
     
+    pDisk->status = 0xff;   // reset status
     if(pDisk->flags & FLAGS_XEXLOADER)
         return ReadXEX(ctx, pDisk, buffer, sector);
+    else if(pDisk->flags & FLAGS_ATXTYPE)
+        return ReadATX(ctx, pDisk, buffer, sector);
     else
         return ReadATR(ctx, pDisk, buffer, sector);
  
@@ -476,14 +509,16 @@ static int WriteATR(HWContext* ctx, file_t* pDisk, unsigned char* buffer, unsign
 int Write(HWContext* ctx, file_t* pDisk, unsigned char* buffer, unsigned short sector)
 {
     StartWriteOperation();
+    StartMotor();
     dprint("Write sector\r\n");
     send_ACK();       
-    
-    if(pDisk->flags & FLAGS_XEXLOADER)
+
+    pDisk->status = 0xff;   // reset status
+    if(pDisk->flags & (FLAGS_XEXLOADER | FLAGS_ATXTYPE))
     {
         if ( ! USART_Get_buffer_and_check_and_send_ACK_or_NACK(buffer, XEX_SECTOR_SIZE) )
         {
-            // not support XEX writing - it is just binary image
+            // not support ATX or XEX writing
             CyDelayUs(800u);	//t5
             send_ERR();
         }                
@@ -510,7 +545,40 @@ void ResetDrives()
     
     memset(&virtual_disk[0], 0, sizeof(file_t)*DEVICESNUM);
     for(int i = 0; i < DEVICESNUM; i++)
+    {
         virtual_disk[i].dir_cluster = f->dir_cluster;
+        virtual_disk[i].status = 0xff;
+    }
+}
+
+CY_ISR(MotorISR)
+{
+#if 0    
+    dprint("MotorISR\r\n");
+#endif 
+    if(motor_state)
+        motor_state++;
+    
+    if(motor_state > 20)
+        StopMotor();   
+}
+
+void StartMotor()
+{
+    if(motor_state == 0)
+    {
+        SpinTimer_WriteCounter(0);
+        SpinTimer_Start();
+        SpinTimerISR_StartEx(MotorISR);            
+    }
+    motor_state = 1;
+}
+
+void StopMotor()
+{
+    SpinTimerISR_Stop();
+    SpinTimer_Stop();
+    motor_state = 0;    
 }
 
 int SimulateDiskDrive(HWContext* ctx, unsigned char* pCommand, unsigned char* buffer)

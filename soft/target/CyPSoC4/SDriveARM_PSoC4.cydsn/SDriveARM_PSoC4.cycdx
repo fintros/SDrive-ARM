@@ -743,7 +743,7 @@
   <block name="SlowUartISR" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="Em_EEPROM_Dynamic" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="cy_lfclk" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="SpinTimerInt" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="SpinTimerISR" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="MMC_SSEL" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
     <register name="MMC_SSEL_CONTROL_REG" address="0x400F0070" bitWidth="8" desc="" hidden="false" />
   </block>

@@ -59,7 +59,7 @@ void USART_Init( unsigned char value )
     Clock_1_SetFractionalDividerRegister(IntDivider, FractDivider);
     UART_1_ClearRxBuffer();
     UART_1_ClearTxBuffer();
-    dprint("Change UART speed %d: [%d, %d] to %d\r\n", value, IntDivider, FractDivider, (int)(48000000*32/(IntDivider*32 + FractDivider)/8));    
+//    dprint("Change UART speed %d: [%d, %d] to %d\r\n", value, IntDivider, FractDivider, (int)(48000000*32/(IntDivider*32 + FractDivider)/8));    
 }
 
 void USART_Transmit_Byte( unsigned char data )
@@ -138,12 +138,20 @@ unsigned char USART_Get_buffer_and_check_and_send_ACK_or_NACK(unsigned char *buf
 	return 0;
 }
 
-void USART_Send_cmpl_and_buffer_and_check_sum(unsigned char *buff, unsigned short len)
+void USART_Send_status_and_buffer_and_check_sum(unsigned char *buff, unsigned short len, unsigned char is_error)
 {
 	unsigned char check_sum;
 
 	CyDelayUs(800u);	//t5
-	send_CMPL();
+    if(!is_error)
+    {
+	    send_CMPL();
+    }
+    else
+    {
+	    send_ERR();
+    }
+        
 	CyDelayUs(200u);
 
 	USART_Send_Buffer(buff, len);

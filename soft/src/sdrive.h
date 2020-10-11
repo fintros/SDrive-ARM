@@ -27,6 +27,7 @@ typedef struct _SDriveSettings
 {
     unsigned int emulated_drive_no;
     unsigned char default_pokey_div;
+    unsigned char is_1050;
 } Settings;
 
 extern SharedParameters shared_parameters;
