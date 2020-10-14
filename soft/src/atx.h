@@ -85,6 +85,9 @@ struct atxTrackChunk {
 /***************************************************************/
 /***************************************************************/
 
+// number of angular units in a full disk rotation
+#define AU_FULL_ROTATION         26042
+
 // load an ATX file (returns sector size if ATX file is successfully loaded; 0 if not)
 u16 loadAtxFile(HWContext* ctx, file_t* pDisk, unsigned char* buffer);
     
@@ -98,7 +101,7 @@ u16 getCurrentHeadPosition();
 u16 incAngularDisplacement(u16 start, u16 delta);
 
 // delays until head position reaches the specified position
-void waitForAngularPosition(u16 pos);
+void waitForAngularPosition(u16 pos, u08 fulldisk);
 
 // hook to allow platform-specific implementations to change byte ordering as needed
 void byteSwapAtxFileHeader(struct atxFileHeader * header);

@@ -29,6 +29,7 @@
 #include "diskemu.h"
 #include "sdrivecmd.h"
 #include "slowuart.h"
+#include "atx.h"
 
 SharedParameters shared_parameters;
 Settings settings;
@@ -82,6 +83,7 @@ int wait_for_command(HWContext* ctx)
     return 0;
 }
 
+unsigned short last_cmd_head_pos = 0;
 
 int get_command(unsigned char* command)
 {
@@ -103,7 +105,9 @@ int get_command(unsigned char* command)
 
 	CyDelayUs(800u);	//t1 (650-950us) (Bez tehle pauzy to cele nefunguje!!!)
 	wait_cmd_LH();	//ceka az se zvedne signal command na H
-	CyDelayUs(100u);	//T2=100   (po zvednuti command a pred ACKem)
+    StopSlowUART();
+    
+    last_cmd_head_pos = getCurrentHeadPosition();   // save current head position
     
 #if 0
     if(err)
@@ -111,8 +115,6 @@ int get_command(unsigned char* command)
     else
         dprint("Command: [%02X %02X %02X %02X]\r\n", command[0], command[1], command[2], command[3]);
 #endif  
-
-    StopSlowUART();
     
     if(err)
     {        
@@ -125,6 +127,8 @@ int get_command(unsigned char* command)
             shared_parameters.fastsio_active = 0;
         }
     }
+    else
+        CyDelayUs(100u);	//T2=100   (po zvednuti command a pred ACKem)
 
 #ifdef DEBUG
     dprint("Command: [%02X %02X %02X %02X]\r\n", command[0], command[1], command[2], command[3]);

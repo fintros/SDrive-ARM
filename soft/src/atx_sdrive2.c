@@ -13,9 +13,25 @@
 #include "sdrive.h"
 #include <CyLib.h>
 #include "dprint.h"
+#include "atx.h"
 
-void waitForAngularPosition(u16 pos) {
-    dprint("%d->%d\r\n", pos, SpinTimer_COUNTER_REG & SpinTimer_16BIT_MASK);
+void waitForAngularPosition(u16 pos, u08 fulldisk) {
+    u16 current = SpinTimer_COUNTER_REG & SpinTimer_16BIT_MASK;
+    dprint("%d->%d\r\n", current, pos);
+    if(!fulldisk)
+    {
+        int diff = pos - current;
+        if(diff < 0)
+            diff = - diff;
+        // in case of overrun
+        if( ((current > pos) && (diff < 2000)) ||
+            ((current < pos) && (diff > (AU_FULL_ROTATION-2000)))
+        )
+        {
+            dprint("!!!!!skip wait\r\n");
+            return;        
+        }                
+    }                
     while(pos < (SpinTimer_COUNTER_REG & SpinTimer_16BIT_MASK));
     while(pos > (SpinTimer_COUNTER_REG & SpinTimer_16BIT_MASK));
     //dprint("Exit at current %d\r\n", SpinTimer_COUNTER_REG & SpinTimer_16BIT_MASK);
@@ -26,7 +42,7 @@ u16 getCurrentHeadPosition() {
     // between 1-26042 (or 8 microseconds based on 288 rpms). So, SpinTimer always gives the 
     // current angular position of the drive head on the track any given time assuming the 
     // disk is spinning continously.
-    return SpinTimer_COUNTER_REG & SpinTimer_16BIT_MASK + 1;
+    return SpinTimer_COUNTER_REG & SpinTimer_16BIT_MASK;
 }
 
 u08 is_1050() {

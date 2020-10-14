@@ -10,6 +10,7 @@
 
 #include "project.h"
 #include <CyLib.h>
+#undef DEBUG
 #include "dprint.h"
 #include "sio.h"
 #include "gpio.h"

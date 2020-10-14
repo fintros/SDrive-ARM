@@ -436,7 +436,7 @@ static int ReadATR(HWContext* ctx, file_t* pDisk, unsigned char* buffer, unsigne
         send_ERR();
     }        
 
-#if 1
+#if 0
     DumpBuffer(buffer, proceeded_bytes);
 #endif
     
@@ -457,7 +457,7 @@ static int ReadATX(HWContext* ctx, file_t* pDisk, unsigned char* buffer, unsigne
         USART_Send_err_and_buffer_and_check_sum(buffer, sector_size);
     }        
 
-#if 1
+#if 0
     DumpBuffer(buffer, proceeded_bytes);
 #endif
     
@@ -567,6 +567,7 @@ void StartMotor()
 {
     if(motor_state == 0)
     {
+        dprint("Start motor\r\n");
         SpinTimer_WriteCounter(0);
         SpinTimer_Start();
         SpinTimerISR_StartEx(MotorISR);            
@@ -579,6 +580,7 @@ void StopMotor()
     SpinTimerISR_Stop();
     SpinTimer_Stop();
     motor_state = 0;    
+    dprint("Stop motor\r\n");
 }
 
 int SimulateDiskDrive(HWContext* ctx, unsigned char* pCommand, unsigned char* buffer)
