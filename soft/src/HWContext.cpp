@@ -60,7 +60,7 @@ void InitLoadableCTX(void)
     _staticVars._context.LEDREG_Write = LEDREG_BL_Write;
     _staticVars._context.ReadOnly_Read = ReadOnly_BL_Read;
 #else
-    _staticVars._context.sd_work_freq = 24000000; // 8MHz
+    _staticVars._context.sd_work_freq = 8000000; // 8MHz
     _staticVars._context.SPI_CLK_SetFractionalDividerRegister = SPI_CLK_B_SetFractionalDividerRegister;
     _staticVars._context.SPIM_Start = SPIM_B_Start;
     _staticVars._context.SPIM_WriteTxData = SPIM_B_SpiUartWriteTxData;

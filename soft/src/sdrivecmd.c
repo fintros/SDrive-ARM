@@ -117,7 +117,7 @@ int MountFile(HWContext* ctx, file_t* pDisk, const char* pFileName, unsigned cha
     }
     pDisk->flags = 0;   // not found
     
-    return 0;
+    return 1;
 }
 
 char DefaultBootFile[]="SDRIVE  ATR";

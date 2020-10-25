@@ -28,6 +28,14 @@ typedef struct _SDriveSettings
     unsigned int emulated_drive_no;
     unsigned char default_pokey_div;
     unsigned char is_1050;
+    unsigned int sd_freq;
+    unsigned int is_tape_turbo;
+//    unsigned char* file_name_d0;
+//    unsigned char* file_name_d1;
+//    unsigned char* file_name_d2;
+//    unsigned char* file_name_d3;
+//    unsigned char* file_name_d4;
+    const char* file_name_tape;
 } Settings;
 
 extern SharedParameters shared_parameters;

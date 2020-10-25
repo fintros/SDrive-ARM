@@ -30,19 +30,26 @@
 #include "sdrivecmd.h"
 #include "slowuart.h"
 #include "atx.h"
+#include "tapeemu.h"
 
 SharedParameters shared_parameters;
 Settings settings;
+
+static char tape_enabled = 0;
 
 int wait_for_command(HWContext* ctx)
 {
     static unsigned long autowritecounter = 0;
     static unsigned char last_key = 0;
 
-    while( get_cmd_H() )	//dokud je Atari signal command na H
+    while( get_cmd_H() )
     {           
         unsigned char actual_key = get_actual_key();
-           
+     
+        // good place to proceed tape routines
+        if(tape_enabled)
+            proceed_tape(ctx, &ctx->atari_sector_buffer[0]);
+        
         if(actual_key != last_key)
         {
             dprint("Key: %02X\r\n", actual_key);
@@ -80,6 +87,9 @@ int wait_for_command(HWContext* ctx)
         else
          autowritecounter++;
     }
+    
+    tape_enabled = 0;
+    
     return 0;
 }
 
@@ -103,8 +113,8 @@ int get_command(unsigned char* command)
 	// end get as ususal
     unsigned char err = USART_Get_Buffer_And_Check(command,4,CMD_STATE_L);
 
-	CyDelayUs(800u);	//t1 (650-950us) (Bez tehle pauzy to cele nefunguje!!!)
-	wait_cmd_LH();	//ceka az se zvedne signal command na H
+	CyDelayUs(800u);	
+	wait_cmd_LH();
     StopSlowUART();
     
     last_cmd_head_pos = getCurrentHeadPosition();   // save current head position
@@ -140,6 +150,8 @@ int get_command(unsigned char* command)
     return 0;
 }
 
+static const char DefaultTapeName[] = "1       CAS";
+
 //----- Begin Code ------------------------------------------------------------
 int sdrive(void)
 {
@@ -152,6 +164,9 @@ int sdrive(void)
     settings.emulated_drive_no = 1; // Emulate D1 for a while
     settings.default_pokey_div = US_POKEY_DIV_DEFAULT; 
     settings.is_1050 = 0;
+    settings.sd_freq = 24000000;
+    settings.is_tape_turbo = 0;
+    settings.file_name_tape = &DefaultTapeName[0];
 
 	unsigned char command[5];
 
@@ -175,7 +190,7 @@ int sdrive(void)
     	USART_Init(ATARI_SPEED_STANDARD);
         
         char ledState = 0;
-        //CEKACI SMYCKA!!!
+        // Check card presense
     	while (SWBUT_Read() & 0x40)
         { 
             CyDelay(200);
@@ -184,8 +199,6 @@ int sdrive(void)
             else LED_RED_OFF; 
         }
 
-    	//pozor, v tomto okamziku nesmi byt nacacheovan zadny sektor
-    	//pro zapis, protoze init karty inicializuje i mmc_sector atd.!!!
         LED_RED_OFF; 
         LED_GREEN_ON;
     	do
@@ -195,8 +208,18 @@ int sdrive(void)
     	}
     	while(mmcReset(ctx));	//Wait for SD card ready
 
+        // read parameters
+        if(ReadSettings(ctx, &settings))
+            continue;
+        
+        if(settings.sd_freq != ctx->sd_work_freq)
+        {
+            ctx->sd_work_freq = settings.sd_freq;
+            continue;
+        }
+        
         LED_GREEN_OFF;
-        dprint("SD card inititialized\r\n");
+        dprint("SD card inititialized\r\n");                
 
         ResetDrives();
 
@@ -204,6 +227,9 @@ int sdrive(void)
         shared_parameters.actual_drive_number = 0;
     	if(InitBootDrive(ctx, &ctx->atari_sector_buffer[0]))
             continue;
+        
+        tape_enabled = 1;
+        mount_tape(ctx, GetVDiskPtr(0), &settings, &ctx->atari_sector_buffer[0]);
         
     	set_display(shared_parameters.actual_drive_number);
 

@@ -53,6 +53,9 @@ typedef enum
 
 int InitBootDrive(HWContext* ctx, unsigned char* pBuffer);
 
+// Mount file in current directory
+int MountFile(HWContext* ctx, file_t* pDisk, const char* pFileName, unsigned char* pBuffer);
+
 int DriveCommand(HWContext* ctx, unsigned char* command, unsigned char* buffer);
 
 

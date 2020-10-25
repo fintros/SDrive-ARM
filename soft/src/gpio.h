@@ -19,10 +19,12 @@
 #define CMD_STATE_L		0
 #define get_cmd_H()		( Command_Read() )
 #define get_cmd_L()		( !(Command_Read()) )
-#define get_readonly()	( ReadOnly_B_Read() == 0 ) 
 #define wait_cmd_HL() { while ( Command_Read() ); }
 #define wait_cmd_LH() { while ( !Command_Read() ); }
 
+#define get_readonly()	( ReadOnly_B_Read() == 0 ) 
+
+    
 #define LED_ON     
 #define LED_OFF    
 

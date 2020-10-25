@@ -18,6 +18,12 @@
 #define US_POKEY_DIV_DEFAULT	0x06		//#6   => 68838 bps
     
 /**
+ * @brief init USART with required baud
+ * @param baud baud rate
+ */  
+void USART_Set_Baud (unsigned int baud);    
+    
+/**
  * @brief init USART with required SIO divider
  * @param div SIO divider
  */  

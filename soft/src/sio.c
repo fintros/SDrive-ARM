@@ -18,10 +18,24 @@
 #include "hwcontext.h"
 #include "sdrive.h"
 
-void USART_Init( unsigned char value )
-{     
-    const unsigned long freq = 48000000;
+const unsigned long _freq = 48000000;
+
+void USART_Set_Baud (unsigned int baud) {
+
+    // fixed point 27.5
+    unsigned long TargetDivider = _freq * 32 / 8 / baud;  // fixed point 27.5
     
+    int IntDivider = TargetDivider / 32 ;
+    int FractDivider = TargetDivider - IntDivider * 32;
+    
+    Clock_1_SetFractionalDividerRegister(IntDivider, FractDivider);
+    UART_1_ClearRxBuffer();
+    UART_1_ClearTxBuffer();
+}
+
+
+void USART_Init( unsigned char value )
+{         
     unsigned long TargetSpeed = 0;
     
     switch(value-6)
@@ -51,15 +65,10 @@ void USART_Init( unsigned char value )
             TargetSpeed = 74575;
             break;
         default:
-            TargetSpeed = freq / 8 * value / 19040 / 46;
+            TargetSpeed = _freq / 8 * value / 19040 / 46;
     }
 
-    unsigned long TargetDivider = freq * 32 / 8 / TargetSpeed;  // fixed point 27.5
-    int IntDivider = TargetDivider / 32 ;
-    int FractDivider = TargetDivider - IntDivider * 32;
-    Clock_1_SetFractionalDividerRegister(IntDivider, FractDivider);
-    UART_1_ClearRxBuffer();
-    UART_1_ClearTxBuffer();
+    USART_Set_Baud(TargetSpeed);
 //    dprint("Change UART speed %d: [%d, %d] to %d\r\n", value, IntDivider, FractDivider, (int)(48000000*32/(IntDivider*32 + FractDivider)/8));    
 }
 
@@ -86,7 +95,7 @@ void USART_Send_Buffer(unsigned char *buff, unsigned short len)
     while(bufIndex < len)
     {
         UART_1_PutChar(buff[bufIndex]);
-        while(UART_1_GetTxBufferSize());
+        while(UART_1_GetTxBufferSize() > 2);
         bufIndex++;
     }
     while(UART_1_GetTxBufferSize());

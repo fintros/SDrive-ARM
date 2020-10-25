@@ -1,6 +1,6 @@
 /*
  * ---------------------------------------------------------------------------
- * -- (c) 2017 Alexey Spirkov
+ * -- (c) 2020 Alexey Spirkov
  * -- I am happy for anyone to use this for non-commercial use.
  * -- If my verilog/vhdl/c files are used commercially or otherwise sold,
  * -- please contact me for explicit permission at me _at_ alsp.net.
@@ -8,23 +8,13 @@
  * ---------------------------------------------------------------------------
  */
 
-#include "project.h"
-#include "HWContext.h"
+#ifndef _TAPEEMU_H
+#define _TAPEEMU_H
 
-int sdrive(void);
+#include "hwcontext.h"
+#include "sdrive.h"
 
-int main(void)
-{
-    
-    //CyDelay(5000);
-    CyGlobalIntEnable; /* Enable global interrupts. */
-    UART_1_Start(); 
-    SlowUARTCounter_Init();
-    HelperTimer_Init();
-    HelperTimer_Start();
-    InitLoadableCTX();
-    sdrive();
-    return 0;
-}
+int mount_tape(HWContext *ctx, file_t * folder, Settings* settings, unsigned char *buffer);
+void proceed_tape(HWContext* ctx, unsigned char *buffer);
 
-/* [] END OF FILE */
+#endif /* _TAPEEMU_H */

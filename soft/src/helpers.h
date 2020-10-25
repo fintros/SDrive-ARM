@@ -10,6 +10,9 @@
 #ifndef _HELPERS_H
 #define _HELPERS_H
 
+#include "hwcontext.h"
+#include "sdrive.h"    
+    
 unsigned char get_checksum(unsigned char* buffer, unsigned short len);
 
 void set_display(unsigned char n);
@@ -20,5 +23,8 @@ void StartWriteOperation();
 void StopWriteOperation();
 
 unsigned long GetRootDirCluster();
+
+int ReadSettings(HWContext* ctx, Settings* settings);
+int SaveSettings(HWContext* ctx, Settings* settings);
 
 #endif /* _HELPERS_H */

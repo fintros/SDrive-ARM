@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <blockRegMap version="1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://cypress.com/xsd/cyblockregmap cyblockregmap.xsd" xmlns="http://cypress.com/xsd/cyblockregmap">
+  <block name="SPI_CLK_B" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="SPIM_B" BASE="0x0" SIZE="0x0" desc="Serial Communication Block" visible="true" hidden="false">
     <block name="sclk_s_VM" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="mosi_s_VM" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
@@ -339,7 +340,6 @@
       <field name="BREAK_DETECT" from="11" to="11" access="RW" resetVal="" desc="Logical and of corresponding request and mask bits" hidden="false" />
     </register>
   </block>
-  <block name="Bootloadable_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="Debug_B" BASE="0x0" SIZE="0x0" desc="Serial Communication Block" visible="true" hidden="false">
     <block name="clock_VM" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="sclk_s_VM" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
@@ -678,9 +678,41 @@
       <field name="BREAK_DETECT" from="11" to="11" access="RW" resetVal="" desc="Logical and of corresponding request and mask bits" hidden="false" />
     </register>
   </block>
-  <block name="SPI_CLK_B" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="CardPresent" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="SPI_SSEL" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="ReadOnly_B" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="SlowUARTCounter" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
+    <block name="VMux_count" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="VMux_reload" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="VMux_start" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="VMux_stop" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="VMux_capture" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="VMux_clock" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="cy_m0s8_tcpwm_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <register name="COUNTER" address="0x40050188" bitWidth="32" desc="Current counter value" hidden="false" />
+    <register name="CC" address="0x4005018C" bitWidth="32" desc="Compare / capture value" hidden="false" />
+    <register name="CC_BUF" address="0x40050190" bitWidth="32" desc="Compare / capture buffer value" hidden="false" />
+    <register name="PERIOD" address="0x40050194" bitWidth="32" desc="Period value" hidden="false" />
+    <register name="PERIOD_BUF" address="0x40050198" bitWidth="32" desc="Period buffer value" hidden="false" />
+  </block>
   <block name="SpinTimer" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
+    <block name="VMux_count" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="VMux_reload" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="VMux_start" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="VMux_stop" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="VMux_capture" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="VMux_clock" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="cy_m0s8_tcpwm_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <register name="COUNTER" address="0x40050148" bitWidth="32" desc="Current counter value" hidden="false" />
+    <register name="CC" address="0x4005014C" bitWidth="32" desc="Compare / capture value" hidden="false" />
+    <register name="CC_BUF" address="0x40050150" bitWidth="32" desc="Compare / capture buffer value" hidden="false" />
+    <register name="PERIOD" address="0x40050154" bitWidth="32" desc="Period value" hidden="false" />
+    <register name="PERIOD_BUF" address="0x40050158" bitWidth="32" desc="Period buffer value" hidden="false" />
+  </block>
+  <block name="BL_Init" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="Bootloadable_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="CardPresent" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="HelperISR" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="HelperTimer" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
     <block name="VMux_count" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="VMux_reload" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="VMux_start" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
@@ -694,6 +726,53 @@
     <register name="PERIOD" address="0x40050114" bitWidth="32" desc="Period value" hidden="false" />
     <register name="PERIOD_BUF" address="0x40050118" bitWidth="32" desc="Period buffer value" hidden="false" />
   </block>
+  <block name="cy_boot" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="Em_EEPROM_Dynamic" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="cy_lfclk" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="UARTDetect" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="MMC_SSEL" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
+    <register name="MMC_SSEL_CONTROL_REG" address="0x400F0070" bitWidth="8" desc="" hidden="false" />
+  </block>
+  <block name="SpinClock" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="SlowUartISR" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="SpinTimerISR" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="Tx_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="Rx_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="Proceed" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="ClockOutput" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="MotorControl" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="Clock_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="Command" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="UART_1" BASE="0x0" SIZE="0x0" desc="UART" visible="true" hidden="false">
+    <block name="VirtualMux_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <block name="BUART" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+    <register name="RX_UART_1_RX_ADDRESS1" address="0x400F0021" bitWidth="8" desc="RX Address1 Register" hidden="false" />
+    <register name="RX_UART_1_RX_ADDRESS2" address="0x400F0031" bitWidth="8" desc="RX Address2 Register" hidden="false" />
+    <register name="RX_UART_1_RX_DATA" address="0x400F0041" bitWidth="8" desc="RX Data Register" hidden="false" />
+    <register name="TX_UART_1_TX_DATA" address="0x400F0042" bitWidth="8" desc="TX Data Register" hidden="false" />
+    <register name="TX_UART_1_TX_STATUS" address="0x400F0062" bitWidth="8" desc="TX status register" hidden="false">
+      <field name="UART_1_TX_STS_COMPLETE" from="0" to="0" access="R" resetVal="" desc="" hidden="false" />
+      <field name="UART_1_TX_STS_FIFO_EMPTY" from="1" to="1" access="R" resetVal="" desc="" hidden="false" />
+      <field name="UART_1_TX_STS_FIFO_FULL" from="2" to="2" access="R" resetVal="" desc="" hidden="false" />
+      <field name="UART_1_TX_STS_FIFO_NOT_FULL" from="3" to="3" access="R" resetVal="" desc="" hidden="false" />
+    </register>
+    <register name="RX_UART_1_RX_STATUS" address="0x400F0063" bitWidth="8" desc="RX status register" hidden="false">
+      <field name="UART_1_RX_STS_MRKSPC" from="0" to="0" access="R" resetVal="" desc="" hidden="false" />
+      <field name="UART_1_RX_STS_BREAK" from="1" to="1" access="R" resetVal="" desc="" hidden="false" />
+      <field name="UART_1_RX_STS_PAR_ERROR" from="2" to="2" access="R" resetVal="" desc="" hidden="false" />
+      <field name="UART_1_RX_STS_STOP_ERROR" from="3" to="3" access="R" resetVal="" desc="" hidden="false" />
+      <field name="UART_1_RX_STS_OVERRUN" from="4" to="4" access="R" resetVal="" desc="" hidden="false" />
+      <field name="UART_1_RX_STS_FIFO_NOTEMPTY" from="5" to="5" access="R" resetVal="" desc="" hidden="false" />
+      <field name="UART_1_RX_STS_ADDR_MATCH" from="6" to="6" access="R" resetVal="" desc="" hidden="false" />
+    </register>
+  </block>
+  <block name="LEDREG_B" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
+    <register name="LEDREG_B_CONTROL_REG" address="0x400F0072" bitWidth="8" desc="" hidden="false" />
+  </block>
+  <block name="LED_G" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="LED_Y1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="LED_Y0" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="LED_Y2" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="CapSense" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
     <block name="CSD" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="ZeroTerminal_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
@@ -723,75 +802,9 @@
     <block name="SnsClk" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
     <block name="ISR" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   </block>
-  <block name="BL_Init" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="SlowUARTCounter" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
-    <block name="VMux_count" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-    <block name="VMux_reload" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-    <block name="VMux_start" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-    <block name="VMux_stop" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-    <block name="VMux_capture" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-    <block name="VMux_clock" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-    <block name="cy_m0s8_tcpwm_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-    <register name="COUNTER" address="0x40050148" bitWidth="32" desc="Current counter value" hidden="false" />
-    <register name="CC" address="0x4005014C" bitWidth="32" desc="Compare / capture value" hidden="false" />
-    <register name="CC_BUF" address="0x40050150" bitWidth="32" desc="Compare / capture buffer value" hidden="false" />
-    <register name="PERIOD" address="0x40050154" bitWidth="32" desc="Period value" hidden="false" />
-    <register name="PERIOD_BUF" address="0x40050158" bitWidth="32" desc="Period buffer value" hidden="false" />
-  </block>
-  <block name="ReadOnly_B" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="cy_boot" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="SlowUartISR" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="Em_EEPROM_Dynamic" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="cy_lfclk" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="SpinTimerISR" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="MMC_SSEL" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
-    <register name="MMC_SSEL_CONTROL_REG" address="0x400F0070" bitWidth="8" desc="" hidden="false" />
-  </block>
-  <block name="SPI_SSEL" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="SpinClock" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="UARTDetect" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="Tx_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="Rx_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="MotorControl" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="Proceed" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="LEDREG_B" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
-    <register name="LEDREG_B_CONTROL_REG" address="0x400F0072" bitWidth="8" desc="" hidden="false" />
-  </block>
-  <block name="Clock_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="Command" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="LED_G" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="UART_1" BASE="0x0" SIZE="0x0" desc="UART" visible="true" hidden="false">
-    <block name="VirtualMux_1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-    <block name="BUART" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-    <register name="RX_UART_1_RX_ADDRESS1" address="0x400F0021" bitWidth="8" desc="RX Address1 Register" hidden="false" />
-    <register name="RX_UART_1_RX_ADDRESS2" address="0x400F0031" bitWidth="8" desc="RX Address2 Register" hidden="false" />
-    <register name="RX_UART_1_RX_DATA" address="0x400F0041" bitWidth="8" desc="RX Data Register" hidden="false" />
-    <register name="TX_UART_1_TX_DATA" address="0x400F0042" bitWidth="8" desc="TX Data Register" hidden="false" />
-    <register name="TX_UART_1_TX_STATUS" address="0x400F0062" bitWidth="8" desc="TX status register" hidden="false">
-      <field name="UART_1_TX_STS_COMPLETE" from="0" to="0" access="R" resetVal="" desc="" hidden="false" />
-      <field name="UART_1_TX_STS_FIFO_EMPTY" from="1" to="1" access="R" resetVal="" desc="" hidden="false" />
-      <field name="UART_1_TX_STS_FIFO_FULL" from="2" to="2" access="R" resetVal="" desc="" hidden="false" />
-      <field name="UART_1_TX_STS_FIFO_NOT_FULL" from="3" to="3" access="R" resetVal="" desc="" hidden="false" />
-    </register>
-    <register name="RX_UART_1_RX_STATUS" address="0x400F0063" bitWidth="8" desc="RX status register" hidden="false">
-      <field name="UART_1_RX_STS_MRKSPC" from="0" to="0" access="R" resetVal="" desc="" hidden="false" />
-      <field name="UART_1_RX_STS_BREAK" from="1" to="1" access="R" resetVal="" desc="" hidden="false" />
-      <field name="UART_1_RX_STS_PAR_ERROR" from="2" to="2" access="R" resetVal="" desc="" hidden="false" />
-      <field name="UART_1_RX_STS_STOP_ERROR" from="3" to="3" access="R" resetVal="" desc="" hidden="false" />
-      <field name="UART_1_RX_STS_OVERRUN" from="4" to="4" access="R" resetVal="" desc="" hidden="false" />
-      <field name="UART_1_RX_STS_FIFO_NOTEMPTY" from="5" to="5" access="R" resetVal="" desc="" hidden="false" />
-      <field name="UART_1_RX_STS_ADDR_MATCH" from="6" to="6" access="R" resetVal="" desc="" hidden="false" />
-    </register>
-  </block>
-  <block name="ClockOutput" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="LED_Y1" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="LED_Y0" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="LED_Y3" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="LED_Y2" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="LED_R" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="ClockInput" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="AtariInt" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
-  <block name="Clock_2" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
   <block name="SWBUT" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false">
     <register name="SWBUT_STATUS_REG" address="0x400F0060" bitWidth="8" desc="" hidden="false" />
     <register name="SWBUT_MASK_REG" address="0x400F0080" bitWidth="8" desc="" hidden="false" />
@@ -822,4 +835,6 @@
       </field>
     </register>
   </block>
+  <block name="LED_R" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
+  <block name="Clock_2" BASE="0x0" SIZE="0x0" desc="" visible="true" hidden="false" />
 </blockRegMap>
