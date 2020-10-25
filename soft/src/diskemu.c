@@ -101,9 +101,10 @@ static int FormatMedium(HWContext* ctx, file_t* pDisk, unsigned char* buffer)
     return 0;
 }
 
-static int GetHighSpeedIndex()
+static int GetHighSpeedIndex(file_t* pDisk)
 {
-    unsigned char divisor = shared_parameters.fastsio_pokeydiv;
+    // use standard speed for ATX
+    unsigned char divisor = (pDisk->flags & FLAGS_ATXTYPE)?US_POKEY_DIV_STANDARD:shared_parameters.fastsio_pokeydiv;
     StartReadOperation();
     dprint("Ask for speed\r\n");
     send_ACK();
@@ -450,12 +451,9 @@ static int ReadATX(HWContext* ctx, file_t* pDisk, unsigned char* buffer, unsigne
 
    
     if(proceeded_bytes)
-        USART_Send_cmpl_and_buffer_and_check_sum(buffer, sector_size);
+        USART_Send_status_and_buffer_and_check_sum(buffer, sector_size, 0, 0);
     else
-    {
-        CyDelayUs(800u);	//t5
-        USART_Send_err_and_buffer_and_check_sum(buffer, sector_size);
-    }        
+        USART_Send_status_and_buffer_and_check_sum(buffer, sector_size, 1, 0);
 
 #if 0
     DumpBuffer(buffer, proceeded_bytes);
@@ -563,11 +561,14 @@ CY_ISR(MotorISR)
         StopMotor();   
 }
 
+unsigned char motor_just_started = 0;
+
 void StartMotor()
 {
     if(motor_state == 0)
     {
         dprint("Start motor\r\n");
+        motor_just_started = 1;
         SpinTimer_WriteCounter(0);
         SpinTimer_Start();
         SpinTimerISR_StartEx(MotorISR);            
@@ -617,7 +618,7 @@ int SimulateDiskDrive(HWContext* ctx, unsigned char* pCommand, unsigned char* bu
     case CmdFormatMedium:
         return FormatMedium(ctx, pDisk, buffer);
     case CmdGetHighSpeedIndex:
-        return GetHighSpeedIndex();
+        return GetHighSpeedIndex(pDisk);
     case CmdReadPercom:
         return ReadPercom(pDisk, buffer);
     case CmdWritePercom:

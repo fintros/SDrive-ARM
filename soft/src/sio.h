@@ -34,10 +34,10 @@ unsigned char USART_Get_Buffer_And_Check(unsigned char *buff, unsigned short len
 unsigned char USART_Get_buffer_and_check_and_send_ACK_or_NACK(unsigned char *buff, unsigned short len);
 
 
-void USART_Send_status_and_buffer_and_check_sum(unsigned char *buff, unsigned short len, unsigned char is_error);
+void USART_Send_status_and_buffer_and_check_sum(unsigned char *buff, unsigned short len, unsigned char is_error, unsigned char do_wait);
 
-#define USART_Send_cmpl_and_buffer_and_check_sum(X, Y) USART_Send_status_and_buffer_and_check_sum(X, Y, 0)
-#define USART_Send_err_and_buffer_and_check_sum(X, Y) USART_Send_status_and_buffer_and_check_sum(X, Y, 1)
+#define USART_Send_cmpl_and_buffer_and_check_sum(X, Y) USART_Send_status_and_buffer_and_check_sum(X, Y, 0, 1)
+#define USART_Send_err_and_buffer_and_check_sum(X, Y) USART_Send_status_and_buffer_and_check_sum(X, Y, 1, 1)
 
 #define send_ACK()	USART_Transmit_Byte('A');  dprint("Send ACK\r\n"); 
 #define send_NACK()	USART_Transmit_Byte('N');  dprint("Send NACK\r\n");

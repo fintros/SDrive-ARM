@@ -15,23 +15,25 @@
 #include "dprint.h"
 #include "atx.h"
 
+extern unsigned short last_cmd_head_pos;
+
 void waitForAngularPosition(u16 pos, u08 fulldisk) {
     u16 current = SpinTimer_COUNTER_REG & SpinTimer_16BIT_MASK;
-    dprint("%d->%d\r\n", current, pos);
     if(!fulldisk)
     {
         int diff = pos - current;
         if(diff < 0)
             diff = - diff;
         // in case of overrun
-        if( ((current > pos) && (diff < 2000)) ||
-            ((current < pos) && (diff > (AU_FULL_ROTATION-2000)))
+        if( ((current > pos) && (diff < 1000)) ||
+            ((current < pos) && (diff > (AU_FULL_ROTATION-1000)))
         )
         {
-            dprint("!!!!!skip wait\r\n");
+            dprint("%d->%d->%d [skip]\r\n", last_cmd_head_pos, current, pos);
             return;        
         }                
     }                
+    dprint("%d->%d->%d, %d\r\n", last_cmd_head_pos, current, pos, fulldisk);
     while(pos < (SpinTimer_COUNTER_REG & SpinTimer_16BIT_MASK));
     while(pos > (SpinTimer_COUNTER_REG & SpinTimer_16BIT_MASK));
     //dprint("Exit at current %d\r\n", SpinTimer_COUNTER_REG & SpinTimer_16BIT_MASK);

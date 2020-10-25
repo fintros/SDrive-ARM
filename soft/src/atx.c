@@ -112,7 +112,7 @@ u16 loadAtxFile(HWContext *ctx, file_t *pDisk, unsigned char *buffer)
     }
 
     _last_disk = pDisk;
-
+    
     return gBytesPerSector;
 }
 
@@ -135,6 +135,7 @@ u16 ReadUnalignedLE16(unsigned char *ptr)
 }
 
 extern unsigned short last_cmd_head_pos;
+extern unsigned char motor_just_started;
 
 u16 loadAtxSector(HWContext *ctx, file_t *pDisk, unsigned char *buffer, u16 num, unsigned short *sectorSize)
 {
@@ -142,6 +143,12 @@ u16 loadAtxSector(HWContext *ctx, file_t *pDisk, unsigned char *buffer, u16 num,
     struct atxSectorListHeader *slHeader;
     struct atxSectorHeader *sectorHeader;
     struct atxTrackChunk *extSectorData;
+
+    if(motor_just_started)
+    {
+        motor_just_started = 0;
+        CyDelay(125);
+    }
 
     if (pDisk != _last_disk)
     {
@@ -170,14 +177,14 @@ u16 loadAtxSector(HWContext *ctx, file_t *pDisk, unsigned char *buffer, u16 num,
     // set the sector size
     *sectorSize = gBytesPerSector;
 
-    u16 addon_rotation;
+    u32 addon_rotation;
 
     // delay for the time the drive takes to process the request
     if (is_1050())
         addon_rotation = MS_DRIVE_REQUEST_DELAY_1050;
     else
         addon_rotation = MS_DRIVE_REQUEST_DELAY_810;
-
+    
     // delay for track stepping if needed
     if (gCurrentHeadTrack != tgtTrackNumber)
     {
@@ -200,10 +207,10 @@ u16 loadAtxSector(HWContext *ctx, file_t *pDisk, unsigned char *buffer, u16 num,
             addon_rotation += MS_HEAD_SETTLE_810;
     }
 
-    if(addon_rotation > AU_FULL_ROTATION)
+    while(addon_rotation > AU_FULL_ROTATION)
     {
-        dprint("!!!!!warning\r\n");
-        addon_rotation += AU_FULL_ROTATION;
+        addon_rotation -= AU_FULL_ROTATION;
+        waitForAngularPosition(incAngularDisplacement(last_cmd_head_pos, AU_FULL_ROTATION), 1);
     }
     
     u16 req_head_pos = incAngularDisplacement(last_cmd_head_pos, addon_rotation);
@@ -286,13 +293,11 @@ u16 loadAtxSector(HWContext *ctx, file_t *pDisk, unsigned char *buffer, u16 num,
             // if the sector status is bad, delay for a full disk rotation
             if (pDisk->status)
             {
-                waitForAngularPosition(incAngularDisplacement(getCurrentHeadPosition(), AU_FULL_ROTATION), 1);
+                waitForAngularPosition(incAngularDisplacement(req_head_pos, AU_FULL_ROTATION), 1);
                 // otherwise, no need to retry
             }
             else
-            {
-                retries = 0;
-            }
+                break;
         }
 
         // if the status is bad, flag as error
@@ -362,8 +367,6 @@ u16 loadAtxSector(HWContext *ctx, file_t *pDisk, unsigned char *buffer, u16 num,
             au_one_sector_read += MS_CRC_CALCULATION_1050;
         else
             au_one_sector_read += MS_CRC_CALCULATION_810;
-
-        dprint("shift2: %d\r\n", getCurrentHeadPosition());
 
         // determine the angular position we need to wait for by summing the head position, rotational delay and the number
         // of rotational units for a sector read. Then wait for the head to reach that position.

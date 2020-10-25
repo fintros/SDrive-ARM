@@ -10,7 +10,7 @@
 
 #include "project.h"
 #include <CyLib.h>
-#undef DEBUG
+//#undef DEBUG
 #include "dprint.h"
 #include "sio.h"
 #include "gpio.h"
@@ -139,11 +139,13 @@ unsigned char USART_Get_buffer_and_check_and_send_ACK_or_NACK(unsigned char *buf
 	return 0;
 }
 
-void USART_Send_status_and_buffer_and_check_sum(unsigned char *buff, unsigned short len, unsigned char is_error)
+void USART_Send_status_and_buffer_and_check_sum(unsigned char *buff, unsigned short len, unsigned char is_error, unsigned char do_wait)
 {
 	unsigned char check_sum;
 
-	CyDelayUs(800u);	//t5
+    if(do_wait)
+	    CyDelayUs(800u);	//t5
+        
     if(!is_error)
     {
 	    send_CMPL();

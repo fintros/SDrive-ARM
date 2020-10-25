@@ -485,8 +485,6 @@ int MountDrive(HWContext* ctx, unsigned char* pBuffer, unsigned char drive_no, u
         drive_no = 0;
     file_t* pDisk = GetVDiskPtr(drive_no);
     
-    pDisk->status = 0xff;   // reset status
-
     if(fatGetDirEntry(ctx, &_browse, pBuffer, index, 0))
     {
         if(_browse.fi.Attr & ATTR_DIRECTORY)
@@ -494,6 +492,7 @@ int MountDrive(HWContext* ctx, unsigned char* pBuffer, unsigned char drive_no, u
         else
         {
             *pDisk = _browse;
+            pDisk->status = 0xff;   // reset status
             pDisk->current_cluster = pDisk->start_cluster;
             pDisk->ncluster = 0;
 			if( pBuffer[8]=='A' && pBuffer[9]=='T' && pBuffer[10]=='R' )        // ATR
@@ -511,8 +510,12 @@ int MountDrive(HWContext* ctx, unsigned char* pBuffer, unsigned char drive_no, u
             }
 			else if( pBuffer[8]=='A' && pBuffer[9]=='T' && pBuffer[10]=='X' )        // ATX
             {
+                CyDelayUs(800u);	//t5
+                send_CMPL();        
                 loadAtxFile(ctx, pDisk, pBuffer);
                 pDisk->flags |= FLAGS_DRIVEON|FLAGS_ATXTYPE;
+                
+                return 0;        
             }
             else
                 pDisk->flags = FLAGS_DRIVEON|FLAGS_XEXLOADER|FLAGS_ATRMEDIUMSIZE;  // XEX            
