@@ -31,6 +31,7 @@
 #include "slowuart.h"
 #include "atx.h"
 #include "tapeemu.h"
+#include "cfg.h"
 
 SharedParameters shared_parameters;
 Settings settings;
@@ -48,7 +49,7 @@ int wait_for_command(HWContext* ctx)
      
         // good place to proceed tape routines
         if(tape_enabled)
-            proceed_tape(ctx, &ctx->atari_sector_buffer[0]);
+            ProceedTape(ctx, &ctx->atari_sector_buffer[0]);
         
         if(actual_key != last_key)
         {
@@ -57,8 +58,8 @@ int wait_for_command(HWContext* ctx)
             switch(actual_key)
         	{
         		case 6: ///BOOT KEY
-        			if(InitBootDrive(ctx, &ctx->atari_sector_buffer[0]))
-                        return -1;
+        			//if(InitBootDrive(ctx, &ctx->atari_sector_buffer[0]))
+                    //    return -1;
                     shared_parameters.actual_drive_number = 0;
         			break;;
         		case 5: //LEFT
@@ -150,8 +151,6 @@ int get_command(unsigned char* command)
     return 0;
 }
 
-static const char DefaultTapeName[] = "1       CAS";
-
 //----- Begin Code ------------------------------------------------------------
 int sdrive(void)
 {
@@ -159,16 +158,12 @@ int sdrive(void)
 
     HWContext* ctx = (HWContext*)__hwcontext;
     unsigned char* atari_sector_buffer = &ctx->atari_sector_buffer[0];
-    
-    // todo setting read from settings file
-    settings.emulated_drive_no = 1; // Emulate D1 for a while
-    settings.default_pokey_div = US_POKEY_DIV_DEFAULT; 
-    settings.is_1050 = 0;
-    settings.sd_freq = 24000000;
-    settings.is_tape_turbo = 0;
-    settings.file_name_tape = &DefaultTapeName[0];
-
 	unsigned char command[5];
+    
+//    CyDelay(10000);
+    
+    // Initialize default settings
+    DefaultSettings(&settings);
 
     LED_OFF;
 	//Parameters
@@ -209,7 +204,7 @@ int sdrive(void)
     	while(mmcReset(ctx));	//Wait for SD card ready
 
         // read parameters
-        if(ReadSettings(ctx, &settings))
+        if(ReadSettings(ctx, &settings, &ctx->atari_sector_buffer[0]))
             continue;
         
         if(settings.sd_freq != ctx->sd_work_freq)
@@ -221,15 +216,12 @@ int sdrive(void)
         LED_GREEN_OFF;
         dprint("SD card inititialized\r\n");                
 
-        ResetDrives();
-
         // set boot drive to active D1:
         shared_parameters.actual_drive_number = 0;
-    	if(InitBootDrive(ctx, &ctx->atari_sector_buffer[0]))
-            continue;
+//    	if(InitBootDrive(ctx, &ctx->atari_sector_buffer[0]))
+//            continue;
         
         tape_enabled = 1;
-        mount_tape(ctx, GetVDiskPtr(0), &settings, &ctx->atari_sector_buffer[0]);
         
     	set_display(shared_parameters.actual_drive_number);
 

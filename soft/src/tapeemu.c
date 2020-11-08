@@ -26,7 +26,7 @@ typedef struct
 	unsigned int block;
 	unsigned char run;
 	unsigned char is_fuji;
-	unsigned char is_turbo;
+	unsigned int tape_baud;
 
 } tape_file_t;
 
@@ -61,7 +61,7 @@ int send_fuji_tape_block(HWContext *ctx, tape_file_t *tape, int offset, unsigned
 				 p[2] == 'u' &&
 				 p[3] == 'd')
 		{
-			if (tape->is_turbo == 0) //ignore baud hdr
+			if (tape->tape_baud == 600) //ignore baud hdr
             {
     		    tape->baud = hdr->irg_length;
     			USART_Set_Baud(tape->baud);                
@@ -163,13 +163,13 @@ int send_tape_block(HWContext *ctx, int offset, unsigned char *buffer)
 
 static int tape_offset = 0;
 
-int mount_tape(HWContext *ctx, file_t * folder, Settings* settings, unsigned char *buffer)
+int MountTape(HWContext *ctx, file_t * folder, const char* file_name, Settings* settings, unsigned char *buffer)
 {
     memset(&tape, 0 , sizeof(tape_file_t));
     tape.file.dir_cluster = folder->dir_cluster;
-    if(MountFile(ctx, &tape.file, settings->file_name_tape, buffer))
+    if(MountFile(ctx, &tape.file, file_name, buffer))
     {
-        dprint("Unable to mount %s to tape\r\n", settings->file_name_tape);
+        dprint("Unable to mount %s to tape\r\n", file_name);
         return 1;
     }
     else
@@ -177,16 +177,13 @@ int mount_tape(HWContext *ctx, file_t * folder, Settings* settings, unsigned cha
     	tape_header_t *hdr = (tape_header_t *)buffer;
     	char *p = hdr->chunk_type;
 
-        tape.is_turbo = settings->is_tape_turbo;
+        tape.tape_baud = settings->tape_baud;
 
     	faccess_offset(ctx, &tape.file, FILE_ACCESS_READ, 0, buffer, sizeof(tape_header_t));
         
     	tape.is_fuji = (p[0] == 'F' && p[1] == 'U' && p[2] == 'J' &&p[3] == 'I')?1:0;
     		
-    	if (settings->is_tape_turbo)	   //set fix to
-    		tape.baud = 1000; //1000 baud
-    	else
-    		tape.baud = 600;
+        tape.baud = settings->tape_baud;
 
     	USART_Set_Baud(tape.baud);
 
@@ -194,7 +191,7 @@ int mount_tape(HWContext *ctx, file_t * folder, Settings* settings, unsigned cha
         
         tape_offset = 0;
         
-        dprint("Mounted %s to tape\r\n", settings->file_name_tape);
+        dprint("Mounted %s to tape\r\n", file_name);
     }
    
     return 0;       
@@ -210,7 +207,7 @@ CY_ISR(LedISR)
     set_display(led_state);
 }
 
-void proceed_tape(HWContext* ctx, unsigned char *buffer)
+void ProceedTape(HWContext* ctx, unsigned char *buffer)
 {   
     if(( tape_offset >=0 ) && (SWBUT_Read() & 0x10))
     {

@@ -12,6 +12,7 @@
 #include "diskemu.h"
 #include "sio.h"
 #include "gpio.h"
+#undef DEBUG
 #include "dprint.h"
 #include "xexloader.h"
 #include "helpers.h"

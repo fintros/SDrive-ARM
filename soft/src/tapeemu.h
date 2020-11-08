@@ -14,7 +14,7 @@
 #include "hwcontext.h"
 #include "sdrive.h"
 
-int mount_tape(HWContext *ctx, file_t * folder, Settings* settings, unsigned char *buffer);
-void proceed_tape(HWContext* ctx, unsigned char *buffer);
+int MountTape(HWContext *ctx, file_t * folder, const char* file_name, Settings* settings, unsigned char *buffer);
+void ProceedTape(HWContext* ctx, unsigned char *buffer);
 
 #endif /* _TAPEEMU_H */

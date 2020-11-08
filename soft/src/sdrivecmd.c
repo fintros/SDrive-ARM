@@ -12,6 +12,7 @@
 #include "sdrivecmd.h"
 #include "sio.h"
 #include "gpio.h"
+//#undef DEBUG
 #include "dprint.h"
 #include "diskemu.h"
 #include "fat.h"
@@ -101,41 +102,73 @@ int SetATRFlags(HWContext* ctx, file_t* pDisk, unsigned char* pBuffer)
 // Mount file in current directory
 int MountFile(HWContext* ctx, file_t* pDisk, const char* pFileName, unsigned char* pBuffer)
 {
-    int i = 0;
-    while(fatGetDirEntry(ctx, pDisk, pBuffer, i++, 0))
-    {
-        if(!strncmp((const char*) pBuffer, pFileName, 11))
+    // repeat 
+    while(pFileName)
+    {   
+        // prepare file name in 8+3 format
+        char pCurFileName[11];
+        memset(&pCurFileName[0], ' ', 11);
+        int i = 0, j = 0;
+        for(; j<11; i++, j++) 
         {
-            dprint("%s found\r\n", pFileName);
-			pDisk->current_cluster=pDisk->start_cluster;
-			pDisk->ncluster=0;
-			pDisk->status=0xff;
-            if(!strncmp(pFileName+8, "ATR", 3)) // if mount ATR
-                return SetATRFlags(ctx, pDisk, pBuffer);
-            return 0;                        
-        }        
+            if(pFileName[i]=='.')
+            {
+                i++;
+                j = 8;
+            }
+            if(pFileName[i]=='/' || pFileName[i]==0)
+                break;
+            pCurFileName[j] = pFileName[i];
+        }      
+        if(pFileName[i]=='/')
+            pFileName += i + 1;
+        else
+            pFileName = 0;                     
+        
+        i = 0;
+        while(fatGetDirEntry(ctx, pDisk, pBuffer, i++, 0))
+        {        
+            if(!strncasecmp((const char*) pBuffer, pCurFileName, 11))
+            {
+                dprint("%s found\r\n", pCurFileName);
+    			pDisk->current_cluster=pDisk->start_cluster;
+                if(pFileName)
+                {
+                    pDisk->dir_cluster = pDisk->start_cluster;
+                    i = 0;
+                }
+                else
+                {
+        			pDisk->ncluster=0;
+        			pDisk->status=0xff;
+                    if(!strncmp(pFileName+8, "ATR", 3)) // if mount ATR
+                        return SetATRFlags(ctx, pDisk, pBuffer);
+                    return 0;                        
+                }
+            }        
+        }
     }
-    pDisk->flags = 0;   // not found
+    pDisk->flags = 0;   // not found                
     
     return 1;
 }
 
-char DefaultBootFile[]="SDRIVE  ATR";
-
-int InitBootDrive(HWContext* ctx, unsigned char* pBuffer)
-{
-    LED_OFF;
-	if ( !fatInit(ctx) ) 
-	{
-		LED_GREEN_OFF;
-        CyDelayUs(1000u);
-        return 1;
-	}
-    
-    dprint("FAT FS inititialized\r\n");    
-    
-    return MountFile(ctx, GetVDiskPtr(0), DefaultBootFile, pBuffer);
-}
+//char DefaultBootFile[]="SDRIVE  ATR";
+//
+//int InitBootDrive(HWContext* ctx, unsigned char* pBuffer)
+//{
+//    LED_OFF;
+//	if ( !fatInit(ctx) ) 
+//	{
+//		LED_GREEN_OFF;
+//        CyDelayUs(1000u);
+//        return 1;
+//	}
+//    
+//    dprint("FAT FS inititialized\r\n");    
+//    
+//    return MountFile(ctx, GetVDiskPtr(0), DefaultBootFile, pBuffer);
+//}
 
 static int InitEmu(HWContext* ctx, unsigned char soft, unsigned char* pBuffer)
 {
@@ -147,8 +180,8 @@ static int InitEmu(HWContext* ctx, unsigned char soft, unsigned char* pBuffer)
     CyDelayUs(800u);	//t5
 	send_CMPL();
     
-    if(!soft || InitBootDrive(ctx, pBuffer))
-        return -1;      // full reinit cycle
+//    if(!soft || InitBootDrive(ctx, pBuffer))
+//        return -1;      // full reinit cycle
 
     return 0;
 }

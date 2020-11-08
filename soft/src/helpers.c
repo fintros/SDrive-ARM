@@ -70,16 +70,3 @@ unsigned long GetRootDirCluster()
     return ctx->fat_data.dir_cluster;       
 }
 
-
-int ReadSettings(HWContext* ctx, Settings* settings)
-{
-    // todo read setting from file
-    return 0;    
-}
-
-int SaveSettings(HWContext* ctx, Settings* settings)
-{
-    // todo save setting to file
-    return 0;        
-}
-

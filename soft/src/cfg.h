@@ -7,21 +7,17 @@
  * -- This applies for source and binary form and derived works.
  * ---------------------------------------------------------------------------
  */
-#ifndef _HELPERS_H
-#define _HELPERS_H
+
+#ifndef _CFG_H
+#define _CFG_H
 
 #include "hwcontext.h"
-#include "sdrive.h"    
+#include "sdrive.h"
+
+#define CONFIG_FILE_NAME "SDRIVE2 CFG"    
     
-unsigned char get_checksum(unsigned char* buffer, unsigned short len);
-
-void set_display(unsigned char n);
-
-void StartReadOperation();
-void StopReadOperation();
-void StartWriteOperation();
-void StopWriteOperation();
-
-unsigned long GetRootDirCluster();
-
-#endif /* _HELPERS_H */
+int DefaultSettings(Settings* settings);
+int ReadSettings(HWContext* ctx, Settings* settings, unsigned char* buffer);
+int WriteSettings(HWContext* ctx, Settings* settings, unsigned char* buffer);    
+    
+#endif
