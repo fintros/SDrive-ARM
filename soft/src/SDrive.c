@@ -160,7 +160,7 @@ int sdrive(void)
     unsigned char* atari_sector_buffer = &ctx->atari_sector_buffer[0];
 	unsigned char command[5];
     
-//    CyDelay(10000);
+    //CyDelay(10000);
     
     // Initialize default settings
     DefaultSettings(&settings);

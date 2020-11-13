@@ -12,6 +12,7 @@
 #include <CyLib.h>
 #include "hwcontext.h"
 #include "helpers.h"
+#undef DEBUG
 #include "dprint.h"
 #include "sdrive.h"
 #include "gpio.h"

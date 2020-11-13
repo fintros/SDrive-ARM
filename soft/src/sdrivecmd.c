@@ -82,94 +82,6 @@ static int GetEmuInfo(unsigned char* pBuffer, unsigned char count)
     return 0;
 }
 
-int SetATRFlags(HWContext* ctx, file_t* pDisk, unsigned char* pBuffer)
-{
-	if(faccess_offset(ctx, pDisk, FILE_ACCESS_READ, 0 , pBuffer, 16)) //ATR header read
-    {
-        pDisk->flags = FLAGS_DRIVEON;
-    	if ( ( pBuffer[4] | pBuffer[5] ) == 0x01 ) {
-    		pDisk->flags|=FLAGS_ATRDOUBLESECTORS;
-    	} else {
-    		if (pDisk->size == (((unsigned long)1040)*128 + 16)) {
-    			pDisk->flags|=FLAGS_ATRMEDIUMSIZE;
-    		}
-    	}
-        return 0;        
-    }
-    return 1;
-}
-
-// Mount file in current directory
-int MountFile(HWContext* ctx, file_t* pDisk, const char* pFileName, unsigned char* pBuffer)
-{
-    // repeat 
-    while(pFileName)
-    {   
-        // prepare file name in 8+3 format
-        char pCurFileName[11];
-        memset(&pCurFileName[0], ' ', 11);
-        int i = 0, j = 0;
-        for(; j<11; i++, j++) 
-        {
-            if(pFileName[i]=='.')
-            {
-                i++;
-                j = 8;
-            }
-            if(pFileName[i]=='/' || pFileName[i]==0)
-                break;
-            pCurFileName[j] = pFileName[i];
-        }      
-        if(pFileName[i]=='/')
-            pFileName += i + 1;
-        else
-            pFileName = 0;                     
-        
-        i = 0;
-        while(fatGetDirEntry(ctx, pDisk, pBuffer, i++, 0))
-        {        
-            if(!strncasecmp((const char*) pBuffer, pCurFileName, 11))
-            {
-                dprint("%s found\r\n", pCurFileName);
-    			pDisk->current_cluster=pDisk->start_cluster;
-                if(pFileName)
-                {
-                    pDisk->dir_cluster = pDisk->start_cluster;
-                    i = 0;
-                }
-                else
-                {
-        			pDisk->ncluster=0;
-        			pDisk->status=0xff;
-                    if(!strncmp(pFileName+8, "ATR", 3)) // if mount ATR
-                        return SetATRFlags(ctx, pDisk, pBuffer);
-                    return 0;                        
-                }
-            }        
-        }
-    }
-    pDisk->flags = 0;   // not found                
-    
-    return 1;
-}
-
-//char DefaultBootFile[]="SDRIVE  ATR";
-//
-//int InitBootDrive(HWContext* ctx, unsigned char* pBuffer)
-//{
-//    LED_OFF;
-//	if ( !fatInit(ctx) ) 
-//	{
-//		LED_GREEN_OFF;
-//        CyDelayUs(1000u);
-//        return 1;
-//	}
-//    
-//    dprint("FAT FS inititialized\r\n");    
-//    
-//    return MountFile(ctx, GetVDiskPtr(0), DefaultBootFile, pBuffer);
-//}
-
 static int InitEmu(HWContext* ctx, unsigned char soft, unsigned char* pBuffer)
 {
     dprint("Init emulator\r\n");
@@ -510,13 +422,124 @@ int ChangeDirRoot(HWContext* ctx, unsigned char* pBuffer)
     return 0;    
 }
 
+// prepare file name in 8+3 format and return next folder/file pointer
+const char* ConvertFileName(const char* pFileName, char* pConvFileName)
+{
+    memset(&pConvFileName[0], ' ', 11);
+    pConvFileName[11] = 0;
+    int i = 0, j = 0;
+    for(; j<11; i++, j++) 
+    {
+        if(pFileName[i]=='.')
+        {
+            i++;
+            j = 8;
+        }
+        if(pFileName[i]=='/' || pFileName[i]==0)
+            break;
+        pConvFileName[j] = pFileName[i];
+    }      
+    if(pFileName[i]=='/')
+        pFileName += i + 1;
+    else
+        pFileName = 0;   
+    
+    return pFileName;    
+}
 
-int MountDrive(HWContext* ctx, unsigned char* pBuffer, unsigned char drive_no, unsigned short index)
+int SetATRFlags(HWContext* ctx, file_t* pDisk, unsigned char* pBuffer)
+{
+	if(faccess_offset(ctx, pDisk, FILE_ACCESS_READ, 0 , pBuffer, 16)) //ATR header read
+    {
+        pDisk->flags = FLAGS_DRIVEON;
+    	if ( ( pBuffer[4] | pBuffer[5] ) == 0x01 ) {
+    		pDisk->flags|=FLAGS_ATRDOUBLESECTORS;
+    	} else {
+    		if (pDisk->size == (((unsigned long)1040)*128 + 16)) {
+    			pDisk->flags|=FLAGS_ATRMEDIUMSIZE;
+    		}
+    	}
+        return 0;        
+    }
+    return 1;
+}
+
+// pBuffer Should contain file name
+int FileFlagsSettings(HWContext* ctx, file_t* pDisk, unsigned char* pBuffer, int delay_enabled)
+{
+    pDisk->status = 0xff;   // reset status
+    pDisk->current_cluster = pDisk->start_cluster;
+    pDisk->ncluster = 0;
+	if( pBuffer[8]=='A' && pBuffer[9]=='T' && pBuffer[10]=='R' )        // ATR
+          SetATRFlags(ctx, pDisk, pBuffer); 
+    else if( pBuffer[8]=='X' && pBuffer[9]=='F' && pBuffer[10]=='D' )   // XFD
+    {				
+		pDisk->flags=(FLAGS_DRIVEON|FLAGS_XFDTYPE);
+		if ( pDisk->size>92160)
+		{
+		 	if ( pDisk->size<=133120)
+				pDisk->flags|=FLAGS_ATRMEDIUMSIZE;
+			else
+				pDisk->flags |= FLAGS_ATRDOUBLESECTORS;
+		}                
+    }
+	else if( pBuffer[8]=='A' && pBuffer[9]=='T' && pBuffer[10]=='X' )        // ATX
+    {
+        if(delay_enabled)
+        {
+            CyDelayUs(800u);	//t5
+            send_CMPL();
+        }
+        loadAtxFile(ctx, pDisk, pBuffer);
+        pDisk->flags |= FLAGS_DRIVEON|FLAGS_ATXTYPE;
+        
+        return 1;
+    }
+    else
+        pDisk->flags = FLAGS_DRIVEON|FLAGS_XEXLOADER|FLAGS_ATRMEDIUMSIZE;  // XEX            
+
+    // apply readonly according filesystem
+    if (pDisk->fi.Attr & ATTR_READONLY) {
+		pDisk->flags |= FLAGS_READONLY;
+	}
+    return 0;  
+}
+
+// pFileName should be deffer with pBuffer
+int MountFile(HWContext* ctx, file_t* pDisk, const char* pFileName, unsigned char* pBuffer)
+{
+    // repeat for folders
+    while(pFileName)
+    {   
+        char pCurFileName[12];
+        int i = 0;
+        pFileName = ConvertFileName(pFileName, &pCurFileName[0]);
+        while(fatGetDirEntry(ctx, pDisk, pBuffer, i++, 0))
+        {        
+            if(!strncasecmp((const char*) pBuffer, pCurFileName, 11))
+            {
+                dprint("%s found\r\n", pCurFileName);
+                if(pDisk->fi.Attr & ATTR_DIRECTORY)
+                {
+                    pDisk->dir_cluster = pDisk->start_cluster;
+                    break;
+                }
+                else
+                {
+                    FileFlagsSettings(ctx, pDisk, pBuffer, 0);
+                    return 0;                        
+                }
+            }        
+        }
+    }
+    pDisk->flags = 0;   // not found                
+    
+    return 1;
+}
+
+int MountDrive(HWContext* ctx, unsigned char* pBuffer, file_t* pDisk, unsigned short index)
 {
     send_ACK();
-    if(drive_no > DEVICESNUM)
-        drive_no = 0;
-    file_t* pDisk = GetVDiskPtr(drive_no);
     
     if(fatGetDirEntry(ctx, &_browse, pBuffer, index, 0))
     {
@@ -525,38 +548,8 @@ int MountDrive(HWContext* ctx, unsigned char* pBuffer, unsigned char drive_no, u
         else
         {
             *pDisk = _browse;
-            pDisk->status = 0xff;   // reset status
-            pDisk->current_cluster = pDisk->start_cluster;
-            pDisk->ncluster = 0;
-			if( pBuffer[8]=='A' && pBuffer[9]=='T' && pBuffer[10]=='R' )        // ATR
-                  SetATRFlags(ctx, pDisk, pBuffer); 
-            else if( pBuffer[8]=='X' && pBuffer[9]=='F' && pBuffer[10]=='D' )   // XFD
-            {				
-				pDisk->flags=(FLAGS_DRIVEON|FLAGS_XFDTYPE);
-				if ( pDisk->size>92160)
-				{
-				 	if ( pDisk->size<=133120)
-						pDisk->flags|=FLAGS_ATRMEDIUMSIZE;
-					else
-						pDisk->flags |= FLAGS_ATRDOUBLESECTORS;
-				}                
-            }
-			else if( pBuffer[8]=='A' && pBuffer[9]=='T' && pBuffer[10]=='X' )        // ATX
-            {
-                CyDelayUs(800u);	//t5
-                send_CMPL();        
-                loadAtxFile(ctx, pDisk, pBuffer);
-                pDisk->flags |= FLAGS_DRIVEON|FLAGS_ATXTYPE;
-                
-                return 0;        
-            }
-            else
-                pDisk->flags = FLAGS_DRIVEON|FLAGS_XEXLOADER|FLAGS_ATRMEDIUMSIZE;  // XEX            
-
-            // apply readonly according filesystem
-            if (pDisk->fi.Attr & ATTR_READONLY) {
-				pDisk->flags |= FLAGS_READONLY;
-			}            
+            if(FileFlagsSettings(ctx, pDisk, pBuffer, 1))
+                return 0;
         }
         CyDelayUs(800u);	//t5
         send_CMPL();        
@@ -632,7 +625,13 @@ int DriveCommand(HWContext* ctx, unsigned char* pCommand, unsigned char* pBuffer
     case SDRSetD11:
     case SDRSetD12:
     case SDRSetBoot:
-        return MountDrive(ctx, pBuffer, pCommand[1]-SDRSetD00, *((unsigned short*)(pCommand+2)));
+        {
+            unsigned short drive_no = pCommand[1]-SDRSetD00;
+            if(drive_no > DEVICESNUM)
+                drive_no = 0;
+            file_t* pDisk = GetVDiskPtr(drive_no);
+            return MountDrive(ctx, pBuffer, pDisk, *((unsigned short*)(pCommand+2)));
+        }
         break;
     case SDRDirUp:
         return ChangeDirUp(ctx, pBuffer, pCommand[2]);

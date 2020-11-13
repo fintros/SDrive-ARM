@@ -5,6 +5,7 @@
 #include "fat.h"
 #include "sio.h"
 #include "gpio.h"
+#undef DEBUG
 #include "dprint.h"
 #include "helpers.h"
 #include "sdrivecmd.h"

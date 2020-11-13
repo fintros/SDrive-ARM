@@ -16,6 +16,7 @@
 #include "sio.h"
 #include "diskemu.h"
 #include "sdrivecmd.h"
+#undef DEBUG
 #include "dprint.h"
 #include "fat.h"
 #include "tapeemu.h"
