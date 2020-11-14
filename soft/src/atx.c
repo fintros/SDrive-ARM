@@ -25,21 +25,22 @@
 #include <CyLib.h>
 #include "fat.h"
 #include "atx.h"
+#undef DEBUG
 #include "dprint.h"
 
 // number of ms for each angular unit
 //#define MS_ANGULAR_UNIT_VAL      0.007999897601
 // number of milliseconds drive takes to process a request
-#define MS_DRIVE_REQUEST_DELAY_810 402 // 3.22 * 1000 / 8
+#define MS_DRIVE_REQUEST_DELAY_810 402  // 3.22 * 1000 / 8
 #define MS_DRIVE_REQUEST_DELAY_1050 402 // 3.22 * 1000 / 8
 // number of milliseconds to calculate CRC
-#define MS_CRC_CALCULATION_810 250 // 2 * 1000 / 8
+#define MS_CRC_CALCULATION_810 250  // 2 * 1000 / 8
 #define MS_CRC_CALCULATION_1050 250 // 2 * 1000 / 8
 // number of milliseconds drive takes to step 1 track
-#define MS_TRACK_STEP_810 662 // 5.3 * 1000/8
+#define MS_TRACK_STEP_810 662   // 5.3 * 1000/8
 #define MS_TRACK_STEP_1050 1551 // 12.41 * 1000/8
 // number of milliseconds drive head takes to settle after track stepping
-#define MS_HEAD_SETTLE_810 0   
+#define MS_HEAD_SETTLE_810 0
 #define MS_HEAD_SETTLE_1050 5000 // 40 * 1000 / 8
 // mask for checking FDC status "data lost" bit
 #define MASK_FDC_DLOST 0x04
@@ -112,7 +113,7 @@ u16 loadAtxFile(HWContext *ctx, file_t *pDisk, unsigned char *buffer)
     }
 
     _last_disk = pDisk;
-    
+
     return gBytesPerSector;
 }
 
@@ -144,7 +145,7 @@ u16 loadAtxSector(HWContext *ctx, file_t *pDisk, unsigned char *buffer, u16 num,
     struct atxSectorHeader *sectorHeader;
     struct atxTrackChunk *extSectorData;
 
-    if(motor_just_started)
+    if (motor_just_started)
     {
         motor_just_started = 0;
         CyDelay(125);
@@ -184,7 +185,7 @@ u16 loadAtxSector(HWContext *ctx, file_t *pDisk, unsigned char *buffer, u16 num,
         addon_rotation = MS_DRIVE_REQUEST_DELAY_1050;
     else
         addon_rotation = MS_DRIVE_REQUEST_DELAY_810;
-    
+
     // delay for track stepping if needed
     if (gCurrentHeadTrack != tgtTrackNumber)
     {
@@ -194,7 +195,7 @@ u16 loadAtxSector(HWContext *ctx, file_t *pDisk, unsigned char *buffer, u16 num,
             diff *= -1;
         // wait for each track (this is done in a loop since _delay_ms needs a compile-time constant)
         // delay for head settling
-        for(int i = 0; i< diff; i++)
+        for (int i = 0; i < diff; i++)
         {
             if (is_1050())
                 addon_rotation += MS_TRACK_STEP_1050;
@@ -202,19 +203,19 @@ u16 loadAtxSector(HWContext *ctx, file_t *pDisk, unsigned char *buffer, u16 num,
                 addon_rotation += MS_TRACK_STEP_810;
         }
         if (is_1050())
-                addon_rotation += MS_HEAD_SETTLE_1050;
+            addon_rotation += MS_HEAD_SETTLE_1050;
         else
             addon_rotation += MS_HEAD_SETTLE_810;
     }
 
-    while(addon_rotation > AU_FULL_ROTATION)
+    while (addon_rotation > AU_FULL_ROTATION)
     {
         addon_rotation -= AU_FULL_ROTATION;
         waitForAngularPosition(incAngularDisplacement(last_cmd_head_pos, AU_FULL_ROTATION), 1);
     }
-    
+
     u16 req_head_pos = incAngularDisplacement(last_cmd_head_pos, addon_rotation);
-    
+
     // set new head track position
     gCurrentHeadTrack = tgtTrackNumber;
 
@@ -362,7 +363,7 @@ u16 loadAtxSector(HWContext *ctx, file_t *pDisk, unsigned char *buffer, u16 num,
         // adapt sector skew dynamically due to count of sectors per track
         // e. g. for enhanced density disks it is only about 1000
         u16 au_one_sector_read = AU_FULL_ROTATION / sectorCount;
-        
+
         if (is_1050())
             au_one_sector_read += MS_CRC_CALCULATION_1050;
         else

@@ -14,47 +14,47 @@
 #include "helpers.h"
 #undef DEBUG
 #include "dprint.h"
-#include "sdrive.h"
+#include "sdrive2.h"
 #include "gpio.h"
 
-unsigned char get_checksum(unsigned char* buffer, unsigned short len)
+unsigned char get_checksum(unsigned char *buffer, unsigned short len)
 {
-	unsigned short i;
-	unsigned char sumo,sum;
-	sum=sumo=0;
-	for(i=0;i<len;i++)
-	{
-		sum+=buffer[i];
-		if(sum<sumo) sum++;
-		sumo = sum;
-	}
-	return sum;
+    unsigned short i;
+    unsigned char sumo, sum;
+    sum = sumo = 0;
+    for (i = 0; i < len; i++)
+    {
+        sum += buffer[i];
+        if (sum < sumo)
+            sum++;
+        sumo = sum;
+    }
+    return sum;
 }
 
 // DISPLAY
 void set_display(unsigned char n)
 {
-    HWContext* ctx = (HWContext*)__hwcontext;
+    HWContext *ctx = (HWContext *)__hwcontext;
     dprint("Set display to %d, %02X\r\n", n, ctx->LEDREG_Read());
     // D0 is boot disk - all LEDs on
-    if(!n)  
+    if (!n)
         n = 15;
-    if(n <= 0x0F)
+    if (n <= 0x0F)
     {
-       unsigned char set = ~(n << 2); 
-       ctx->LEDREG_Write((ctx->LEDREG_Read() | 0x3C) & set);
+        unsigned char set = ~(n << 2);
+        ctx->LEDREG_Write((ctx->LEDREG_Read() | 0x3C) & set);
     }
 }
 
-
 void StartReadOperation()
 {
-    LED_GREEN_ON;    
+    LED_GREEN_ON;
 }
 
 void StopReadOperation()
 {
-    LED_GREEN_OFF;    
+    LED_GREEN_OFF;
 }
 
 void StartWriteOperation()
@@ -67,7 +67,6 @@ void StopWriteOperation()
 
 unsigned long GetRootDirCluster()
 {
-    HWContext* ctx = (HWContext*)__hwcontext;
-    return ctx->fat_data.dir_cluster;       
+    HWContext *ctx = (HWContext *)__hwcontext;
+    return ctx->fat_data.dir_cluster;
 }
-

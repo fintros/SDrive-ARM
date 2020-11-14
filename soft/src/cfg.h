@@ -12,12 +12,12 @@
 #define _CFG_H
 
 #include "hwcontext.h"
-#include "sdrive.h"
+#include "sdrive2.h"
 
-#define CONFIG_FILE_NAME "SDRIVE2 CFG"    
-    
-int DefaultSettings(Settings* settings);
-int ReadSettings(HWContext* ctx, Settings* settings, unsigned char* buffer);
-int WriteSettings(HWContext* ctx, Settings* settings, unsigned char* buffer);    
-    
+#define CONFIG_FILE_NAME "SDRIVE2 CFG"
+
+int DefaultSettings(Settings *settings);
+int ReadSettings(HWContext *ctx, Settings *settings, unsigned char *buffer);
+int WriteSettings(HWContext *ctx, Settings *settings, unsigned char *buffer);
+
 #endif

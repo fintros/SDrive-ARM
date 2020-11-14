@@ -1,4 +1,4 @@
- /* mbed Microcontroller Library
+/* mbed Microcontroller Library
  * Copyright (c) 2006-2012 ARM Limited
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -112,7 +112,8 @@
  * | 0xFE | data[0] | data[1] |        | data[n] | crc[15:8] | crc[7:0] |
  * +------+---------+---------+- -  - -+---------+-----------+----------+
  */
-extern "C" {
+extern "C"
+{
 #include "HWContext.h"
 #include "dprint.h"
 }
@@ -121,62 +122,70 @@ extern "C" {
 
 #define SD_COMMAND_TIMEOUT 5000
 
-#define SD_DBG             0
-
+#define SD_DBG 0
 
 static unsigned char spiTransferByte(unsigned char data)
 {
-    HWContext* ctx = (HWContext*)__hwcontext;
+    HWContext *ctx = (HWContext *)__hwcontext;
 
     ctx->SPIM_WriteTxData(data);
-    while(!ctx->SPIM_GetRxBufferSize());
-    return ctx->SPIM_ReadRxData();    
+    while (!ctx->SPIM_GetRxBufferSize())
+        ;
+    return ctx->SPIM_ReadRxData();
 }
 
-SDAccess::SDAccess() :
-    _is_initialized(0) {
- 
+SDAccess::SDAccess() : _is_initialized(0)
+{
+
     // Set default to 100kHz for initialisation and 8MHz for data transfer
 }
 
-#define R1_IDLE_STATE           (1 << 0)
-#define R1_ERASE_RESET          (1 << 1)
-#define R1_ILLEGAL_COMMAND      (1 << 2)
-#define R1_COM_CRC_ERROR        (1 << 3)
+#define R1_IDLE_STATE (1 << 0)
+#define R1_ERASE_RESET (1 << 1)
+#define R1_ILLEGAL_COMMAND (1 << 2)
+#define R1_COM_CRC_ERROR (1 << 3)
 #define R1_ERASE_SEQUENCE_ERROR (1 << 4)
-#define R1_ADDRESS_ERROR        (1 << 5)
-#define R1_PARAMETER_ERROR      (1 << 6)
+#define R1_ADDRESS_ERROR (1 << 5)
+#define R1_PARAMETER_ERROR (1 << 6)
 
-int SDAccess::initialise_card() {
+int SDAccess::initialise_card()
+{
     // Set to SCK for initialisation, and clock card with cs = 1
 
-    HWContext* ctx = (HWContext*)__hwcontext;
+    HWContext *ctx = (HWContext *)__hwcontext;
 
-    ctx->SPI_CLK_SetFractionalDividerRegister(48000000/ctx->sd_init_freq, 0);
-	ctx->SPIM_Start();
+    ctx->SPI_CLK_SetFractionalDividerRegister(48000000 / ctx->sd_init_freq, 0);
+    ctx->SPIM_Start();
     int ret = 0;
 
-    for (int i = 0; i < 16; i++) {
+    for (int i = 0; i < 16; i++)
+    {
         spiTransferByte(0xFF);
     }
 
     ctx->SPIM_SS(0); // 0 to SS
 
     // send CMD0, should return with all zeros except IDLE STATE set (bit 0)
-    if (_cmd(0, 0) != R1_IDLE_STATE) {
+    if (_cmd(0, 0) != R1_IDLE_STATE)
+    {
         dprint("No disk, or could not put SD card in to SPI idle state\r\n");
         ret = SDCARD_FAIL;
     }
 
-    if(!ret)
+    if (!ret)
     {
         // send CMD8 to determine whther it is ver 2.x
         int r = _cmd8();
-        if (r == R1_IDLE_STATE) {
+        if (r == R1_IDLE_STATE)
+        {
             ret = initialise_card_v2();
-        } else if (r == (R1_IDLE_STATE | R1_ILLEGAL_COMMAND)) {
+        }
+        else if (r == (R1_IDLE_STATE | R1_ILLEGAL_COMMAND))
+        {
             ret = initialise_card_v1();
-        } else {
+        }
+        else
+        {
             dprint("Not in idle state after sending CMD8 (not an SD card?)\r\n");
             ret = SDCARD_FAIL;
         }
@@ -184,15 +193,18 @@ int SDAccess::initialise_card() {
 
     ctx->SPIM_SS(1); // 1 to SS
 
-    return ret;    
+    return ret;
 }
 
-int SDAccess::initialise_card_v1() {
-    for (int i = 0; i < SD_COMMAND_TIMEOUT; i++) {
+int SDAccess::initialise_card_v1()
+{
+    for (int i = 0; i < SD_COMMAND_TIMEOUT; i++)
+    {
         _cmd(55, 0);
-        if (_cmd(41, 0) == 0) {
+        if (_cmd(41, 0) == 0)
+        {
             cdv = 512;
-            dprint( "\r\n\rInit: SDCARD_V1\r\n\r");
+            dprint("\r\n\rInit: SDCARD_V1\r\n\r");
             return SDCARD_V1;
         }
     }
@@ -201,14 +213,17 @@ int SDAccess::initialise_card_v1() {
     return SDCARD_FAIL;
 }
 
-int SDAccess::initialise_card_v2() {
-    HWContext* ctx = (HWContext*)__hwcontext;
+int SDAccess::initialise_card_v2()
+{
+    HWContext *ctx = (HWContext *)__hwcontext;
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 10; i++)
+    {
         ctx->Delay(50);
         _cmd58();
         _cmd(55, 0);
-        if (_cmd(41, 0x40000000) == 0) {
+        if (_cmd(41, 0x40000000) == 0)
+        {
             _cmd58();
             dprint("\r\n\rInit: SDCARD_V2\r\n\r");
             cdv = 1;
@@ -220,91 +235,105 @@ int SDAccess::initialise_card_v2() {
     return SDCARD_FAIL;
 }
 
-int SDAccess::disk_initialize() {
-    HWContext* ctx = (HWContext*)__hwcontext;
+int SDAccess::disk_initialize()
+{
+    HWContext *ctx = (HWContext *)__hwcontext;
 
     _is_initialized = initialise_card();
-    if (_is_initialized == 0) {
+    if (_is_initialized == 0)
+    {
         dprint("Fail to initialize card\r\n");
         return 1;
     }
     dprint("init card = %d\r\n", _is_initialized);
     ctx->SPIM_SS(0); // 0 to SS
-    
+
     _sectors = _sd_sectors();
 
     // Set block length to 512 (CMD16)
-    if (_cmd(16, 512) != 0) {
+    if (_cmd(16, 512) != 0)
+    {
         dprint("Set 512-byte block timed out\r\n");
         return 1;
     }
     ctx->SPIM_SS(1); // 1 to SS
-    
 
     // Set SCK for data transfer
-    ctx->SPI_CLK_SetFractionalDividerRegister(48000000/ctx->sd_work_freq, 0);
+    ctx->SPI_CLK_SetFractionalDividerRegister(48000000 / ctx->sd_work_freq, 0);
     return 0;
 }
 
-int SDAccess::disk_write(const uint8_t* buffer, uint32_t block_number, uint32_t count) {
-    if (!_is_initialized) {
+int SDAccess::disk_write(const uint8_t *buffer, uint32_t block_number, uint32_t count)
+{
+    if (!_is_initialized)
+    {
         return -1;
     }
 
     int res = 0;
-    HWContext* ctx = (HWContext*)__hwcontext;
+    HWContext *ctx = (HWContext *)__hwcontext;
 
     ctx->SPIM_SS(0); // 0 to SS
 
-    for (uint32_t b = block_number; b < block_number + count; b++) {
+    for (uint32_t b = block_number; b < block_number + count; b++)
+    {
         // set write address for single block (CMD24)
-        if (_cmd(24, b * cdv) != 0) {
+        if (_cmd(24, b * cdv) != 0)
+        {
             res = 1;
             break;
         }
-        
+
         // send the data block
         _write(buffer, 512);
         buffer += 512;
     }
-    
+
     ctx->SPIM_SS(1); // 1 to SS
-    
+
     return res;
 }
 
-int SDAccess::disk_read(uint8_t* buffer, uint32_t block_number, uint32_t count) {
-    if (!_is_initialized) {
+int SDAccess::disk_read(uint8_t *buffer, uint32_t block_number, uint32_t count)
+{
+    if (!_is_initialized)
+    {
         return -1;
     }
-    
+
     int res = 0;
-    HWContext* ctx = (HWContext*)__hwcontext;
-    
+    HWContext *ctx = (HWContext *)__hwcontext;
+
     ctx->SPIM_SS(0); // 0 to SS
-    
-    for (uint32_t b = block_number; b < block_number + count; b++) {
+
+    for (uint32_t b = block_number; b < block_number + count; b++)
+    {
         // set read address for single block (CMD17)
-        if (_cmd(17, b * cdv) != 0) {
+        if (_cmd(17, b * cdv) != 0)
+        {
             res = 1;
             break;
         }
-        
+
         // receive the data
         _read(buffer, 512);
         buffer += 512;
     }
 
     ctx->SPIM_SS(1); // 1 to SS
-    
+
     return res;
 }
 
-int SDAccess::disk_status() {
+int SDAccess::disk_status()
+{
     // FATFileSystem::disk_status() returns 0 when initialized
-    if (_is_initialized) {
+    if (_is_initialized)
+    {
         return 0;
-    } else {
+    }
+    else
+    {
         return 1;
     }
 }
@@ -312,9 +341,9 @@ int SDAccess::disk_status() {
 int SDAccess::disk_sync() { return 0; }
 uint32_t SDAccess::disk_sectors() { return _sectors; }
 
-
 // PRIVATE FUNCTIONS
-int SDAccess::_cmd(int cmd, int arg) {
+int SDAccess::_cmd(int cmd, int arg)
+{
     _cs = 0;
 
     // send a command
@@ -326,9 +355,11 @@ int SDAccess::_cmd(int cmd, int arg) {
     spiTransferByte(0x95);
 
     // wait for the repsonse (response[7] == 0)
-    for (int i = 0; i < SD_COMMAND_TIMEOUT; i++) {
+    for (int i = 0; i < SD_COMMAND_TIMEOUT; i++)
+    {
         int response = spiTransferByte(0xFF);
-        if (!(response & 0x80)) {
+        if (!(response & 0x80))
+        {
             //_cs = 1;
             spiTransferByte(0xFF);
             return response;
@@ -338,7 +369,8 @@ int SDAccess::_cmd(int cmd, int arg) {
     spiTransferByte(0xFF);
     return -1; // timeout
 }
-int SDAccess::_cmdx(int cmd, int arg) {
+int SDAccess::_cmdx(int cmd, int arg)
+{
     _cs = 0;
 
     // send a command
@@ -350,9 +382,11 @@ int SDAccess::_cmdx(int cmd, int arg) {
     spiTransferByte(0x95);
 
     // wait for the repsonse (response[7] == 0)
-    for (int i = 0; i < SD_COMMAND_TIMEOUT; i++) {
+    for (int i = 0; i < SD_COMMAND_TIMEOUT; i++)
+    {
         int response = spiTransferByte(0xFF);
-        if (!(response & 0x80)) {
+        if (!(response & 0x80))
+        {
             return response;
         }
     }
@@ -361,8 +395,8 @@ int SDAccess::_cmdx(int cmd, int arg) {
     return -1; // timeout
 }
 
-
-int SDAccess::_cmd58() {
+int SDAccess::_cmd58()
+{
     _cs = 0;
     int arg = 0;
 
@@ -375,9 +409,11 @@ int SDAccess::_cmd58() {
     spiTransferByte(0x95);
 
     // wait for the repsonse (response[7] == 0)
-    for (int i = 0; i < SD_COMMAND_TIMEOUT; i++) {
+    for (int i = 0; i < SD_COMMAND_TIMEOUT; i++)
+    {
         int response = spiTransferByte(0xFF);
-        if (!(response & 0x80)) {
+        if (!(response & 0x80))
+        {
             int ocr = spiTransferByte(0xFF) << 24;
             ocr |= spiTransferByte(0xFF) << 16;
             ocr |= spiTransferByte(0xFF) << 8;
@@ -392,7 +428,8 @@ int SDAccess::_cmd58() {
     return -1; // timeout
 }
 
-int SDAccess::_cmd8() {
+int SDAccess::_cmd8()
+{
     _cs = 0;
 
     // send a command
@@ -404,11 +441,14 @@ int SDAccess::_cmd8() {
     spiTransferByte(0x87);     // crc
 
     // wait for the repsonse (response[7] == 0)
-    for (int i = 0; i < SD_COMMAND_TIMEOUT * 1000; i++) {
+    for (int i = 0; i < SD_COMMAND_TIMEOUT * 1000; i++)
+    {
         char response[5];
         response[0] = spiTransferByte(0xFF);
-        if (!(response[0] & 0x80)) {
-            for (int j = 1; j < 5; j++) {
+        if (!(response[0] & 0x80))
+        {
+            for (int j = 1; j < 5; j++)
+            {
                 response[i] = spiTransferByte(0xFF);
             }
             _cs = 1;
@@ -421,14 +461,17 @@ int SDAccess::_cmd8() {
     return -1; // timeout
 }
 
-int SDAccess::_read(uint8_t *buffer, uint32_t length) {
+int SDAccess::_read(uint8_t *buffer, uint32_t length)
+{
     _cs = 0;
 
     // read until start byte (0xFF)
-    while (spiTransferByte(0xFF) != 0xFE);
+    while (spiTransferByte(0xFF) != 0xFE)
+        ;
 
     // read data
-    for (uint32_t i = 0; i < length; i++) {
+    for (uint32_t i = 0; i < length; i++)
+    {
         buffer[i] = spiTransferByte(0xFF);
     }
     spiTransferByte(0xFF); // checksum
@@ -439,14 +482,16 @@ int SDAccess::_read(uint8_t *buffer, uint32_t length) {
     return 0;
 }
 
-int SDAccess::_write(const uint8_t*buffer, uint32_t length) {
+int SDAccess::_write(const uint8_t *buffer, uint32_t length)
+{
     _cs = 0;
 
     // indicate start of block
-   spiTransferByte(0xFE);
+    spiTransferByte(0xFE);
 
     // write the data
-    for (uint32_t i = 0; i < length; i++) {
+    for (uint32_t i = 0; i < length; i++)
+    {
         spiTransferByte(buffer[i]);
     }
 
@@ -455,24 +500,28 @@ int SDAccess::_write(const uint8_t*buffer, uint32_t length) {
     spiTransferByte(0xFF);
 
     // check the response token
-    if ((spiTransferByte(0xFF) & 0x1F) != 0x05) {
+    if ((spiTransferByte(0xFF) & 0x1F) != 0x05)
+    {
         _cs = 1;
         spiTransferByte(0xFF);
         return 1;
     }
 
     // wait for write to finish
-    while (spiTransferByte(0xFF) == 0);
+    while (spiTransferByte(0xFF) == 0)
+        ;
 
     _cs = 1;
     spiTransferByte(0xFF);
     return 0;
 }
 
-static uint32_t ext_bits(unsigned char *data, int msb, int lsb) {
+static uint32_t ext_bits(unsigned char *data, int msb, int lsb)
+{
     uint32_t bits = 0;
     uint32_t size = 1 + msb - lsb;
-    for (uint32_t i = 0; i < size; i++) {
+    for (uint32_t i = 0; i < size; i++)
+    {
         uint32_t position = lsb + i;
         uint32_t byte = 15 - (position >> 3);
         uint32_t bit = position & 0x7;
@@ -482,20 +531,23 @@ static uint32_t ext_bits(unsigned char *data, int msb, int lsb) {
     return bits;
 }
 
-uint32_t SDAccess::_sd_sectors() {
+uint32_t SDAccess::_sd_sectors()
+{
     uint32_t c_size, c_size_mult, read_bl_len;
     uint32_t block_len, mult, blocknr, capacity;
     uint32_t hc_c_size;
     uint32_t blocks;
 
     // CMD9, Response R2 (R1 byte + 16-byte block read)
-    if (_cmdx(9, 0) != 0) {
+    if (_cmdx(9, 0) != 0)
+    {
         dprint("Didn't get a response from the disk\r\n");
         return 0;
     }
 
     uint8_t csd[16];
-    if (_read(csd, 16) != 0) {
+    if (_read(csd, 16) != 0)
+    {
         dprint("Couldn't read csd response from disk\r\n");
         return 0;
     }
@@ -507,31 +559,32 @@ uint32_t SDAccess::_sd_sectors() {
 
     int csd_structure = ext_bits(csd, 127, 126);
 
-    switch (csd_structure) {
-        case 0:
-            cdv = 512;
-            c_size = ext_bits(csd, 73, 62);
-            c_size_mult = ext_bits(csd, 49, 47);
-            read_bl_len = ext_bits(csd, 83, 80);
+    switch (csd_structure)
+    {
+    case 0:
+        cdv = 512;
+        c_size = ext_bits(csd, 73, 62);
+        c_size_mult = ext_bits(csd, 49, 47);
+        read_bl_len = ext_bits(csd, 83, 80);
 
-            block_len = 1 << read_bl_len;
-            mult = 1 << (c_size_mult + 2);
-            blocknr = (c_size + 1) * mult;
-            capacity = blocknr * block_len;
-            blocks = capacity / 512;
-            dprint("\r\n\rSDCard\r\n\rc_size: %d \r\n\rcapacity: %d \r\n\rsectors: %d\r\n\r", c_size, capacity, blocks);
-            break;
+        block_len = 1 << read_bl_len;
+        mult = 1 << (c_size_mult + 2);
+        blocknr = (c_size + 1) * mult;
+        capacity = blocknr * block_len;
+        blocks = capacity / 512;
+        dprint("\r\n\rSDCard\r\n\rc_size: %d \r\n\rcapacity: %d \r\n\rsectors: %d\r\n\r", c_size, capacity, blocks);
+        break;
 
-        case 1:
-            cdv = 1;
-            hc_c_size = ext_bits(csd, 63, 48);
-            blocks = (hc_c_size+1)*1024;
-            dprint("\r\n\rSDHC Card \r\n\rhc_c_size: %d\r\n\rcapacity: %d \r\n\rsectors: %d\r\n\r", hc_c_size, blocks*512, blocks);
-            break;
+    case 1:
+        cdv = 1;
+        hc_c_size = ext_bits(csd, 63, 48);
+        blocks = (hc_c_size + 1) * 1024;
+        dprint("\r\n\rSDHC Card \r\n\rhc_c_size: %d\r\n\rcapacity: %d \r\n\rsectors: %d\r\n\r", hc_c_size, blocks * 512, blocks);
+        break;
 
-        default:
-            dprint("CSD struct unsupported\r\r\n");
-            return 0;
+    default:
+        dprint("CSD struct unsupported\r\r\n");
+        return 0;
     };
     return blocks;
 }

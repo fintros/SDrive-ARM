@@ -7,12 +7,11 @@
  * -- This applies for source and binary form and derived works.
  * ---------------------------------------------------------------------------
  */
-    
+
 #ifndef _KEYS_H
 #define _KEYS_H
 
 void init_keys();
 unsigned char get_actual_key();
-    
-    
+
 #endif /* _KEYS_H */

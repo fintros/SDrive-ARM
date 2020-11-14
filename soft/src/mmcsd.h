@@ -10,41 +10,40 @@
 
 #ifndef MMCSD_H
 #define MMCSD_H
-    
-#include "hwcontext.h"    
 
-// functions    
-    
+#include "hwcontext.h"
+
+// functions
+
 #ifdef __cplusplus
-extern "C" {    
+extern "C"
+{
 #endif
 
-//! Initialize ARM<->MMC hardware interface.
-/// Prepares hardware for MMC access.
-void mmcInit(HWContext* ctx);
+    //! Initialize ARM<->MMC hardware interface.
+    /// Prepares hardware for MMC access.
+    void mmcInit(HWContext *ctx);
 
-//! Initialize the card and prepare it for use.
-/// Returns zero if successful.
-int mmcReset(HWContext* ctx);
+    //! Initialize the card and prepare it for use.
+    /// Returns zero if successful.
+    int mmcReset(HWContext *ctx);
 
-//! Read 512-byte sector from card to buffer
-/// Returns zero if successful.
-int mmcRead(HWContext* ctx, unsigned long sector);
+    //! Read 512-byte sector from card to buffer
+    /// Returns zero if successful.
+    int mmcRead(HWContext *ctx, unsigned long sector);
 
-//! Write 512-byte sector from buffer to card
-/// Returns zero if successful.
-int mmcWrite(HWContext* ctx, unsigned long sector);
+    //! Write 512-byte sector from buffer to card
+    /// Returns zero if successful.
+    int mmcWrite(HWContext *ctx, unsigned long sector);
 
+    int mmcWriteCached(HWContext *ctx, unsigned char force);
 
-int mmcWriteCached(HWContext* ctx, unsigned char force);
+    void mmcWriteCachedFlush(HWContext *ctx);
 
-void mmcWriteCachedFlush(HWContext* ctx);
-
-void mmcReadCached(HWContext* ctx, unsigned long sector);
+    void mmcReadCached(HWContext *ctx, unsigned long sector);
 
 #ifdef __cplusplus
 }
 #endif
-
 
 #endif

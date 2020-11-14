@@ -11,9 +11,9 @@
 #define _HELPERS_H
 
 #include "hwcontext.h"
-#include "sdrive.h"    
-    
-unsigned char get_checksum(unsigned char* buffer, unsigned short len);
+#include "sdrive2.h"
+
+unsigned char get_checksum(unsigned char *buffer, unsigned short len);
 
 void set_display(unsigned char n);
 

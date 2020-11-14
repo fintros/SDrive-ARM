@@ -8,7 +8,6 @@
  * ---------------------------------------------------------------------------
  */
 
-
 #include "project.h"
 #include <CyLib.h>
 #include "keys.h"
@@ -19,26 +18,26 @@ void init_keys()
     CapSense_InitializeAllBaselines();
     CapSense_ScanAllWidgets();
 }
-    
+
 unsigned char get_actual_key()
 {
     static unsigned char actual_key = 0;
-    
-    if(CapSense_NOT_BUSY == CapSense_IsBusy())
+
+    if (CapSense_NOT_BUSY == CapSense_IsBusy())
     {
         CapSense_ProcessAllWidgets();
-        if(CapSense_IsAnyWidgetActive())
+        if (CapSense_IsAnyWidgetActive())
         {
-            if(CapSense_IsWidgetActive(CapSense_BUTTON0_WDGT_ID))
+            if (CapSense_IsWidgetActive(CapSense_BUTTON0_WDGT_ID))
                 actual_key = 6;
-            else if(CapSense_IsWidgetActive(CapSense_BUTTON1_WDGT_ID))
+            else if (CapSense_IsWidgetActive(CapSense_BUTTON1_WDGT_ID))
                 actual_key = 5;
-            else if(CapSense_IsWidgetActive(CapSense_BUTTON2_WDGT_ID))
+            else if (CapSense_IsWidgetActive(CapSense_BUTTON2_WDGT_ID))
                 actual_key = 3;
-        }                                
+        }
         else
         {
-		    actual_key = 0;
+            actual_key = 0;
         }
         CapSense_ScanAllWidgets();
     }

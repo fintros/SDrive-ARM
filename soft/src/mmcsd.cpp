@@ -7,80 +7,85 @@
  * -- This applies for source and binary form and derived works.
  * ---------------------------------------------------------------------------
  */
- 
+
 #include "mmcsd.h"
 #include "sdaccess.h"
 
-#define LED_RED_ON		(ctx->LEDREG_Write(ctx->LEDREG_Read() & ~0x2))
-#define LED_RED_OFF		(ctx->LEDREG_Write(ctx->LEDREG_Read() | 0x2))
+#define LED_RED_ON (ctx->LEDREG_Write(ctx->LEDREG_Read() & ~0x2))
+#define LED_RED_OFF (ctx->LEDREG_Write(ctx->LEDREG_Read() | 0x2))
 
-extern "C" {    
-
-void mmcInit(HWContext* ctx)
+extern "C"
 {
-  	ctx->n_actual_mmc_sector=0xFFFFFFFF;
-	ctx->n_actual_mmc_sector_needswrite=0;
-}
 
-int mmcReset(HWContext* ctx)
-{  
-    return ((SDAccess*)(ctx->sdAccess))->disk_initialize();
-}
-
-int mmcRead(HWContext* ctx, unsigned long sector)
-{
-	return ((SDAccess*)(ctx->sdAccess))->disk_read(&ctx->mmc_sector_buffer[0], sector, 1);
-}
-
-int mmcWrite(HWContext* ctx, unsigned long sector)
-{
-	return ((SDAccess*)(ctx->sdAccess))->disk_write(&ctx->mmc_sector_buffer[0], sector, 1);
-}
-
-void mmcReadCached(HWContext* ctx, unsigned long sector)
-{
-	if(sector==ctx->n_actual_mmc_sector) return;
-
-	unsigned char ret, retry;
-	mmcWriteCachedFlush(ctx);
-	retry=0;
-	do
+	void mmcInit(HWContext *ctx)
 	{
-		ret = mmcRead(ctx, sector);
-		retry--;
-	} while (ret && retry);
-	while(ret);
-	ctx->n_actual_mmc_sector=sector;
-}
+		ctx->n_actual_mmc_sector = 0xFFFFFFFF;
+		ctx->n_actual_mmc_sector_needswrite = 0;
+	}
 
-int mmcWriteCached(HWContext* ctx, unsigned char force)
-{
-	if ( ctx->ReadOnly_Read() == 0  ) return 0xff; //zakazany zapis
-	LED_RED_ON;
-	if (force)
+	int mmcReset(HWContext *ctx)
 	{
-		unsigned char ret,retry;
-		retry=16;
+		return ((SDAccess *)(ctx->sdAccess))->disk_initialize();
+	}
+
+	int mmcRead(HWContext *ctx, unsigned long sector)
+	{
+		return ((SDAccess *)(ctx->sdAccess))->disk_read(&ctx->mmc_sector_buffer[0], sector, 1);
+	}
+
+	int mmcWrite(HWContext *ctx, unsigned long sector)
+	{
+		return ((SDAccess *)(ctx->sdAccess))->disk_write(&ctx->mmc_sector_buffer[0], sector, 1);
+	}
+
+	void mmcReadCached(HWContext *ctx, unsigned long sector)
+	{
+		if (sector == ctx->n_actual_mmc_sector)
+			return;
+
+		unsigned char ret, retry;
+		mmcWriteCachedFlush(ctx);
+		retry = 0;
 		do
 		{
-			ret = mmcWrite(ctx, ctx->n_actual_mmc_sector);
+			ret = mmcRead(ctx, sector);
 			retry--;
 		} while (ret && retry);
-		while(ret);
-        ctx->n_actual_mmc_sector_needswrite = 0;
-		LED_RED_OFF;
+		while (ret)
+			;
+		ctx->n_actual_mmc_sector = sector;
 	}
-	else
+
+	int mmcWriteCached(HWContext *ctx, unsigned char force)
 	{
-		ctx->n_actual_mmc_sector_needswrite=1;
+		if (ctx->ReadOnly_Read() == 0)
+			return 0xff; //zakazany zapis
+		LED_RED_ON;
+		if (force)
+		{
+			unsigned char ret, retry;
+			retry = 16;
+			do
+			{
+				ret = mmcWrite(ctx, ctx->n_actual_mmc_sector);
+				retry--;
+			} while (ret && retry);
+			while (ret)
+				;
+			ctx->n_actual_mmc_sector_needswrite = 0;
+			LED_RED_OFF;
+		}
+		else
+		{
+			ctx->n_actual_mmc_sector_needswrite = 1;
+		}
+		return 0;
 	}
-	return 0;
-}
 
-void mmcWriteCachedFlush(HWContext* ctx)
-{
-	if (ctx->n_actual_mmc_sector_needswrite)
-	 while (mmcWriteCached(ctx, 1));
+	void mmcWriteCachedFlush(HWContext *ctx)
+	{
+		if (ctx->n_actual_mmc_sector_needswrite)
+			while (mmcWriteCached(ctx, 1))
+				;
+	}
 }
-
-}    

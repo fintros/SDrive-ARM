@@ -30,23 +30,22 @@
 //  - v2.x High Capacity
 //  - Not recognised as an SD Card
 #define SDCARD_FAIL 0
-#define SDCARD_V1   1
-#define SDCARD_V2   2
+#define SDCARD_V1 1
+#define SDCARD_V2 2
 #define SDCARD_V2HC 3
-    
-class SDAccess {
-public:
 
+class SDAccess
+{
+public:
     SDAccess();
     int disk_initialize();
     int disk_status();
-    int disk_read(uint8_t* buffer, uint32_t block_number, uint32_t count);
-    int disk_write(const uint8_t* buffer, uint32_t block_number, uint32_t count);
+    int disk_read(uint8_t *buffer, uint32_t block_number, uint32_t count);
+    int disk_write(const uint8_t *buffer, uint32_t block_number, uint32_t count);
     int disk_sync();
     uint32_t disk_sectors();
 
 protected:
-
     int _cmd(int cmd, int arg);
     int _cmdx(int cmd, int arg);
     int _cmd8();
@@ -55,7 +54,7 @@ protected:
     int initialise_card_v1();
     int initialise_card_v2();
 
-    int _read(uint8_t * buffer, uint32_t length);
+    int _read(uint8_t *buffer, uint32_t length);
     int _write(const uint8_t *buffer, uint32_t length);
     uint32_t _sd_sectors();
     uint32_t _sectors;

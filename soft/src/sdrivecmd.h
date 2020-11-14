@@ -7,7 +7,7 @@
  * -- This applies for source and binary form and derived works.
  * ---------------------------------------------------------------------------
  */
-    
+
 #ifndef _SDRIVEOPS_H
 #define _SDRIVEOPS_H
 
@@ -46,17 +46,18 @@ typedef enum
    SDRSetD10 = 0xfa,
    SDRSetD11 = 0xfb,
    SDRSetD12 = 0xfc,
-   SDRDirUp  = 0xfd,
+   SDRDirUp = 0xfd,
    SDRRootDir = 0xfe,
    SDRSetBoot = 0xff,
 } EEmuCommand;
 
-int InitBootDrive(HWContext* ctx, unsigned char* pBuffer);
-
 // Mount file in current directory
-int MountFile(HWContext* ctx, file_t* pDisk, const char* pFileName, unsigned char* pBuffer);
+int MountFile(HWContext *ctx, file_t *pDisk, const char *pFileName, unsigned char *pBuffer);
 
-int DriveCommand(HWContext* ctx, unsigned char* command, unsigned char* buffer);
+// Execute drive command
+int DriveCommand(HWContext *ctx, unsigned char *command, unsigned char *buffer);
 
+// get file path to buffer
+int GetPathString(HWContext *ctx, file_t* pFile, unsigned char *pBuffer, unsigned char max_no, unsigned char separator);
 
 #endif /* _SDRIVEOPS_H */

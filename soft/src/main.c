@@ -15,10 +15,10 @@ int sdrive(void);
 
 int main(void)
 {
-    
+
     //CyDelay(5000);
     CyGlobalIntEnable; /* Enable global interrupts. */
-    UART_1_Start(); 
+    UART_1_Start();
     SlowUARTCounter_Init();
     HelperTimer_Init();
     HelperTimer_Start();
