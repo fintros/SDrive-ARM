@@ -161,7 +161,7 @@ int sdrive(void)
     unsigned char *atari_sector_buffer = &ctx->atari_sector_buffer[0];
     unsigned char command[5];
 
-    CyDelay(10000);
+    //CyDelay(10000); // wait for ebugger connection
 
     // Initialize default settings
     DefaultSettings(&settings);
@@ -180,7 +180,7 @@ int sdrive(void)
     for (;;)
     {
         shared_parameters.fastsio_active = 0;
-        shared_parameters.bootloader_relocation = 0;
+        shared_parameters.bootloader_relocation = settings.bootloader_relocation;
         shared_parameters.fastsio_pokeydiv = settings.default_pokey_div;
 
         USART_Init(ATARI_SPEED_STANDARD);
@@ -209,22 +209,20 @@ int sdrive(void)
         if (ReadSettings(ctx, &settings, &ctx->atari_sector_buffer[0]))
             continue;
         
-        // test write params
-        WriteSettings(ctx, &settings, &ctx->atari_sector_buffer[0]);
-
         if (settings.sd_freq != ctx->sd_work_freq)
         {
             ctx->sd_work_freq = settings.sd_freq;
             continue;
         }
-
+        
         LED_GREEN_OFF;
         dprint("SD card inititialized\r\n");
 
-        // set boot drive to active D1:
-        shared_parameters.actual_drive_number = 0;
-        //    	if(InitBootDrive(ctx, &ctx->atari_sector_buffer[0]))
-        //            continue;
+        // test write params
+        // WriteSettings(ctx, &settings, &ctx->atari_sector_buffer[0]);
+        
+        // set boot drive to actual
+        shared_parameters.actual_drive_number = settings.actual_drive_number;
 
         tape_enabled = 1;
 
@@ -248,7 +246,7 @@ int sdrive(void)
                 if ((res = SimulateDiskDrive(ctx, command, &atari_sector_buffer[0])) > 0)
                     continue;
             }
-            else if (command[0] == (unsigned char)0x70 + settings.emulated_drive_no)
+            else if (command[0] == (unsigned char)0x70 + settings.sdrive_no)
             {
                 if ((res = DriveCommand(ctx, command, &atari_sector_buffer[0])) > 0)
                     continue;

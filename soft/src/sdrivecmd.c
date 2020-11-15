@@ -254,7 +254,7 @@ int GetPathString(HWContext *ctx, file_t* pFile, unsigned char *pBuffer, unsigne
 
     unsigned char count = max_no;
 
-    memset(pBuffer, separator, ATARI_BUFFER_SIZE);
+    memset(pBuffer, separator, count*12);
 
     unsigned char *pCurrent = pBuffer + count * 12;
 

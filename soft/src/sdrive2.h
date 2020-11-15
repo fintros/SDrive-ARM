@@ -24,11 +24,14 @@ typedef struct _SharedParameters
 
 typedef struct _SDriveSettings
 {
+    unsigned int sdrive_no;
     unsigned int emulated_drive_no;
-    unsigned char default_pokey_div;
-    unsigned char is_1050;
     unsigned int sd_freq;
     unsigned int tape_baud;
+    unsigned char default_pokey_div;
+    unsigned char is_1050;
+    unsigned char bootloader_relocation;
+    unsigned char actual_drive_number;
 } Settings;
 
 extern SharedParameters shared_parameters;
