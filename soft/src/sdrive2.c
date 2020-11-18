@@ -34,7 +34,6 @@
 #include "tapeemu.h"
 #include "cfg.h"
 
-SharedParameters shared_parameters;
 Settings settings;
 
 static char tape_enabled = 0;
@@ -61,23 +60,23 @@ int wait_for_command(HWContext *ctx)
             case 6: ///BOOT KEY
                     //if(InitBootDrive(ctx, &ctx->atari_sector_buffer[0]))
                 //    return -1;
-                shared_parameters.actual_drive_number = 0;
+                settings.shared_parameters.actual_drive_number = 0;
                 break;
                 ;
             case 5: //LEFT
-                if (shared_parameters.actual_drive_number > 1)
-                    shared_parameters.actual_drive_number--;
+                if (settings.shared_parameters.actual_drive_number > 1)
+                    settings.shared_parameters.actual_drive_number--;
                 else
-                    shared_parameters.actual_drive_number = DEVICESNUM - 1;
+                    settings.shared_parameters.actual_drive_number = DEVICESNUM - 1;
                 break;
             case 3: //RIGHT
-                if (shared_parameters.actual_drive_number < (DEVICESNUM - 1))
-                    shared_parameters.actual_drive_number++;
+                if (settings.shared_parameters.actual_drive_number < (DEVICESNUM - 1))
+                    settings.shared_parameters.actual_drive_number++;
                 else
-                    shared_parameters.actual_drive_number = 1;
+                    settings.shared_parameters.actual_drive_number = 1;
                 break;
             }
-            set_display(shared_parameters.actual_drive_number);
+            set_display(settings.shared_parameters.actual_drive_number);
             last_key = actual_key;
             CyDelay(50); //sleep for 50ms
         }
@@ -103,10 +102,10 @@ int get_command(unsigned char *command)
     LED_OFF;
     memset(command, 0, 4);
 
-    if (!shared_parameters.fastsio_active)
+    if (!settings.shared_parameters.fastsio_active)
     {
-        USART_Init(6 + shared_parameters.fastsio_pokeydiv); // by default init UART for FastIO
-        shared_parameters.fastsio_active = 1;
+        USART_Init(6 + settings.shared_parameters.fastsio_pokeydiv); // by default init UART for FastIO
+        settings.shared_parameters.fastsio_active = 1;
     }
 
     // try to catch on ordinary speed
@@ -136,7 +135,7 @@ int get_command(unsigned char *command)
         if (!err)
         {
             USART_Init(6 + US_POKEY_DIV_STANDARD);
-            shared_parameters.fastsio_active = 0;
+            settings.shared_parameters.fastsio_active = 0;
         }
     }
     else
@@ -179,9 +178,7 @@ int sdrive(void)
 
     for (;;)
     {
-        shared_parameters.fastsio_active = 0;
-        shared_parameters.bootloader_relocation = settings.bootloader_relocation;
-        shared_parameters.fastsio_pokeydiv = settings.default_pokey_div;
+        settings.shared_parameters.fastsio_active = 0;
 
         USART_Init(ATARI_SPEED_STANDARD);
 
@@ -222,11 +219,9 @@ int sdrive(void)
         // WriteSettings(ctx, &settings, &ctx->atari_sector_buffer[0]);
         
         // set boot drive to actual
-        shared_parameters.actual_drive_number = settings.actual_drive_number;
-
         tape_enabled = 1;
 
-        set_display(shared_parameters.actual_drive_number);
+        set_display(settings.shared_parameters.actual_drive_number);
 
         for (;;)
         {

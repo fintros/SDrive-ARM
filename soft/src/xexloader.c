@@ -48,7 +48,7 @@ int ReadXEX(HWContext *ctx, file_t *pDisk, unsigned char *buffer, unsigned short
         {
             unsigned char src = pBase[i];
             if (src == 0x07)
-                src += shared_parameters.bootloader_relocation;
+                src += settings.shared_parameters.bootloader_relocation;
             buffer[i] = src;
         }
     }

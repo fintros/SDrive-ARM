@@ -28,13 +28,10 @@ typedef struct _SDriveSettings
     unsigned int emulated_drive_no;
     unsigned int sd_freq;
     unsigned int tape_baud;
-    unsigned char default_pokey_div;
     unsigned char is_1050;
-    unsigned char bootloader_relocation;
-    unsigned char actual_drive_number;
+    SharedParameters shared_parameters;
 } Settings;
 
-extern SharedParameters shared_parameters;
 extern Settings settings;
 
 #endif /* _SDRIVE_H */

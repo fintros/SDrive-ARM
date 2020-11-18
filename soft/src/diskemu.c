@@ -103,7 +103,7 @@ static int FormatMedium(HWContext *ctx, file_t *pDisk, unsigned char *buffer)
 static int GetHighSpeedIndex(file_t *pDisk)
 {
     // use standard speed for ATX
-    unsigned char divisor = (pDisk->flags & FLAGS_ATXTYPE) ? US_POKEY_DIV_STANDARD : shared_parameters.fastsio_pokeydiv;
+    unsigned char divisor = (pDisk->flags & FLAGS_ATXTYPE) ? US_POKEY_DIV_STANDARD : settings.shared_parameters.fastsio_pokeydiv;
     StartReadOperation();
     dprint("Ask for speed\r\n");
     send_ACK();
@@ -509,9 +509,9 @@ int SimulateDiskDrive(HWContext *ctx, unsigned char *pCommand, unsigned char *bu
 
     // emulated drive number replaced to choosen drive
     if (pCommand[0] == (0x30 + settings.emulated_drive_no))
-        virtual_drive_number = shared_parameters.actual_drive_number;
+        virtual_drive_number = settings.shared_parameters.actual_drive_number;
     // and vise a versa
-    else if (pCommand[0] == (0x30 + shared_parameters.actual_drive_number))
+    else if (pCommand[0] == (0x30 + settings.shared_parameters.actual_drive_number))
         virtual_drive_number = settings.emulated_drive_no;
     else
         virtual_drive_number = pCommand[0] & 0xf;

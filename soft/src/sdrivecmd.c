@@ -51,7 +51,7 @@ static int SetBLReloc(unsigned char reloc)
 {
     dprint("Set reloc\r\n");
     send_ACK();
-    shared_parameters.bootloader_relocation = reloc;
+    settings.shared_parameters.bootloader_relocation = reloc;
     CyDelayUs(800u); //t5
     send_CMPL();
     return 0;
@@ -106,8 +106,8 @@ int SetFastIO(unsigned char divider)
         return 1;
     }
 
-    shared_parameters.fastsio_active = 0;
-    shared_parameters.fastsio_pokeydiv = divider;
+    settings.shared_parameters.fastsio_active = 0;
+    settings.shared_parameters.fastsio_pokeydiv = divider;
 
     CyDelayUs(800u); //t5
     send_CMPL();
@@ -363,8 +363,8 @@ int ChangeActualDrive(unsigned char drive_no)
     send_ACK();
 
     // (if drive_no>=DEVICESNUM) Set default (all devices with relevant numbers).
-    shared_parameters.actual_drive_number = drive_no < DEVICESNUM ? drive_no : settings.emulated_drive_no;
-    set_display(shared_parameters.actual_drive_number);
+    settings.shared_parameters.actual_drive_number = drive_no < DEVICESNUM ? drive_no : settings.emulated_drive_no;
+    set_display(settings.shared_parameters.actual_drive_number);
 
     CyDelayUs(800u); //t5
     send_CMPL();
@@ -375,7 +375,7 @@ int ChangeActualDrive(unsigned char drive_no)
 int GetSharedParams(unsigned char size, unsigned char offset)
 {
     send_ACK();
-    USART_Send_cmpl_and_buffer_and_check_sum(((unsigned char *)(&shared_parameters)) + offset, size);
+    USART_Send_cmpl_and_buffer_and_check_sum(((unsigned char *)(&settings.shared_parameters)) + offset, size);
     return 0;
 }
 

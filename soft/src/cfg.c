@@ -33,12 +33,12 @@ int DefaultSettings(Settings *settings)
     memset(settings, 0, sizeof(Settings));
     settings->sdrive_no = 1; // first sdrive by default
     settings->emulated_drive_no = 1; // Emulate D1 by defaut
-    settings->default_pokey_div = US_POKEY_DIV_DEFAULT;
+    settings->shared_parameters.fastsio_pokeydiv = US_POKEY_DIV_DEFAULT;
     settings->is_1050 = 0;
     settings->sd_freq = 8000000; // Slow speed by default - NB! not compatible with some ATX
     settings->tape_baud = 600;   // defaut non turbo mode
-    settings->actual_drive_number = 0; // boot drive by default
-    settings->bootloader_relocation = 0; // relocate to 0 by default
+    settings->shared_parameters.actual_drive_number = 0; // boot drive by default
+    settings->shared_parameters.bootloader_relocation = 0; // relocate to 0 by default
     return 0;
 }
 
@@ -50,6 +50,7 @@ static const char MountSettings[] = "MOUNT_";
 static const char TapeBaudSettings[] = "TAPE_BAUD";
 static const char SystemDriveSettings[] = "SYSTEM_DRIVE";
 static const char ActiveDriveSettings[] = "BOOT_DRIVE";
+static const char RelocSettings[] = "BL_RELOC";
 static const char IntParam[] = "%s=%d\r\n";
 static const char StringParam[] = "%s=%s\r\n";
 
@@ -114,13 +115,17 @@ int ParseConfigLine(HWContext *ctx, Settings *settings, char *buffer)
     }
     else if (!strncmp(ActiveDriveSettings, buffer, 10))
     {
-        settings->actual_drive_number = atoi(buffer + 11);
+        settings->shared_parameters.actual_drive_number = atoi(buffer + 11);
+    }
+    else if (!strncmp(RelocSettings, buffer, 8))
+    {
+        settings->shared_parameters.bootloader_relocation = atoi(buffer + 9);
     }
     else if (!strncmp(SIODivSettings, buffer, 7))
     {
-        settings->default_pokey_div = atoi(buffer + 8);
-        if (settings->default_pokey_div == 0)
-            settings->default_pokey_div = US_POKEY_DIV_DEFAULT;
+        settings->shared_parameters.fastsio_pokeydiv = atoi(buffer + 8);
+        if (settings->shared_parameters.fastsio_pokeydiv == 0)
+            settings->shared_parameters.fastsio_pokeydiv = US_POKEY_DIV_DEFAULT;
     }
     else if (!strncmp(SDFreqSettings, buffer, 7))
     {
@@ -269,10 +274,11 @@ int WriteSettings(HWContext *ctx, Settings *settings, unsigned char *buffer)
     unsigned int cur_size = config_file.size;
     int len;
     len = snprintf((char*)buffer, ATARI_BUFFER_SIZE, &IntParam[0], &DriveSettings[0], settings->sdrive_no);
-    len += snprintf((char*)buffer+len, ATARI_BUFFER_SIZE-len, &IntParam[0], &SystemDriveSettings[0], settings->emulated_drive_no);
-    len += snprintf((char*)buffer+len, ATARI_BUFFER_SIZE-len, &IntParam[0], &ActiveDriveSettings[0], settings->actual_drive_number);
-    len += snprintf((char*)buffer+len, ATARI_BUFFER_SIZE-len, &IntParam[0], &SIODivSettings[0], settings->default_pokey_div);
     len += snprintf((char*)buffer+len, ATARI_BUFFER_SIZE-len, &IntParam[0], &SDFreqSettings[0], settings->sd_freq);
+    len += snprintf((char*)buffer+len, ATARI_BUFFER_SIZE-len, &IntParam[0], &SystemDriveSettings[0], settings->emulated_drive_no);
+    len += snprintf((char*)buffer+len, ATARI_BUFFER_SIZE-len, &IntParam[0], &ActiveDriveSettings[0], settings->shared_parameters.actual_drive_number);
+    len += snprintf((char*)buffer+len, ATARI_BUFFER_SIZE-len, &IntParam[0], &SIODivSettings[0], settings->shared_parameters.fastsio_pokeydiv);
+    len += snprintf((char*)buffer+len, ATARI_BUFFER_SIZE-len, &IntParam[0], &RelocSettings[0], settings->shared_parameters.bootloader_relocation);
     len += snprintf((char*)buffer+len, ATARI_BUFFER_SIZE-len, &IntParam[0], &ATX1050Settings[0], settings->is_1050);
     len += snprintf((char*)buffer+len, ATARI_BUFFER_SIZE-len, &IntParam[0], &TapeBaudSettings[0], settings->tape_baud);
     unsigned short offset = faccess_offset(ctx, &config_file, FILE_ACCESS_WRITE, 0, buffer, len);
