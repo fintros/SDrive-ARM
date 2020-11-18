@@ -15,15 +15,24 @@
 
 typedef enum
 {
-   SDRSaveConfig = 0xd4,
-   SDRLoadConfig = 0xd5,
+   // = 0xd4,
+   // = 0xd5,
+   // = 0xd6,
+   SDRSaveConfig = 0xd8,
+   SDRLoadConfig = 0xd9,
+   // = 0xda,
+   // = 0xdb,
+   // = 0xdc,
+   // SDRDirUp = 0xdd,          // todo replace commands
+   // SDRRootDir = 0xde,
+   SDRSetTape = 0xdf,
    SDRGet20FileNames = 0xc0,
    SDRSetGastIO = 0xc1,
    SDRSetBLReloc = 0xc2,
    SDREmuInfo = 0xe0,
    SDRInitDrive = 0xe1,
    SDRDeactivateDrive = 0xe2,
-   SDRSetDir = 0xe3,
+   SDRGetCurrentFileName = 0xe3,    // p3 - 0 - 15 - disk drive, 16 - tape
    SDRGetFileDetails = 0xe5,
    SDRGetLongFileName256 = 0xe6,
    SDRGetLongFileName128 = 0xe7,
@@ -48,9 +57,11 @@ typedef enum
    SDRSetD10 = 0xfa,
    SDRSetD11 = 0xfb,
    SDRSetD12 = 0xfc,
-   SDRDirUp = 0xfd,
+   //SDRSetD13 = 0xfd,
+   //SDRSetD14 = 0xfe,
+   SDRDirUp  = 0xfd,
    SDRRootDir = 0xfe,
-   SDRSetBoot = 0xff,
+   SDRSetD15 = 0xff,
 } EEmuCommand;
 
 // Mount file in current directory

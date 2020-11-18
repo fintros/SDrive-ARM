@@ -18,6 +18,8 @@
 #include "helpers.h"
 #include "mmcsd.h"
 #include "atx.h"
+#include "cfg.h"
+#include "tapeemu.h"
 
 static file_t _browse;
 
@@ -80,7 +82,7 @@ static int GetEmuInfo(unsigned char *pBuffer, unsigned char count)
     return 0;
 }
 
-static int InitEmu(HWContext *ctx, unsigned char soft, unsigned char *pBuffer)
+static int InitEmu(HWContext *ctx, unsigned char soft)
 {
     dprint("Init emulator\r\n");
     send_ACK();
@@ -90,8 +92,11 @@ static int InitEmu(HWContext *ctx, unsigned char soft, unsigned char *pBuffer)
     CyDelayUs(800u); //t5
     send_CMPL();
 
-    //    if(!soft || InitBootDrive(ctx, pBuffer))
-    //        return -1;      // full reinit cycle
+    if(!soft)
+        return -1;      // full reinit cycle
+    
+    settings.shared_parameters.actual_drive_number = 0;
+    set_display(settings.shared_parameters.actual_drive_number);    
 
     return 0;
 }
@@ -200,13 +205,14 @@ int GetCurrentFileName(HWContext *ctx, unsigned char *pBuffer, unsigned char dri
 {
     int size = 14;
     send_ACK();
-    if (drive_no > DEVICESNUM)
+    if (drive_no >= DEVICESNUM)
     {
         CyDelayUs(800u); //t5
         send_ERR();
         return 1;
     }
-    file_t *pDisk = GetVDiskPtr(drive_no);
+    
+    file_t *pDisk = drive_no == DEVICESNUM?GetMountedTape():GetVDiskPtr(drive_no);
     if ((pDisk->flags & FLAGS_DRIVEON) && fatGetDirEntry(ctx, pDisk, pBuffer, pDisk->file_index, 0))
     {
         pBuffer[11] = pDisk->fi.Attr;
@@ -573,6 +579,25 @@ int MountDrive(HWContext *ctx, unsigned char *pBuffer, file_t *pDisk, unsigned s
     return 1;
 }
 
+int SaveConfig(HWContext *ctx, unsigned char *pBuffer)
+{
+    send_ACK();
+    WriteSettings(ctx, &settings, pBuffer);    
+    CyDelayUs(800u); //t5
+    send_CMPL();
+    return 0;
+}
+
+int LoadConfig(HWContext *ctx, unsigned char *pBuffer)
+{
+    send_ACK();
+    ReadSettings(ctx, &settings, pBuffer);    
+    CyDelayUs(800u); //t5
+    send_CMPL();
+    return 0;    
+}
+
+
 int DriveCommand(HWContext *ctx, unsigned char *pCommand, unsigned char *pBuffer)
 {
     switch (pCommand[1])
@@ -586,6 +611,10 @@ int DriveCommand(HWContext *ctx, unsigned char *pCommand, unsigned char *pBuffer
     case CmdStatus:
         // simulate status command for boot disk
         return GetStatus(GetVDiskPtr(0));
+    case SDRSaveConfig:
+        return SaveConfig(ctx, pBuffer);
+    case SDRLoadConfig:
+        return LoadConfig(ctx, pBuffer);        
     case SDRGet20FileNames:
         return GetNext20FileNames(ctx, pBuffer, *((unsigned short *)(pCommand + 2)));
     case SDRSetGastIO:
@@ -596,10 +625,10 @@ int DriveCommand(HWContext *ctx, unsigned char *pCommand, unsigned char *pBuffer
         return GetEmuInfo(pBuffer, pCommand[2]);
         break;
     case SDRInitDrive:
-        return InitEmu(ctx, pCommand[2], pBuffer);
+        return InitEmu(ctx, pCommand[2]);
     case SDRDeactivateDrive:
         return DeactivateDrive(pCommand[2]);
-    case SDRSetDir:
+    case SDRGetCurrentFileName:
         return GetCurrentFileName(ctx, pBuffer, pCommand[2]);
     case SDRGetFileDetails:
         return GetFileDetails(ctx, pBuffer, *((unsigned short *)(pCommand + 2)));
@@ -637,14 +666,17 @@ int DriveCommand(HWContext *ctx, unsigned char *pCommand, unsigned char *pBuffer
     case SDRSetD10:
     case SDRSetD11:
     case SDRSetD12:
-    case SDRSetBoot:
+//    case SDRSetD13:
+//    case SDRSetD14:
+    case SDRSetD15:
     {
         unsigned short drive_no = pCommand[1] - SDRSetD00;
         if (drive_no > DEVICESNUM)
             drive_no = 0;
         return MountDrive(ctx, pBuffer, GetVDiskPtr(drive_no), *((unsigned short *)(pCommand + 2)));
     }
-    break;
+    case SDRSetTape:
+        return MountDrive(ctx, pBuffer, GetMountedTape(), *((unsigned short *)(pCommand + 2)));
     case SDRDirUp:
         return ChangeDirUp(ctx, pBuffer, pCommand[2]);
     case SDRRootDir:
