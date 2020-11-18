@@ -11,7 +11,7 @@
 #ifndef _SDRIVE_H
 #define _SDRIVE_H
 
-#define DEVICESNUM 13 //	//D0:-D12:
+#define DEVICESNUM 16 //	//D0:-D12:
 
 typedef struct _SharedParameters
 {

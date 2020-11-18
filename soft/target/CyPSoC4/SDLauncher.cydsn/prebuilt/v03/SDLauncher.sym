@@ -16,6 +16,7 @@ fatClustToSect = 0x00000c0c;
 fatGetDirEntry = 0x00000e04;
 memset = 0x00001bbe;
 _ZN8SDAccessC1Ev = 0x000006ea;
+__aeabi_uidiv = 0x00001a3c;
 mmcReset = 0x000005a4;
 mmcInit = 0x00000594;
 faccess_offset = 0x00001158;

@@ -131,7 +131,7 @@ typedef struct _PercomItem
     PercomBlock block;
 } PercomItem;
 
-static PercomItem percom_table[] = {
+static const PercomItem percom_table[] = {
     // 720*128=92160	   (  90,000KB)
     {.size = 92160,
      .block = {

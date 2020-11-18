@@ -57,7 +57,7 @@ static int SetBLReloc(unsigned char reloc)
     return 0;
 }
 
-uint8_t system_info[] = "SDrive-ARM-02 20200912 by AlSp based on Bob!k & Raster, C.P.U.";
+static const uint8_t system_info[] = "SDrive-ARM-02 20200912 by AlSp based on Bob!k & Raster, C.P.U.";
 //                                VV YYYYMMDD
 
 static int GetEmuInfo(unsigned char *pBuffer, unsigned char count)
@@ -642,8 +642,7 @@ int DriveCommand(HWContext *ctx, unsigned char *pCommand, unsigned char *pBuffer
         unsigned short drive_no = pCommand[1] - SDRSetD00;
         if (drive_no > DEVICESNUM)
             drive_no = 0;
-        file_t *pDisk = GetVDiskPtr(drive_no);
-        return MountDrive(ctx, pBuffer, pDisk, *((unsigned short *)(pCommand + 2)));
+        return MountDrive(ctx, pBuffer, GetVDiskPtr(drive_no), *((unsigned short *)(pCommand + 2)));
     }
     break;
     case SDRDirUp:

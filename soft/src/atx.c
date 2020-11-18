@@ -170,8 +170,8 @@ u16 loadAtxSector(HWContext *ctx, file_t *pDisk, unsigned char *buffer, u16 num,
     int16_t weakOffset = -1;
 
     // calculate track and relative sector number from the absolute sector number
-    u08 tgtTrackNumber = (num - 1) / gSectorsPerTrack + 1;
-    u08 tgtSectorNumber = (num - 1) % gSectorsPerTrack + 1;
+    u08 tgtTrackNumber = (unsigned int)(num - 1) / gSectorsPerTrack + 1;
+    u08 tgtSectorNumber = (unsigned int) (num - 1) % gSectorsPerTrack + 1;
 
     // set initial status (in case the target sector is not found)
     pDisk->status = 0x10;
@@ -362,7 +362,7 @@ u16 loadAtxSector(HWContext *ctx, file_t *pDisk, unsigned char *buffer, u16 num,
 
         // adapt sector skew dynamically due to count of sectors per track
         // e. g. for enhanced density disks it is only about 1000
-        u16 au_one_sector_read = AU_FULL_ROTATION / sectorCount;
+        u16 au_one_sector_read = (unsigned int)AU_FULL_ROTATION / sectorCount;
 
         if (is_1050())
             au_one_sector_read += MS_CRC_CALCULATION_1050;

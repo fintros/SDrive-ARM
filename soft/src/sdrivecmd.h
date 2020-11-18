@@ -15,6 +15,8 @@
 
 typedef enum
 {
+   SDRSaveConfig = 0xd4,
+   SDRLoadConfig = 0xd5,
    SDRGet20FileNames = 0xc0,
    SDRSetGastIO = 0xc1,
    SDRSetBLReloc = 0xc2,
